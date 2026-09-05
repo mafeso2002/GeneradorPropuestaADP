@@ -935,6 +935,50 @@
       gap: 14px;
       margin-bottom: 10px;
     }
+    .plan-context-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(220px, .6fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .plan-context-card {
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      padding: 16px;
+      background: var(--cp-surface-soft);
+    }
+    .plan-context-card strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--cp-text);
+      font-size: 13px;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .plan-context-card p {
+      margin: 0;
+      color: var(--cp-text);
+      font-size: 16px;
+      line-height: 1.35;
+    }
+    .plan-ai-card {
+      border-color: var(--cp-cowork);
+      background:
+        radial-gradient(circle at right, var(--cp-cowork-soft), transparent 9rem),
+        var(--cp-surface);
+      text-align: center;
+    }
+    .plan-ai-card p {
+      color: var(--cp-cowork);
+      font-weight: 900;
+    }
+    .plan-ai-card span {
+      display: block;
+      margin-top: 4px;
+      color: var(--cp-text-muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
     .plan-metric-row {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1840,7 +1884,7 @@
     .hidden { display: none !important; }
     @media (max-width: 860px) {
       .hero, .layout, .form-row, .review-grid, .roadmap, .links { grid-template-columns: 1fr; }
-      .proposal-grid, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context { grid-template-columns: 1fr; }
+      .proposal-grid, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid { grid-template-columns: 1fr; }
       .topbar, .top-actions { align-items: flex-start; flex-direction: column; }
       .auth-status { max-width: 100%; }
       .cowork-hero-header { grid-template-columns: 96px 1fr; }
@@ -3423,6 +3467,9 @@
           scope: "1 grupo piloto · Art of the Possible · business case",
           price: "USD 3.500",
           icon: "rocket",
+          customerCase: "Ya usa Microsoft 365 y tiene Copilot Chat sin licencia; quiere probar la IA.",
+          aiLevel: "Copilot Chat",
+          aiLevelDetail: "sin licencia",
           desc: "Permite descubrir dónde la IA genera valor real, priorizar casos de uso y decidir si avanzar con licenciamiento de Copilot.",
           bestFor: "Cuando el cliente aún no tiene Microsoft 365 Copilot, quiere explorar IA, validar casos de uso o construir un business case antes de invertir.",
           execution: ["Art of the Possible abierto hasta 50 asistentes", "Piloto controlado con hasta 15 personas", "Revisión inicial de seguridad, SharePoint, Purview y oversharing", "Sesiones prácticas con Copilot Chat"],
@@ -3438,6 +3485,9 @@
           scope: "Olas Express, Estándar o Completa · hasta 600 colaboradores/año",
           price: "Según ola seleccionada",
           icon: "wave",
+          customerCase: "Solo necesita adopción de herramientas Microsoft 365.",
+          aiLevel: "Copilot Chat",
+          aiLevelDetail: "sin licencia",
           desc: "Consolida hábitos de trabajo digital en Microsoft 365 e introduce una primera experiencia con Copilot Chat.",
           bestFor: "Cuando el cliente necesita mejorar adopción de Microsoft 365, tiene madurez baja o media y Copilot todavía no es el foco principal.",
           execution: ["Olas Express, Estándar o Completa", "Grupos de 15 a 25 personas", "Workshops de Outlook, Teams, OneDrive, SharePoint, tareas y formularios", "Introducción a Copilot Chat"],
@@ -3453,6 +3503,9 @@
           scope: "Hasta 45 usuarios con licencias propias · 2 o 3 grupos de 15",
           price: "USD 5.900",
           icon: "spark",
+          customerCase: "Ya tiene licencias de Microsoft 365 Copilot.",
+          aiLevel: "Microsoft 365 Copilot",
+          aiLevelDetail: "con licencia",
           desc: "Acelera el uso efectivo de Microsoft 365 Copilot con datos corporativos, casos por rol, prompts y medición.",
           bestFor: "Cuando el cliente ya tiene licencias o trial de Copilot, Microsoft 365 está consolidado y busca demostrar ROI rápido.",
           execution: ["Preparación técnica y funcional", "Casos por rol con datos corporativos", "Copilot en Word, Excel, Outlook y Teams", "Medición con Copilot Dashboard"],
@@ -3468,6 +3521,9 @@
           scope: "Hasta 300 colaboradores · hasta 20 grupos de 15 personas",
           price: "A cotizar según alcance",
           icon: "calendar-cycle",
+          customerCase: "Quiere herramientas Microsoft 365 y Copilot en un mismo recorrido.",
+          aiLevel: "M365 + Microsoft 365 Copilot",
+          aiLevelDetail: "con licencia",
           desc: "Integra adopción de Microsoft 365 y Microsoft 365 Copilot en un único programa con gestión del cambio y medición.",
           bestFor: "Cuando el cliente necesita transformación integral, varias áreas, escala organizacional, agentes como add-on y acompañamiento sostenido.",
           execution: ["2 olas de 3 meses", "Hasta 20 grupos de 15 personas", "Recorrido Microsoft 365 + recorrido Copilot", "Agentes/Copilot Studio como add-on o piloto avanzado", "Champions, webinars, comunicación y medición"],
@@ -3748,6 +3804,16 @@
                 <div>
                   <span class="badge">${recommended.badge}</span>
                   <h3>${recommended.name}</h3>
+                </div>
+              </div>
+              <div class="plan-context-grid">
+                <div class="plan-context-card">
+                  <strong>Caso de cliente</strong>
+                  <p>${recommended.customerCase}</p>
+                </div>
+                <div class="plan-context-card plan-ai-card">
+                  <strong>Nivel de IA</strong>
+                  <p>${recommended.aiLevel}<span>${recommended.aiLevelDetail}</span></p>
                 </div>
               </div>
               <p><strong>Análisis comercial:</strong> ${recommendationReason(recommendedKey)}</p>
