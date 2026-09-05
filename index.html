@@ -1485,7 +1485,7 @@
           </div>
         </div>
         <div class="toolbar">
-          <span class="pill">7 pasos + recomendación final</span>
+          <span class="pill">9 pasos + recomendación final</span>
           <button class="btn primary" id="startBtn">Comenzar</button>
         </div>
       </div>
@@ -1637,6 +1637,120 @@
       ],
       meetingApps: ["Teams", "Zoom", "Google Meet", "Webex", "Otra app o presencial"]
     };
+    const operationalFields = [
+      {
+        key: "m365Tools",
+        icon: "maturity",
+        label: "Herramientas Microsoft 365 usadas hoy",
+        help: "Qué tan instalado está el uso real de Outlook, Teams, OneDrive, SharePoint, Planner, To Do y Forms.",
+        options: [
+          ["basic", "Outlook/Word/Excel principalmente"],
+          ["partial", "Teams/OneDrive parcial"],
+          ["collaboration", "Teams + OneDrive + SharePoint en uso"],
+          ["advanced", "Planner/To Do/Forms y colaboración avanzada"]
+        ]
+      },
+      {
+        key: "informationLocation",
+        icon: "proposal-doc",
+        label: "Dónde vive hoy la información",
+        help: "Permite detectar dispersión documental y esfuerzo de ordenamiento.",
+        options: [
+          ["scattered", "WhatsApp, carpetas locales y correo"],
+          ["mixed", "Mixto: local, OneDrive, Teams y correo"],
+          ["mostly-cloud", "Mayormente OneDrive/Teams/SharePoint"],
+          ["structured", "SharePoint/Teams con estructura definida"]
+        ]
+      },
+      {
+        key: "teamsSharepointStructure",
+        icon: "teams",
+        label: "Estructura de Teams y SharePoint",
+        help: "Define si hay que presupuestar arquitectura funcional y gobierno básico.",
+        options: [
+          ["none", "No existe o quedó abandonada"],
+          ["informal", "Hay equipos/canales sin orden claro"],
+          ["partial", "Parcialmente estructurada"],
+          ["governed", "Estructurada y gobernada"]
+        ]
+      },
+      {
+        key: "taskManagement",
+        icon: "projects",
+        label: "Gestión de tareas y seguimiento",
+        help: "Identifica si el seguimiento está en conversaciones o en herramientas trazables.",
+        options: [
+          ["manual", "Manual por WhatsApp/correo/consultas"],
+          ["partial", "Planner/To Do parcial"],
+          ["external", "Sistema externo de gestión"],
+          ["formal", "Herramienta formal adoptada"]
+        ]
+      },
+      {
+        key: "firstChange",
+        icon: "target",
+        label: "Qué quieren cambiar primero",
+        help: "Ayuda a orientar el caso de valor y el primer entregable.",
+        options: [
+          ["communication", "Comunicación interna"],
+          ["documents", "Archivos y documentación"],
+          ["tasks", "Tareas y seguimiento"],
+          ["processes", "Procesos administrativos"],
+          ["reports", "Reportes y trazabilidad"]
+        ]
+      }
+    ];
+    const logisticsFields = [
+      {
+        key: "deliveryMode",
+        icon: "training",
+        label: "Modalidad preferida",
+        help: "Impacta esfuerzo, agenda y presupuesto.",
+        options: [
+          ["onsite", "Presencial"],
+          ["remote", "Virtual"],
+          ["hybrid", "Mixta"],
+          ["undefined", "A definir"]
+        ]
+      },
+      {
+        key: "sessionFrequency",
+        icon: "calendar",
+        label: "Frecuencia esperada",
+        help: "Ayuda a dimensionar duración y acompañamiento.",
+        options: [
+          ["weekly", "Semanal"],
+          ["biweekly", "Quincenal"],
+          ["intensive", "Intensiva"],
+          ["undefined", "A definir"]
+        ]
+      },
+      {
+        key: "groupModel",
+        icon: "users-mix",
+        label: "Modelo de grupos",
+        help: "Define si conviene trabajar por área, mixto o con referentes.",
+        options: [
+          ["by-area", "Por área"],
+          ["mixed", "Grupos mixtos"],
+          ["champions", "Champions / referentes"],
+          ["undefined", "A definir"]
+        ]
+      },
+      {
+        key: "successMetric",
+        icon: "measurement",
+        label: "Métrica principal de éxito",
+        help: "Permite cerrar una propuesta más medible.",
+        options: [
+          ["reduce-whatsapp", "Reducir uso de WhatsApp"],
+          ["teams-adoption", "Uso sostenido de Teams"],
+          ["document-centralization", "Documentos centralizados"],
+          ["task-traceability", "Tareas trazables"],
+          ["satisfaction", "Satisfacción de usuarios"]
+        ]
+      }
+    ];
     const qualificationFields = [
       {
         key: "primaryObjective",
@@ -1804,6 +1918,15 @@
       governance: "",
       accompaniment: "",
       primaryObjective: "",
+      m365Tools: "",
+      informationLocation: "",
+      teamsSharepointStructure: "",
+      taskManagement: "",
+      firstChange: "",
+      deliveryMode: "",
+      sessionFrequency: "",
+      groupModel: "",
+      successMetric: "",
       inbox: "",
       meeting: "",
       meetingApp: "Teams",
@@ -1823,10 +1946,12 @@
       { key: "industry", label: "Paso 1 · Contexto del cliente", kicker: "Relevamiento comercial", title: "¿En qué tipo de cliente estás trabajando?", subtitle: "Mientras conversás con el cliente, elegí el contexto que mejor represente su negocio. Esto ayuda a orientar la propuesta de adopción de Possumus con ejemplos, dolores y argumentos relevantes." },
       { key: "users", label: "Paso 2 · Alcance de usuarios", kicker: "Relevamiento de alcance", title: "¿A qué grupo de usuarios conviene orientar la propuesta?", subtitle: "Mientras hablás con el cliente, identificá si la adopción debería empezar por un área prioritaria o por perfiles de distintas áreas. No hace falta definir una cantidad cerrada en esta etapa." },
       { key: "qualification", label: "Paso 3 · Readiness y plan recomendado", kicker: "Readiness y oportunidad", title: "¿Qué necesitamos saber para recomendar el plan correcto?", subtitle: "Estas preguntas califican la oportunidad: objetivo, licencias, madurez, escala y capacidad de cambio. Con esa información se identifica la propuesta de adopción más adecuada para el cliente." },
-      { key: "inbox", label: "Paso 4 · Dolor en comunicaciones", kicker: "Relevamiento de productividad", title: "¿Qué problema de comunicación aparece más seguido?", subtitle: "Usá esta pregunta para guiar la conversación y elegí la opción que mejor represente el impacto que el cliente quiere resolver." },
-      { key: "meeting", label: "Paso 5 · Reuniones y seguimiento", kicker: "Relevamiento de reuniones", title: "¿Qué tipo de reuniones le consumen más tiempo al cliente?", subtitle: "Identificá dónde aparece más valor: preparación previa, toma de notas, resumen, decisiones, responsables o seguimiento posterior." },
-      { key: "create", label: "Paso 6 · Crea en menos tiempo", kicker: "Crea en menos tiempo", title: "¿Qué tarda más en crear o analizar el equipo del cliente?", subtitle: "Identificá tareas de contenido, análisis o documentación que puedan convertirse en casos de valor para la propuesta." },
-      { key: "automate", label: "Paso 7 · Automatiza trabajo repetitivo", kicker: "Automatiza trabajo repetitivo", title: "¿Qué trabajo repetitivo consume más tiempo?", subtitle: "Identificá qué tareas repetitivas aparecen como oportunidad para mejorar productividad, estandarizar respuestas o acelerar entregables." },
+      { key: "operational", label: "Paso 4 · Diagnóstico operativo M365", kicker: "Uso actual y orden digital", title: "¿Cómo trabaja hoy el cliente con Microsoft 365?", subtitle: "Estas preguntas detectan dispersión de información, estructura de Teams/SharePoint, gestión de tareas y primer foco de cambio. Sirven para presupuestar mejor adopción base." },
+      { key: "logistics", label: "Paso 5 · Logística y medición", kicker: "Formato de entrega", title: "¿Cómo conviene entregar y medir la adopción?", subtitle: "Definí modalidad, frecuencia, modelo de grupos y métrica de éxito para ajustar alcance, esfuerzo y handoff con adopción." },
+      { key: "inbox", label: "Paso 6 · Dolor en comunicaciones", kicker: "Relevamiento de productividad", title: "¿Qué problema de comunicación aparece más seguido?", subtitle: "Usá esta pregunta para guiar la conversación y elegí la opción que mejor represente el impacto que el cliente quiere resolver." },
+      { key: "meeting", label: "Paso 7 · Reuniones y seguimiento", kicker: "Relevamiento de reuniones", title: "¿Qué tipo de reuniones le consumen más tiempo al cliente?", subtitle: "Identificá dónde aparece más valor: preparación previa, toma de notas, resumen, decisiones, responsables o seguimiento posterior." },
+      { key: "create", label: "Paso 8 · Crea en menos tiempo", kicker: "Crea en menos tiempo", title: "¿Qué tarda más en crear o analizar el equipo del cliente?", subtitle: "Identificá tareas de contenido, análisis o documentación que puedan convertirse en casos de valor para la propuesta." },
+      { key: "automate", label: "Paso 9 · Automatiza trabajo repetitivo", kicker: "Automatiza trabajo repetitivo", title: "¿Qué trabajo repetitivo consume más tiempo?", subtitle: "Identificá qué tareas repetitivas aparecen como oportunidad para mejorar productividad, estandarizar respuestas o acelerar entregables." },
       { key: "cowork", label: "Copilot Cowork · Recomendado", kicker: "Mejora opcional", title: "¿Conviene incluir Copilot Cowork en la propuesta?", subtitle: "Cowork puede fortalecer la propuesta cuando el cliente necesita resolver tareas más grandes, de varios pasos, que combinan investigación, análisis y generación de entregables." },
       { key: "addons", label: "Add-ons · Módulos sugeridos", kicker: "Módulos opcionales", title: "¿Qué add-ons querés sumar a la propuesta?", subtitle: "Según el plan recomendado y lo relevado, seleccioná los módulos opcionales que conviene cotizar aparte." }
     ];
@@ -1978,6 +2103,8 @@
         return state.usersMode === "mix" ? `Perfiles de distintas áreas · ${selected.join(", ")}` : `Área prioritaria · ${selected[0]}`;
       }
       if (key === "qualification") return qualificationSummary();
+      if (key === "operational") return discoverySummary(operationalFields);
+      if (key === "logistics") return discoverySummary(logisticsFields);
       if (key === "inbox") return find(inboxOptions(), state.inbox)[1];
       if (key === "meeting") return find(data.meetings, state.meeting)[1];
       if (key === "create") return find(createOptions(), state.create)[1];
@@ -2078,6 +2205,8 @@
         { id: "webinar", title: "Webinar / kickoff ejecutivo", desc: "Evento de lanzamiento, alineación o cierre ejecutivo.", icon: "communication", price: "A cotizar", requirement: "Disponible para todos" },
         { id: "champions", title: "Programa Champions", desc: "Activación y acompañamiento de referentes internos.", icon: "training", price: "A cotizar", requirement: "Disponible para todos" },
         { id: "office-hours", title: "Office Hours / acompañamiento", desc: "Espacios de consulta, acompañamiento en piso y soporte post-sesión.", icon: "support", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "teams-sharepoint", title: "Arquitectura Teams + SharePoint", desc: "Diseño funcional de equipos, canales, bibliotecas y repositorios para ordenar colaboración.", icon: "teams", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "document-governance", title: "Orden documental y trazabilidad", desc: "Estructura de archivos, criterios de uso, migración desde canales dispersos y buenas prácticas.", icon: "proposal-doc", price: "A cotizar", requirement: "Disponible para todos" },
         { id: "readiness", title: "Readiness técnico", desc: "Revisión de SharePoint, oversharing, Purview, permisos y preparación para IA.", icon: "shield", price: "A cotizar", requirement: "Disponible para todos" },
         { id: "change", title: "Gestión del cambio", desc: "Comunicación interna, sponsors, adopción, medición y acompañamiento del cambio.", icon: "communication", price: "A cotizar", requirement: "Disponible para todos" },
         { id: "support-desk", title: "Mesa de ayuda post-programa", desc: "Acompañamiento posterior para consultas, adopción y continuidad.", icon: "support", price: "A cotizar", requirement: "Disponible para todos" },
@@ -2094,6 +2223,9 @@
       if (state.primaryObjective === "copilot-roi") ids.add("prompt-library");
       if (state.sponsor === "yes") ids.add("webinar");
       if (state.accompaniment !== "training") ids.add("champions");
+      if (state.teamsSharepointStructure && state.teamsSharepointStructure !== "governed") ids.add("teams-sharepoint");
+      if (state.informationLocation === "scattered" || state.informationLocation === "mixed" || state.successMetric === "document-centralization") ids.add("document-governance");
+      if (state.deliveryMode === "onsite" || state.deliveryMode === "hybrid") ids.add("office-hours");
       if (state.governance !== "high") ids.add("readiness");
       if (state.accompaniment === "change-management") ids.add("change");
       if (state.copilotLicenses === "licensed" || state.copilotLicenses === "trial") ids.add("dashboard");
@@ -2127,6 +2259,30 @@
       if (!objective && !licenses) return "";
       return [objective, licenses].filter(Boolean).join(" · ");
     }
+    function discoveryValue(fields, key) {
+      const field = fields.find((item) => item.key === key);
+      const option = field && field.options.find((item) => item[0] === state[key]);
+      return option ? option[1] : "";
+    }
+    function discoverySummary(fields) {
+      const values = fields.map((field) => discoveryValue(fields, field.key)).filter(Boolean);
+      if (!values.length) return "";
+      return values.slice(0, 2).join(" · ");
+    }
+    function renderDiscoveryFields(fields) {
+      return `<div class="qualification-grid">${fields.map((field, index) => `<div class="qualification-field ${state[field.key] ? "answered" : ""}">
+        <div class="qualification-number">${String(index + 1).padStart(2, "0")}</div>
+        <div class="qualification-icon">${iconSvg(field.icon)}</div>
+        <div class="qualification-copy">
+          <label for="${field.key}">${field.label}</label>
+          <p>${field.help}</p>
+          <select id="${field.key}" data-discovery="${field.key}">
+            <option value="">Seleccionar...</option>
+            ${field.options.map(([value, label]) => `<option value="${value}" ${state[field.key] === value ? "selected" : ""}>${label}</option>`).join("")}
+          </select>
+        </div>
+      </div>`).join("")}</div>`;
+    }
     function renderNav(targetId = "navList") {
       $(targetId).innerHTML = visibleSteps().map((s) => {
         const i = steps.indexOf(s);
@@ -2149,6 +2305,9 @@
     function visibleSteps() {
       return steps;
     }
+    function stepIndexByKey(key) {
+      return steps.findIndex((item) => item.key === key);
+    }
     function nextStepIndex(fromIndex) {
       for (let i = fromIndex + 1; i < steps.length; i += 1) {
         return i;
@@ -2164,6 +2323,8 @@
     function isStepComplete(key) {
       if (key === "users") return Boolean(state.usersMode) && selectedDepartments().length > 0;
       if (key === "qualification") return qualificationFields.every((field) => Boolean(state[field.key]));
+      if (key === "operational") return operationalFields.every((field) => Boolean(state[field.key]));
+      if (key === "logistics") return logisticsFields.every((field) => Boolean(state[field.key]));
       if (key === "cowork") return Boolean(state.coworkReviewed);
       if (key === "addons") return Boolean(state.addonsReviewed);
       return Boolean(state[key]);
@@ -2241,6 +2402,26 @@
             </div>`;
           }).join("")}</div>
         </section>`).join("");
+      }
+      if (step.key === "operational") {
+        body = `<div class="conversation-guide">
+          <div class="stage-icon">${iconSvg("diagnostic")}</div>
+          <div>
+            <strong>Pregunta sugerida para hacerle al cliente</strong>
+            <p>“¿Dónde está hoy la información, cómo usan Teams/SharePoint y cómo hacen seguimiento de tareas o documentos críticos?”</p>
+          </div>
+        </div>
+        ${renderDiscoveryFields(operationalFields)}`;
+      }
+      if (step.key === "logistics") {
+        body = `<div class="conversation-guide">
+          <div class="stage-icon">${iconSvg("calendar")}</div>
+          <div>
+            <strong>Pregunta sugerida para hacerle al cliente</strong>
+            <p>“¿Prefieren encuentros presenciales, virtuales o mixtos, con qué frecuencia y qué indicador les demostraría que la adopción funcionó?”</p>
+          </div>
+        </div>
+        ${renderDiscoveryFields(logisticsFields)}`;
       }
       if (step.key === "inbox") body = `<div class="conversation-guide">
         <div class="stage-icon">${iconSvg("mail")}</div>
@@ -2397,6 +2578,11 @@
         select.closest(".qualification-field").classList.toggle("answered", Boolean(select.value));
         renderNav();
       }));
+      $("stepBody").querySelectorAll("[data-discovery]").forEach((select) => select.addEventListener("change", () => {
+        state[select.dataset.discovery] = select.value;
+        select.closest(".qualification-field").classList.toggle("answered", Boolean(select.value));
+        renderNav();
+      }));
       const sw = $("coworkSwitch");
       if (sw) sw.addEventListener("click", () => {
         if (!hasCopilotLicense()) return;
@@ -2413,20 +2599,36 @@
       if (key === "cowork") return true;
       if (key === "addons") return true;
       if (key === "qualification") return qualificationFields.every((field) => Boolean(state[field.key]));
+      if (key === "operational") return operationalFields.every((field) => Boolean(state[field.key]));
+      if (key === "logistics") return logisticsFields.every((field) => Boolean(state[field.key]));
       return Boolean(state[key]);
     }
     function renderReview() {
       currentStep = Math.min(currentStep, steps.length - 1);
       renderNav("reviewNav");
       const items = [
-        { label: "Contexto del cliente", title: selectedLabel("industry"), desc: find(industries, state.industry)[2], edit: 0, icon: "client-context" },
-        { label: "Alcance de usuarios", title: selectedLabel("users"), desc: state.usersMode === "mix" ? "Adopción transversal con referentes de varias áreas" : "Foco inicial en un equipo o función con mayor oportunidad de impacto", edit: 1, icon: state.usersMode === "mix" ? "users-mix" : "users-dept" },
-        { label: "Calificación comercial", title: qualificationSummary(), desc: `Inicio: ${formatDate(state.startDate)} · ${qualificationValue("m365Maturity")} · ${qualificationValue("userRange")} · Sponsor: ${qualificationValue("sponsor")}`, edit: 2, icon: "diagnostic" },
+        { label: "Contexto del cliente", title: selectedLabel("industry"), desc: find(industries, state.industry)[2], edit: stepIndexByKey("industry"), icon: "client-context" },
+        { label: "Alcance de usuarios", title: selectedLabel("users"), desc: state.usersMode === "mix" ? "Adopción transversal con referentes de varias áreas" : "Foco inicial en un equipo o función con mayor oportunidad de impacto", edit: stepIndexByKey("users"), icon: state.usersMode === "mix" ? "users-mix" : "users-dept" },
+        { label: "Calificación comercial", title: qualificationSummary(), desc: `Inicio: ${formatDate(state.startDate)} · ${qualificationValue("m365Maturity")} · ${qualificationValue("userRange")} · Sponsor: ${qualificationValue("sponsor")}`, edit: stepIndexByKey("qualification"), icon: "diagnostic" },
+        {
+          label: "Diagnóstico operativo M365",
+          title: discoverySummary(operationalFields),
+          desc: `${discoveryValue(operationalFields, "teamsSharepointStructure")} · ${discoveryValue(operationalFields, "taskManagement")} · Primer cambio: ${discoveryValue(operationalFields, "firstChange")}`,
+          edit: stepIndexByKey("operational"),
+          icon: "teams"
+        },
+        {
+          label: "Logística y medición",
+          title: discoverySummary(logisticsFields),
+          desc: `${discoveryValue(logisticsFields, "groupModel")} · Métrica: ${discoveryValue(logisticsFields, "successMetric")}`,
+          edit: stepIndexByKey("logistics"),
+          icon: "calendar"
+        },
         {
           label: "Necesidades detectadas",
           title: "Comunicación, reuniones, creación y automatización",
           desc: "",
-          edit: 3,
+          edit: stepIndexByKey("inbox"),
           icon: "spark",
           lines: [
             ["Comunicación", selectedLabel("inbox")],
@@ -2436,8 +2638,8 @@
           ]
         }
       ];
-      items.push({ label: "Add-ons", title: selectedAddonItems().length ? selectedAddonItems().map((item) => item.title).join(", ") : "Sin add-ons seleccionados", desc: "Módulos opcionales para cotizar por separado", edit: 8, icon: "proposal-doc" });
-      items.push({ label: "Copilot Cowork", title: state.cowork ? "Seleccionado como add-on" : "No incluido en la recomendación", desc: state.cowork ? "Capacidad para tareas complejas, multi-paso y de mayor valor" : "Requiere licencia/trial de Microsoft 365 Copilot o decisión comercial de incluirlo como add-on futuro.", edit: 7, icon: "cowork" });
+      items.push({ label: "Add-ons", title: selectedAddonItems().length ? selectedAddonItems().map((item) => item.title).join(", ") : "Sin add-ons seleccionados", desc: "Módulos opcionales para cotizar por separado", edit: stepIndexByKey("addons"), icon: "proposal-doc" });
+      items.push({ label: "Copilot Cowork", title: state.cowork ? "Seleccionado como add-on" : "No incluido en la recomendación", desc: state.cowork ? "Capacidad para tareas complejas, multi-paso y de mayor valor" : "Requiere licencia/trial de Microsoft 365 Copilot o decisión comercial de incluirlo como add-on futuro.", edit: stepIndexByKey("cowork"), icon: "cowork" });
       items.push({ label: "Comercial", title: state.commercialName || "Sin sesión Microsoft", desc: state.commercialEmail || "Iniciá sesión para asociar la propuesta a un usuario de Possumus.", edit: null, icon: "sales" });
       $("summaryGrid").innerHTML = items.map((item) => `<div class="summary-item ${item.label === "Copilot Cowork" ? `cowork-summary ${state.cowork ? "" : "not-included"}` : ""}">
         <div class="summary-main">
@@ -2585,14 +2787,15 @@
       const deptCount = selectedDepartments().length;
       const hasCopilot = state.copilotLicenses === "trial" || state.copilotLicenses === "licensed";
       const noCopilot = state.copilotLicenses === "none" || state.copilotLicenses === "chat";
-      const scale = state.userRange === "large" || deptCount >= 4 || state.projectStage === "scale";
+      const scale = state.userRange === "large" || (state.userRange === "medium" && deptCount >= 4) || (state.userRange !== "small" && state.projectStage === "scale");
       const integral = state.primaryObjective === "integral-transformation" || state.accompaniment === "change-management";
       const m365NeedsWork = state.m365Maturity === "low" || state.m365Maturity === "medium";
+      const operationalDisorder = ["scattered", "mixed"].includes(state.informationLocation) || ["none", "informal"].includes(state.teamsSharepointStructure) || ["manual", "partial"].includes(state.taskManagement);
       const copilotPriority = state.primaryObjective === "copilot-roi" || state.primaryObjective === "integral-transformation";
       if (scale || (hasCopilot && m365NeedsWork && copilotPriority) || (integral && hasCopilot)) return "plan3";
       if (hasCopilot && state.m365Maturity === "high") return "plan2";
       if (noCopilot && state.primaryObjective === "explore-ai") return "plan0";
-      if (m365NeedsWork && state.primaryObjective === "digital-productivity") return "plan1";
+      if ((m365NeedsWork || operationalDisorder) && state.primaryObjective === "digital-productivity") return "plan1";
       if (noCopilot && copilotPriority) return "plan0";
       if (hasCopilot) return "plan2";
       return "plan1";
@@ -2604,7 +2807,7 @@
       const license = qualificationValue("copilotLicenses").toLowerCase();
       const maturity = qualificationValue("m365Maturity").toLowerCase();
       if (key === "plan0") return `Recomendamos Plan 0 porque ${areaText}, el cliente está en etapa de exploración o sin licencias Copilot consolidadas (${license}) y necesita construir evidencia antes de avanzar.`;
-      if (key === "plan1") return `Recomendamos Plan 1 porque ${areaText}, la madurez Microsoft 365 es ${maturity} y la prioridad es fortalecer hábitos digitales antes de acelerar Copilot.`;
+      if (key === "plan1") return `Recomendamos Plan 1 porque ${areaText}, la madurez Microsoft 365 es ${maturity}, ${discoveryValue(operationalFields, "teamsSharepointStructure").toLowerCase()} y la prioridad es ordenar colaboración, documentación y hábitos digitales antes de acelerar Copilot.`;
       if (key === "plan2") return `Recomendamos Plan 2 porque ${areaText}, el cliente ya tiene Copilot o trial (${license}) y puede demostrar valor real con casos por rol, prompts y medición en 30 días.`;
       return `Recomendamos Plan 3 porque ${areaText}, hay escala, complejidad o necesidad de gestión del cambio integral para trabajar Microsoft 365 y Copilot en una misma iniciativa.`;
     }
@@ -2665,6 +2868,19 @@
       const quote = quoteForPlan(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
       const commercialLabel = state.commercialEmail ? `${state.commercialName || "Comercial"} · ${state.commercialEmail}` : "Sin comercial asociado";
+      const operationalSummary = [
+        discoveryValue(operationalFields, "m365Tools"),
+        discoveryValue(operationalFields, "informationLocation"),
+        discoveryValue(operationalFields, "teamsSharepointStructure"),
+        discoveryValue(operationalFields, "taskManagement"),
+        discoveryValue(operationalFields, "firstChange")
+      ].filter(Boolean);
+      const logisticsSummary = [
+        discoveryValue(logisticsFields, "deliveryMode"),
+        discoveryValue(logisticsFields, "sessionFrequency"),
+        discoveryValue(logisticsFields, "groupModel"),
+        discoveryValue(logisticsFields, "successMetric")
+      ].filter(Boolean);
       $("plan").innerHTML = `
         <div class="result-hero">
           <div class="result-top">
@@ -2755,6 +2971,16 @@
             <p>Inicial relevado: ${qualificationValue("userRange")} · Sponsor: ${qualificationValue("sponsor")} · ${qualificationValue("accompaniment")}</p>
             <p>Plan recomendado: ${recommended.scope}</p>
           </article>
+          <article class="plan-option-card">
+            <div class="stage-icon">${iconSvg("teams")}</div>
+            <h4>Diagnóstico operativo Microsoft 365</h4>
+            <p>${operationalSummary.join(" · ")}</p>
+          </article>
+          <article class="plan-option-card">
+            <div class="stage-icon">${iconSvg("calendar")}</div>
+            <h4>Logística y medición</h4>
+            <p>${logisticsSummary.join(" · ")}</p>
+          </article>
         </div>
         <h2 style="margin-top:28px">Metodología de adopción</h2>
         <div class="method-grid">${methodologyPillars().map(([title, desc, icon]) => `<article class="pillar-card">
@@ -2813,6 +3039,19 @@
       const quote = quoteForPlan(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
       const commercialLabel = state.commercialEmail ? `${state.commercialName || "Comercial"} · ${state.commercialEmail}` : "Sin comercial asociado";
+      const operationalSummary = [
+        discoveryValue(operationalFields, "m365Tools"),
+        discoveryValue(operationalFields, "informationLocation"),
+        discoveryValue(operationalFields, "teamsSharepointStructure"),
+        discoveryValue(operationalFields, "taskManagement"),
+        discoveryValue(operationalFields, "firstChange")
+      ].filter(Boolean);
+      const logisticsSummary = [
+        discoveryValue(logisticsFields, "deliveryMode"),
+        discoveryValue(logisticsFields, "sessionFrequency"),
+        discoveryValue(logisticsFields, "groupModel"),
+        discoveryValue(logisticsFields, "successMetric")
+      ].filter(Boolean);
       const css = `
         <style>
           @page { size: A4 landscape; margin: 0; }
@@ -2902,6 +3141,8 @@
           <div class="grid-2">
             <div class="card"><strong>Contexto relevado</strong><p>${selectedLabel("industry")} · ${selectedLabel("users")}</p><p>${focus.join(" · ")}</p></div>
             <div class="card"><strong>Alcance de referencia</strong><p>${plan.scope}</p><p>${plan.bestFor}</p></div>
+            <div class="card"><strong>Diagnóstico operativo M365</strong><p>${operationalSummary.join(" · ")}</p></div>
+            <div class="card"><strong>Logística y medición</strong><p>${logisticsSummary.join(" · ")}</p></div>
           </div>${footer}
         </section>
         <section class="slide">
@@ -2996,7 +3237,7 @@
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "", department: "", departments: [], userRange: "", m365Maturity: "", copilotLicenses: "", projectStage: "", sponsor: "", governance: "", accompaniment: "", primaryObjective: "", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, completed: {} });
+      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "", department: "", departments: [], userRange: "", m365Maturity: "", copilotLicenses: "", projectStage: "", sponsor: "", governance: "", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "", sessionFrequency: "", groupModel: "", successMetric: "", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, completed: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
       location.hash = "/onboarding";
