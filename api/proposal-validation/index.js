@@ -96,6 +96,94 @@ function isValidationObject(value) {
   );
 }
 
+function normalizeText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function fallbackValidation(payload, summary) {
+  const proposal = payload.proposal || {};
+  const decision = proposal.decision || {};
+  const answers = payload.answers || {};
+  const qualification = answers.qualification || {};
+  const addonStates = payload.validationInstructions && Array.isArray(payload.validationInstructions.addonStates)
+    ? payload.validationInstructions.addonStates
+    : [];
+  const notes = normalizeText(payload.validationNotes);
+  const confidence = Number(decision.confidence || 0);
+  const risks = [];
+  const missingQuestions = [];
+  const addonReview = { keep: [], remove: [], add: [] };
+  let status = "consistent";
+  let planDecision = "mantener";
+  let planComment = `El plan recomendado (${proposal.recommendedPlanName || "plan actual"}) es consistente con las señales principales del relevamiento.`;
+
+  if (confidence && confidence < 50) {
+    status = "risky";
+    planDecision = "validar alternativa";
+    risks.push("La confianza del algoritmo es baja; no conviene presentar sin revisión de preventa/adopción.");
+  } else if (confidence && confidence < 70) {
+    status = "review";
+    planDecision = "validar alternativa";
+    risks.push("La confianza del algoritmo es media; conviene revisar alternativas antes de cerrar alcance.");
+  }
+
+  if (notes.includes("solo") && notes.includes("excel")) {
+    status = status === "risky" ? status : "review";
+    planComment = "El plan puede mantenerse como referencia, pero el alcance comercial parece más cercano a un módulo focalizado de Excel.";
+    missingQuestions.push("¿El cliente espera solo capacitación/adopción de Excel o una adopción Microsoft 365 más amplia?");
+    addonStates.forEach((addon) => {
+      const title = addon.title || addon.id || "";
+      const normalizedTitle = normalizeText(title);
+      if (normalizedTitle.includes("excel") && addon.state !== "unavailable") addonReview.keep.push(title);
+      if (addon.selected && !normalizedTitle.includes("excel")) addonReview.remove.push(title);
+    });
+    risks.push("La propuesta puede sobredimensionarse si se incluyen módulos de Teams/SharePoint, cambio o IA cuando el alcance real es solo Excel.");
+  }
+
+  if (normalizeText(qualification.agentNeed).includes("activ") && normalizeText(qualification.copilotLicenses).includes("no tiene")) {
+    status = "review";
+    missingQuestions.push("¿El cliente tiene previsto adquirir Microsoft 365 Copilot antes de trabajar agentes o solo quiere explorar posibilidades?");
+    risks.push("Hay interés en agentes, pero no hay licencias Microsoft 365 Copilot confirmadas.");
+  }
+
+  if (!missingQuestions.length) {
+    missingQuestions.push("¿El alcance esperado es capacitación puntual, adopción por ola o programa integral?");
+  }
+
+  const selectedAddons = addonStates.filter((addon) => addon.selected && addon.state !== "unavailable");
+  selectedAddons.forEach((addon) => {
+    if (!addonReview.remove.includes(addon.title) && !addonReview.keep.includes(addon.title)) addonReview.keep.push(addon.title);
+  });
+
+  const statusLabel = status === "consistent"
+    ? "Consistente"
+    : status === "review"
+    ? "Revisar antes de presentar"
+    : "Riesgoso";
+  const commercialRecommendation = status === "consistent"
+    ? "Generar la propuesta con el árbol actual y usar la validación como respaldo comercial."
+    : "Validar las preguntas faltantes y ajustar add-ons antes de enviar la propuesta, o generar igual dejando claro el alcance.";
+
+  const validation = {
+    status,
+    statusLabel,
+    planDecision,
+    planComment,
+    missingQuestions: missingQuestions.slice(0, 3),
+    addonReview,
+    risks,
+    commercialRecommendation,
+  };
+  const aiComment = summary ? `\n\n## Comentario IA\n${summary}` : "";
+  return {
+    ...validation,
+    markdownSummary: `${validationToMarkdown(validation)}${aiComment}`
+  };
+}
+
 module.exports = async function (context, req) {
   const flowUrl = process.env.POWER_AUTOMATE_AI_SUMMARY_URL;
 
@@ -146,8 +234,10 @@ module.exports = async function (context, req) {
   const text = findText(responseBody);
   const parsedCandidate = extractJsonObject(text) || extractJsonObject(responseText) || (responseBody && typeof responseBody === "object" ? responseBody.validation : null);
   const parsed = isValidationObject(parsedCandidate) ? parsedCandidate : null;
-  const summary = parsed
-    ? (parsed.markdownSummary || validationToMarkdown(parsed))
+  const fallback = parsed ? null : fallbackValidation(payload, text);
+  const validation = parsed || fallback;
+  const summary = validation
+    ? (validation.markdownSummary || validationToMarkdown(validation))
     : text;
 
   context.res = {
@@ -156,7 +246,7 @@ module.exports = async function (context, req) {
     body: flowResponse.ok
       ? {
           summary,
-          validation: parsed && typeof parsed === "object" ? parsed : null,
+          validation,
           raw: responseBody
         }
       : {
