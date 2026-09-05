@@ -248,6 +248,41 @@
       box-shadow: 0 10px 24px rgba(46, 45, 49, 0.16);
     }
     .btn.primary:hover { background: var(--cp-accent-hover); }
+    .btn.action-ai {
+      background: var(--cp-brand-yellow);
+      border-color: var(--cp-brand-yellow);
+      color: var(--cp-brand-dark);
+    }
+    .btn.action-pdf {
+      background: #2563eb;
+      border-color: #2563eb;
+      color: #ffffff;
+    }
+    .btn.action-mail {
+      background: var(--cp-cowork);
+      border-color: var(--cp-cowork);
+      color: #ffffff;
+    }
+    .btn.action-ai:hover { background: #ffe44d; }
+    .btn.action-pdf:hover { background: #1d4ed8; }
+    .btn.action-mail:hover { background: #008944; }
+    .btn .btn-icon {
+      display: inline-grid;
+      place-items: center;
+      width: 18px;
+      height: 18px;
+      margin-right: 8px;
+      vertical-align: -3px;
+    }
+    .btn .btn-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
     .btn.ghost { border-color: var(--cp-border); }
     .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
     .side {
@@ -681,6 +716,7 @@
       gap: 12px;
       align-items: center;
       min-width: 0;
+      flex: 1;
     }
     .summary-main .option-icon {
       width: 34px;
@@ -692,9 +728,10 @@
     }
     .summary-text {
       display: grid;
-      grid-template-columns: minmax(150px, .55fr) minmax(0, 1fr);
-      gap: 12px;
+      grid-template-columns: minmax(230px, 280px) minmax(0, 1fr);
+      gap: 22px;
       align-items: start;
+      width: 100%;
     }
     .summary-text strong { display: block; }
     .summary-text .summary-title { color: var(--cp-text); font-weight: 700; }
@@ -790,7 +827,7 @@
     }
     .proposal-meta {
       display: grid;
-      grid-template-columns: .55fr .55fr 1fr 1.55fr;
+      grid-template-columns: .55fr .55fr 1.55fr;
       gap: 10px;
       margin: 14px 0;
       align-items: start;
@@ -1361,9 +1398,27 @@
       padding: 0 18px 18px;
     }
     .pdf-note {
-      margin-left: auto;
       color: var(--cp-text-muted);
       font-size: 13px;
+    }
+    .proposal-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-top: 28px;
+    }
+    .proposal-action-buttons {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-left: auto;
+    }
+    .proposal-note-row {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--cp-border);
+      text-align: right;
     }
     .handoff-status {
       width: 100%;
@@ -1424,6 +1479,20 @@
         var(--cp-surface);
       box-shadow: 0 14px 34px rgba(46, 45, 49, 0.08);
     }
+    .ai-summary-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 16px;
+    }
+    .ai-summary-head h3 { margin-bottom: 0; }
+    .ai-summary-empty {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: center;
+    }
+    .ai-summary-empty h3 { margin: 10px 0 6px; }
     .ai-summary-panel h3 { margin-top: 10px; }
     .ai-summary-panel p { margin-bottom: 0; color: var(--cp-text); }
     .ai-badge {
@@ -1440,6 +1509,56 @@
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: .04em;
+    }
+    .thinking-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background: rgba(255, 255, 255, .82);
+      backdrop-filter: blur(10px);
+    }
+    .thinking-card {
+      width: min(420px, 100%);
+      border: 1px solid var(--cp-brand-yellow);
+      border-radius: 24px;
+      padding: 30px;
+      text-align: center;
+      background:
+        radial-gradient(circle at 50% 0, var(--cp-brand-yellow-soft), transparent 13rem),
+        var(--cp-panel-strong);
+      box-shadow: var(--cp-shadow);
+    }
+    .thinking-icon {
+      width: 66px;
+      height: 66px;
+      margin: 0 auto 18px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      background: var(--cp-brand-yellow);
+      color: var(--cp-brand-dark);
+      animation: thinking-pulse 1.1s ease-in-out infinite;
+    }
+    .thinking-icon svg {
+      width: 34px;
+      height: 34px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      animation: thinking-spin 2.4s linear infinite;
+    }
+    .thinking-card p { margin-bottom: 0; }
+    @keyframes thinking-pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(252, 215, 2, .42); }
+      50% { transform: scale(1.06); box-shadow: 0 0 0 16px rgba(252, 215, 2, 0); }
+    }
+    @keyframes thinking-spin {
+      to { transform: rotate(360deg); }
     }
     .pdf-only { display: none; }
     .links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
@@ -1514,6 +1633,18 @@
       .topbar, .top-actions { align-items: flex-start; flex-direction: column; }
       .auth-status { max-width: 100%; }
       .cowork-hero-header { grid-template-columns: 96px 1fr; }
+      .summary-text, .ai-summary-empty { grid-template-columns: 1fr; }
+      .proposal-actions {
+        align-items: stretch;
+        flex-direction: column;
+      }
+      .proposal-action-buttons {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        margin-left: 0;
+      }
+      .proposal-note-row { text-align: left; }
       .cowork-toggle-card { grid-column: 1 / -1; width: fit-content; }
       .timeline-body { padding-left: 18px; }
       .hero-card { padding: 32px 22px; }
@@ -1619,40 +1750,17 @@
       </main>
     </section>
 
-    <section id="ready" class="hero hidden">
-      <div class="hero-card">
-        <p class="eyebrow">Propuesta lista para revisar</p>
-        <h1>Ya tenés una recomendación para avanzar con el cliente.</h1>
-        <p class="lead">Con el relevamiento cargado durante la conversación, generamos una propuesta integral de adopción Possumus para ordenar el enfoque comercial, los argumentos de valor y los próximos pasos.</p>
-        <div class="toolbar">
-          <button class="btn primary" id="viewPlanBtn">Ver propuesta generada</button>
-        </div>
-      </div>
-      <aside class="side">
-        <div class="delivery-visual">
-          <svg viewBox="0 0 64 64" aria-hidden="true">
-            <rect x="14" y="10" width="34" height="44" rx="5"></rect>
-            <path d="M23 24h18"></path>
-            <path d="M23 32h14"></path>
-            <path d="M23 40h10"></path>
-            <circle cx="47" cy="45" r="9"></circle>
-            <path d="M43 45l3 3 6-7"></path>
-          </svg>
-        </div>
-        <h3>Qué se generó</h3>
-        <p>Un entregable para que sales o preventa pueda continuar la oportunidad con más claridad.</p>
-        <div class="generated-list">
-          <div class="generated-item"><div class="option-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"></path><path d="M4 17c4-3 8 3 12 0V5c-4 3-8-3-12 0"></path><path d="M18 7h2v10h-2"></path></svg></div><div><strong>Enfoque recomendado</strong><p>Qué propuesta conviene priorizar según el contexto relevado.</p></div></div>
-          <div class="generated-item"><div class="option-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v4l3 2"></path></svg></div><div><strong>Argumentos de valor</strong><p>Mensajes para explicar impacto, adopción y próximos pasos.</p></div></div>
-          <div class="generated-item"><div class="option-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l2 2 4-4"></path><rect x="5" y="4" width="14" height="17" rx="2"></rect></svg></div><div><strong>Hoja de ruta comercial</strong><p>Acciones sugeridas para acompañar la oportunidad desde Possumus.</p></div></div>
-        </div>
-      </aside>
-    </section>
-
     <section id="plan" class="hidden"></section>
   </div>
 
   <div id="toast" class="toast"></div>
+  <div id="thinkingOverlay" class="thinking-overlay hidden" aria-live="polite" aria-busy="true">
+    <div class="thinking-card">
+      <div class="thinking-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"></path><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8L18 15z"></path></svg></div>
+      <h3>Generando resumen con IA</h3>
+      <p>Estoy pensando la mejor síntesis comercial con las respuestas del relevamiento.</p>
+    </div>
+  </div>
   <div id="handoffModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="handoffModalTitle">
     <div class="modal-card">
       <div class="modal-header">
@@ -2158,7 +2266,7 @@
       }
     }
     function show(section) {
-      ["onboarding", "wizard", "review", "ready", "plan"].forEach((id) => $(id).classList.add("hidden"));
+      ["onboarding", "wizard", "review", "plan"].forEach((id) => $(id).classList.add("hidden"));
       $(section).classList.remove("hidden");
       window.scrollTo(0, 0);
     }
@@ -2768,7 +2876,6 @@
         }
       ];
       items.push({ label: "Add-ons", title: selectedAddonItems().length ? selectedAddonItems().map((item) => item.title).join(", ") : "Sin add-ons seleccionados", desc: "Módulos opcionales para cotizar por separado", edit: stepIndexByKey("addons"), icon: "proposal-doc" });
-      items.push({ label: "Copilot Cowork", title: state.cowork ? "Seleccionado como add-on" : "No incluido en la recomendación", desc: state.cowork ? "Capacidad para tareas complejas, multi-paso y de mayor valor" : "Requiere licencia/trial de Microsoft 365 Copilot o decisión comercial de incluirlo como add-on futuro.", edit: stepIndexByKey("cowork"), icon: "cowork" });
       items.push({
         label: "Logística y medición",
         title: discoverySummary(logisticsFields),
@@ -2776,7 +2883,7 @@
         edit: stepIndexByKey("logistics"),
         icon: "calendar"
       });
-      items.push({ label: "Comercial", title: state.commercialName || "Sin sesión Microsoft", desc: state.commercialEmail || "Iniciá sesión para asociar la propuesta a un usuario de Possumus.", edit: null, icon: "sales" });
+      items.push({ label: "Copilot Cowork", title: state.cowork ? "Seleccionado como add-on" : "No incluido en la recomendación", desc: state.cowork ? "Capacidad para tareas complejas, multi-paso y de mayor valor" : "Requiere licencia/trial de Microsoft 365 Copilot o decisión comercial de incluirlo como add-on futuro.", edit: stepIndexByKey("cowork"), icon: "cowork" });
       $("summaryGrid").innerHTML = items.map((item) => `<div class="summary-item ${item.label === "Copilot Cowork" ? `cowork-summary ${state.cowork ? "" : "not-included"}` : ""}">
         <div class="summary-main">
           <div class="option-icon">${iconSvg(item.icon)}</div>
@@ -2810,8 +2917,8 @@
       state.completed = {};
       localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
       localStorage.setItem(`copilot-user-${state.userId}`, state.planId);
-      location.hash = `/done/${state.planId}`;
-      show("ready");
+      location.hash = `/admin/${state.planId}`;
+      renderPlan("admin");
     }
     function loadPlan(id) {
       const stored = localStorage.getItem(`copilot-plan-${id}`);
@@ -3003,7 +3110,6 @@
       const roadmapItems = proposalRoadmap(recommendedKey);
       const quote = quoteForPlan(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
-      const commercialLabel = state.commercialEmail ? `${state.commercialName || "Comercial"} · ${state.commercialEmail}` : "Sin comercial asociado";
       const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
       const operationalSummary = [
         discoveryValue(operationalFields, "m365Tools"),
@@ -3033,7 +3139,6 @@
           <div class="proposal-meta">
             <div class="proposal-meta-card"><strong>${formatDate(state.startDate)}</strong><span>Inicio estimado</span></div>
             <div class="proposal-meta-card"><strong>${planEndDate(recommended)}</strong><span>Fin estimado</span></div>
-            <div class="proposal-meta-card"><strong>${commercialLabel}</strong><span>Comercial responsable</span></div>
             <div class="proposal-meta-card quote-card"><div class="money-icon">$</div><div><strong>${quote.main}</strong><span>Cotización de referencia</span><p>${quote.detail}</p></div></div>
           </div>
           <div class="proposal-grid">
@@ -3067,11 +3172,21 @@
               </div>
             </div>
           </div>
-          ${aiSummaryText ? `<div class="ai-summary-panel">
-            <span class="ai-badge">Generado con IA</span>
-            <h3>Resumen ejecutivo comercial</h3>
-            <p>${formatGeneratedText(aiSummaryText)}</p>
-          </div>` : ""}
+          <div class="ai-summary-panel ${aiSummaryText ? "" : "ai-summary-empty"}">
+            <div>
+              ${aiSummaryText ? `<div class="ai-summary-head">
+                <div>
+                  <span class="ai-badge">Generado con IA</span>
+                  <h3>Resumen ejecutivo comercial</h3>
+                </div>
+                <button class="btn action-ai" id="aiSummaryBtn"><span class="btn-icon">${iconSvg("spark")}</span>Regenerar IA</button>
+              </div>
+              <p>${formatGeneratedText(aiSummaryText)}</p>` : `<span class="ai-badge">Resumen con IA</span>
+              <h3>Resumen ejecutivo comercial</h3>
+              <p>Generá una síntesis comercial con madurez, foco recomendado, plan sugerido y argumentos para el cliente.</p>`}
+            </div>
+            ${aiSummaryText ? "" : `<button class="btn action-ai" id="aiSummaryBtn"><span class="btn-icon">${iconSvg("spark")}</span>Mejorar con IA</button>`}
+          </div>
           ${state.cowork ? `<div class="cowork-selected-panel">
             <div class="recommendation-title">
               <div class="cowork-brand-icon"><img src="copilot-cowork-icon.webp" alt="Copilot Cowork"></div>
@@ -3087,12 +3202,15 @@
             <p>Según el PPT, los add-ons se suman a cualquier plan y se cotizan por separado.</p>
             <div class="addons-grid">${addons.map(([title, desc, icon, price]) => `<div class="addon-item"><div class="stage-icon">${iconSvg(icon)}</div><div><strong>${title}</strong><p>${desc}</p><span class="addon-price"><span class="money-icon" style="width:22px;height:22px;font-size:13px;margin-right:6px">$</span> ${price}</span></div></div>`).join("")}</div>
           </div>` : ""}
-          <div class="toolbar">
+          <div class="proposal-actions">
             <button class="btn" id="editPlanBtn">Editar datos</button>
-            <span class="pdf-note">Incluye portada, presentación de Possumus, metodología y plan generado.</span>
-            <button class="btn primary" id="aiSummaryBtn">${aiSummaryText ? "Regenerar resumen IA" : "Mejorar con IA"}</button>
-            <button class="btn primary" id="printBtn">Generar PDF</button>
-            <button class="btn primary" id="handoffBtn">Enviar handoff</button>
+            <div class="proposal-action-buttons">
+              <button class="btn action-pdf" id="printBtn">Generar PDF</button>
+              <button class="btn action-mail" id="handoffBtn"><span class="btn-icon">${iconSvg("mail")}</span>Enviar handoff</button>
+            </div>
+          </div>
+          <div class="proposal-note-row">
+            <span class="pdf-note">El PDF incluye portada, presentación de Possumus, metodología y plan generado.</span>
             <div class="handoff-status" id="aiSummaryStatus"></div>
             <div class="handoff-status" id="handoffStatus"></div>
           </div>
@@ -3314,10 +3432,12 @@ ${location.href}`
     async function generateAiSummary(recommendedKey = recommendedPlanKey()) {
       const button = $("aiSummaryBtn");
       const status = $("aiSummaryStatus");
+      const overlay = $("thinkingOverlay");
       const payload = buildHandoffPayload(recommendedKey);
       button.disabled = true;
       status.className = "handoff-status";
       status.textContent = "Generando resumen ejecutivo con IA...";
+      overlay.classList.remove("hidden");
       try {
         const response = await fetch("/api/ai-summary", {
           method: "POST",
@@ -3341,7 +3461,8 @@ ${location.href}`
         status.className = "handoff-status error";
         status.textContent = `No se pudo generar el resumen IA: ${error.message}`;
       } finally {
-        button.disabled = false;
+        overlay.classList.add("hidden");
+        if ($("aiSummaryBtn")) $("aiSummaryBtn").disabled = false;
       }
     }
     async function copyHandoffPayload(payload) {
@@ -3407,7 +3528,6 @@ ${location.href}`
       const generatedAt = new Date().toLocaleDateString("es-AR");
       const quote = quoteForPlan(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
-      const commercialLabel = state.commercialEmail ? `${state.commercialName || "Comercial"} · ${state.commercialEmail}` : "Sin comercial asociado";
       const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
       const operationalSummary = [
         discoveryValue(operationalFields, "m365Tools"),
@@ -3472,7 +3592,7 @@ ${location.href}`
             <div>
               <p style="font-size:24pt;color:#ffffff;font-weight:900">${state.company}</p>
               <p>Inicio estimado: ${formatDate(state.startDate)} · Fin estimado: ${planEndDate(plan)}</p>
-              <p>Documento generado a partir del relevamiento comercial realizado por ${commercialLabel}.</p>
+              <p>Documento generado a partir del relevamiento cargado en el diseñador.</p>
             </div>
             <div class="brand"><span class="logo">P</span><span>Possumus</span></div>
           </div>
@@ -3610,7 +3730,6 @@ ${location.href}`
     });
     $("reviewBackBtn").addEventListener("click", () => { currentStep = steps.length - 1; renderStep(); show("wizard"); });
     $("buildBtn").addEventListener("click", generatePlan);
-    $("viewPlanBtn").addEventListener("click", () => { location.hash = `/admin/${state.planId}`; renderPlan("admin"); });
     $("closeHandoffModalBtn").addEventListener("click", closeHandoffModal);
     $("cancelHandoffBtn").addEventListener("click", closeHandoffModal);
     $("handoffModal").addEventListener("click", (event) => {
@@ -3635,7 +3754,7 @@ ${location.href}`
       const [, routeName, id] = hash.split("/");
       if (routeName === "admin") { loadPlan(id); renderPlan("admin"); return; }
       if (routeName === "user") { loadUserPlan(id); renderPlan("user"); return; }
-      if (routeName === "done") { loadPlan(id); show("ready"); return; }
+      if (routeName === "done") { loadPlan(id); renderPlan("admin"); return; }
       show("onboarding");
     }
     restoreMicrosoftSession();
