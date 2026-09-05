@@ -828,6 +828,57 @@
       width: 16px;
       height: 16px;
     }
+    .validation-panel {
+      margin-top: 18px;
+      padding: 20px;
+      border: 1px solid var(--cp-border);
+      border-radius: 18px;
+      background:
+        radial-gradient(circle at right top, var(--cp-brand-lilac), transparent 14rem),
+        var(--cp-surface);
+    }
+    .validation-panel h3 { margin-bottom: 6px; }
+    .validation-panel textarea {
+      margin-top: 12px;
+      min-height: 86px;
+    }
+    .validation-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .validation-result {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .validation-status {
+      display: inline-flex;
+      width: fit-content;
+      border-radius: 999px;
+      padding: 6px 11px;
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .validation-status.consistent {
+      border: 1px solid var(--cp-success);
+      background: var(--cp-brand-mint);
+      color: #116b2f;
+    }
+    .validation-status.review {
+      border: 1px solid var(--cp-brand-yellow);
+      background: var(--cp-brand-yellow-soft);
+      color: var(--cp-brand-dark);
+    }
+    .validation-status.risky {
+      border: 1px solid var(--cp-danger);
+      background: #fff1f2;
+      color: var(--cp-danger);
+    }
     .result-hero { padding: 34px; background: linear-gradient(135deg, var(--cp-surface), var(--cp-bg-elevated)); }
     .result-hero {
       border: 1px solid var(--cp-border);
@@ -2105,6 +2156,7 @@
         <h2>Así se perfila la propuesta integral de adopción.</h2>
         <p>Revisá los criterios relevados con el cliente y generá una recomendación de propuesta Possumus con focos de valor, argumentos y próximos pasos.</p>
         <div class="review-grid" id="summaryGrid"></div>
+        <div id="validationPanel"></div>
         <div class="toolbar">
           <button class="btn" id="reviewBackBtn">← Atrás</button>
           <button class="btn primary" id="buildBtn">Generar propuesta</button>
@@ -2641,6 +2693,8 @@
       commercialName: "",
       commercialEmail: "",
       includeBudgetEstimate: true,
+      validationNotes: "",
+      aiValidation: null,
       aiSummary: null,
       completed: {}
     };
@@ -2740,6 +2794,14 @@
       const temp = document.createElement("div");
       temp.innerHTML = value || "";
       return temp.textContent || temp.innerText || "";
+    }
+    function normalizeText(value) {
+      return String(value || "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, " ")
+        .trim();
     }
 
     function showToast(message) {
@@ -3045,6 +3107,42 @@
       const selected = state.selectedAddons && state.selectedAddons.length ? state.selectedAddons : suggestedAddonIds();
       const included = includedAddonIdsForPlan();
       return addOnCatalog().filter((item) => selected.includes(item.id) && !included.has(item.id));
+    }
+    function addonIdFromAiValue(value) {
+      const normalized = normalizeText(value);
+      if (!normalized) return "";
+      const catalog = addOnCatalog();
+      const direct = catalog.find((addon) => addon.id === value);
+      if (direct) return direct.id;
+      const byTitle = catalog.find((addon) => normalizeText(addon.title) === normalized);
+      if (byTitle) return byTitle.id;
+      const byContains = catalog.find((addon) => normalized.includes(normalizeText(addon.title)) || normalizeText(addon.title).includes(normalized));
+      return byContains ? byContains.id : "";
+    }
+    function validationAddonChanges() {
+      const review = state.aiValidation && state.aiValidation.validation && state.aiValidation.validation.addonReview;
+      if (!review || typeof review !== "object") return { add: [], remove: [] };
+      const add = (Array.isArray(review.add) ? review.add : []).map(addonIdFromAiValue).filter(Boolean);
+      const remove = (Array.isArray(review.remove) ? review.remove : []).map(addonIdFromAiValue).filter(Boolean);
+      return { add: [...new Set(add)], remove: [...new Set(remove)] };
+    }
+    function applyValidationAddons() {
+      const changes = validationAddonChanges();
+      if (!changes.add.length && !changes.remove.length) {
+        showToast("La validación no trajo cambios automáticos de add-ons.");
+        return;
+      }
+      const selected = new Set(state.selectedAddons.length ? state.selectedAddons : suggestedAddonIds());
+      const included = includedAddonIdsForPlan();
+      changes.remove.forEach((id) => selected.delete(id));
+      changes.add.forEach((id) => {
+        const addon = addOnCatalog().find((item) => item.id === id);
+        if (addon && isAddonEnabled(addon) && !included.has(id)) selected.add(id);
+      });
+      state.selectedAddons = Array.from(selected);
+      state.addonsReviewed = true;
+      showToast("Add-ons sugeridos aplicados.");
+      renderReview();
     }
     function addonState(addon, planKey = recommendedPlanKey()) {
       if (includedAddonIdsForPlan(planKey).has(addon.id)) return "included";
@@ -3525,6 +3623,48 @@
         ${item.edit === null ? "" : `<button class="summary-edit" data-edit="${item.edit}">Editar</button>`}
       </div>`).join("");
       $("summaryGrid").querySelectorAll("[data-edit]").forEach((btn) => btn.addEventListener("click", () => { currentStep = Number(btn.dataset.edit); renderStep(); show("wizard"); }));
+      renderValidationPanel();
+    }
+    function validationStatusClass(status) {
+      const normalized = normalizeText(status);
+      if (normalized.includes("riesg")) return "risky";
+      if (normalized.includes("revis")) return "review";
+      return "consistent";
+    }
+    function validationStatusLabel(validation) {
+      return validation && (validation.statusLabel || validation.status) ? (validation.statusLabel || validation.status) : "Validación IA";
+    }
+    function renderValidationPanel() {
+      const validation = state.aiValidation && state.aiValidation.validation;
+      const summary = state.aiValidation && state.aiValidation.summary ? state.aiValidation.summary : "";
+      const changes = validationAddonChanges();
+      $("validationPanel").innerHTML = `<div class="validation-panel">
+        <span class="ai-badge">Segunda mirada IA</span>
+        <h3>Validación IA del diagnóstico</h3>
+        <p>La IA revisa consistencia del plan, señales mezcladas, preguntas faltantes, add-ons y riesgos comerciales. No cambia nada automáticamente.</p>
+        <label for="validationNotes">Notas comerciales adicionales para la IA</label>
+        <textarea id="validationNotes" placeholder="Ej.: El cliente aclaró que por ahora solo quiere Excel.">${escapeHtml(state.validationNotes || "")}</textarea>
+        ${summary ? `<div class="validation-result">
+          <span class="validation-status ${validationStatusClass(validationStatusLabel(validation))}">${escapeHtml(validationStatusLabel(validation))}</span>
+          ${formatAiSummaryText(summary)}
+        </div>` : ""}
+        <div class="validation-actions">
+          <button class="btn" id="validateDiagnosisBtn">${summary ? "Revalidar diagnóstico" : "Validar diagnóstico con IA"}</button>
+          ${summary ? `<button class="btn" id="editFromValidationBtn">Editar respuestas</button>
+          <button class="btn" id="applyValidationAddonsBtn" ${changes.add.length || changes.remove.length ? "" : "disabled"}>Aplicar add-ons sugeridos</button>
+          <button class="btn primary" id="ignoreValidationBuildBtn">Ignorar y generar propuesta</button>` : ""}
+        </div>
+        <div class="handoff-status" id="validationStatus"></div>
+      </div>`;
+      $("validationNotes").addEventListener("input", (event) => { state.validationNotes = event.target.value; });
+      $("validateDiagnosisBtn").addEventListener("click", validateDiagnosisWithAi);
+      if ($("editFromValidationBtn")) $("editFromValidationBtn").addEventListener("click", () => {
+        currentStep = stepIndexByKey("qualification");
+        renderStep();
+        show("wizard");
+      });
+      if ($("applyValidationAddonsBtn")) $("applyValidationAddonsBtn").addEventListener("click", applyValidationAddons);
+      if ($("ignoreValidationBuildBtn")) $("ignoreValidationBuildBtn").addEventListener("click", generatePlan);
     }
     function formatDate(iso) {
       if (!iso) return "";
@@ -3996,6 +4136,11 @@
             </div>
             <p>Se incluye como add-on recomendado porque el relevamiento detectó procesos complejos, tareas de varios pasos o necesidad de automatización asistida.</p>
           </div>` : ""}
+          ${state.aiValidation && state.aiValidation.summary ? `<div class="validation-panel">
+            <span class="validation-status ${validationStatusClass(validationStatusLabel(state.aiValidation.validation))}">${escapeHtml(validationStatusLabel(state.aiValidation.validation))}</span>
+            <h3>Validación IA del diagnóstico</h3>
+            ${formatAiSummaryText(state.aiValidation.summary)}
+          </div>` : ""}
           ${addons.length ? `<div class="addons-panel">
             <h3>Add-ons y módulos sugeridos</h3>
             <p>Según el PPT, los add-ons se suman a cualquier plan y se cotizan por separado.</p>
@@ -4101,6 +4246,9 @@
       const aiSection = aiSummary && aiSummary.text
         ? `\n\nResumen ejecutivo generado con IA:\n${aiSummary.text}`
         : "";
+      const validationSection = state.aiValidation && state.aiValidation.summary
+        ? `\n\nValidación IA del diagnóstico:\n${state.aiValidation.summary}`
+        : "";
       return {
         from: "adopcion@possumus.tech",
         to,
@@ -4114,7 +4262,7 @@ Confianza: ${confidenceLabel(decision.level)} · ${decision.confidence}%
 Duración: ${recommended.duration}
 Alcance: ${recommended.scope}
 Cotización: ${quote.main}
-Detalle: ${quote.detail}${aiSection}
+Detalle: ${quote.detail}${aiSection}${validationSection}
 
 Motivo de recomendación:
 ${recommendationReason(recommendedKey)}
@@ -4229,6 +4377,11 @@ ${location.href}`
           quote: quote.main,
           quoteDetail: quote.detail,
           budgetEstimateInput: budgetEstimateInput(recommendedKey, quote, decision),
+          aiValidation: state.aiValidation ? {
+            summary: state.aiValidation.summary || "",
+            generatedAt: state.aiValidation.generatedAt || "",
+            validation: state.aiValidation.validation || null
+          } : null,
           decision: {
             confidence: decision.confidence,
             confidenceLevel: decision.level,
@@ -4310,6 +4463,67 @@ ${location.href}`
           }
         }
       };
+    }
+    function buildValidationPayload() {
+      const recommendedKey = recommendedPlanKey();
+      const payload = buildHandoffPayload(recommendedKey);
+      const planKey = payload.proposal.recommendedPlanKey;
+      payload.validationNotes = state.validationNotes || "";
+      payload.validationInstructions = {
+        purpose: "Auditar la consistencia comercial de la propuesta antes de generarla. No modificar automaticamente el plan ni las respuestas.",
+        responseFormat: "Devolver JSON con campos status, statusLabel, planDecision, planComment, missingQuestions, addonReview, risks, commercialRecommendation y markdownSummary. status debe ser consistent, review o risky. addonReview.keep/remove/add deben usar nombres exactos de add-ons cuando sea posible.",
+        currentPlan: payload.proposal.recommendedPlanName,
+        decisionConfidence: payload.proposal.decision,
+        addonStates: addOnCatalog().map((addon) => ({
+          id: addon.id,
+          title: addon.title,
+          category: addon.category || "Add-on",
+          state: addonState(addon, planKey),
+          selected: state.selectedAddons.includes(addon.id),
+          requiresCopilot: Boolean(addon.requiresCopilot)
+        })),
+        actionsAvailableToCommercial: [
+          "Editar respuestas estructuradas",
+          "Aplicar add-ons sugeridos por la IA",
+          "Ignorar validacion y generar propuesta con el arbol actual"
+        ]
+      };
+      return payload;
+    }
+    async function validateDiagnosisWithAi() {
+      const button = $("validateDiagnosisBtn");
+      const status = $("validationStatus");
+      const overlay = $("thinkingOverlay");
+      button.disabled = true;
+      status.className = "handoff-status";
+      status.textContent = "Validando diagnóstico, plan y add-ons con IA...";
+      overlay.classList.remove("hidden");
+      try {
+        const response = await fetch("/api/proposal-validation", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(buildValidationPayload())
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+        const summary = String(result.summary || result.text || "").trim();
+        if (!summary) throw new Error("El Flow no devolvió una validación.");
+        state.aiValidation = {
+          summary,
+          validation: result.validation || null,
+          generatedAt: new Date().toISOString(),
+          source: result.source || "Power Automate AI"
+        };
+        showToast("Validación IA generada.");
+        renderReview();
+      } catch (error) {
+        console.error(error);
+        status.className = "handoff-status error";
+        status.textContent = `No se pudo validar el diagnóstico: ${error.message}`;
+      } finally {
+        overlay.classList.add("hidden");
+        if ($("validateDiagnosisBtn")) $("validateDiagnosisBtn").disabled = false;
+      }
     }
     async function generateAiSummary(recommendedKey = recommendedPlanKey()) {
       const button = $("aiSummaryBtn");
@@ -4412,6 +4626,7 @@ ${location.href}`
       const quote = quoteForPlan(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
       const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
+      const validationSummaryText = state.aiValidation && state.aiValidation.summary ? state.aiValidation.summary : "";
       const decision = planDecision();
       const operationalSummary = [
         discoveryValue(operationalFields, "m365Tools"),
@@ -4539,6 +4754,11 @@ ${location.href}`
           <p class="eyebrow">Resumen ejecutivo comercial</p>
           <h2>Lectura ejecutiva generada con IA.</h2>
           <div class="card ai-card"><span class="ai-badge">Generado con IA</span>${formatAiSummaryText(aiSummaryText)}</div>${footer}
+        </section>` : ""}
+        ${validationSummaryText ? `<section class="slide">
+          <p class="eyebrow">Validación IA del diagnóstico</p>
+          <h2>Segunda mirada sobre plan, add-ons y riesgos.</h2>
+          <div class="card"><span class="ai-badge">Validación interna</span>${formatAiSummaryText(validationSummaryText)}</div>${footer}
         </section>` : ""}
         <section class="slide">
           <p class="eyebrow">Ejecución del plan recomendado</p>
@@ -4712,7 +4932,7 @@ ${location.href}`
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "", department: "", departments: [], userRange: "", m365Maturity: "", copilotLicenses: "", copilotUsage: "", concreteUseCases: "", agentNeed: "", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, aiSummary: null, completed: {} });
+      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "", department: "", departments: [], userRange: "", m365Maturity: "", copilotLicenses: "", copilotUsage: "", concreteUseCases: "", agentNeed: "", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, validationNotes: "", aiValidation: null, aiSummary: null, completed: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
       location.hash = "/onboarding";

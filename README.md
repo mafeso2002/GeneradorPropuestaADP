@@ -22,6 +22,12 @@ La pantalla de add-ons muestra el plan probable y separa los módulos entre suge
 
 El botón global "Ayuda · lógica de decisión" abre una explicación transparente del árbol/scoring, los planes, la confianza, las alternativas y el tratamiento de add-ons.
 
+## Validación IA del diagnóstico
+
+La app publica una API `POST /api/proposal-validation` que reutiliza el Flow de IA para auditar la consistencia comercial antes de generar la propuesta. La validación no cambia respuestas automáticamente: el comercial puede editar respuestas, aplicar add-ons sugeridos o ignorar la validación y generar la propuesta con el árbol actual.
+
+La validación recibe plan recomendado, confianza, alternativas, respuestas, add-ons sugeridos/incluidos/no disponibles y notas comerciales libres. Devuelve estado de consistencia, preguntas faltantes, riesgos, revisión de add-ons y recomendación final para el comercial.
+
 ## Resumen ejecutivo con IA
 
 La app publica una API `POST /api/ai-summary` para pedir a Power Automate un resumen ejecutivo comercial generado con IA. Antes de invocar el Flow, la API intenta detectar el sitio oficial probable de la empresa, leer paginas publicas relevantes y enriquecer el payload con actividad, productos/servicios y canales publicos. Si no encuentra datos confiables, informa esa situacion en el payload para que la IA no invente informacion externa.
