@@ -18,7 +18,7 @@ La app publica una API `GET /api/addon-prices` que consulta Power Automate y ree
 
 Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_AUTOMATE_ADDON_PRICES_URL` con la URL del trigger HTTP del Flow creado en el entorno **Possumus - Desarrollo** (`474ab5eb-a1ed-4530-b1c4-d47edde7c659`).
 
-Tabla sugerida en Dataverse: `AddonPrice`.
+Tabla Dataverse en **Possumus - Desarrollo**: `PreciosAddonsAdopcion` (`pss_PreciosAddonsAdopcion`).
 
 | Campo | Uso |
 | --- | --- |

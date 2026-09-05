@@ -1,18 +1,19 @@
 function normalizeRow(row) {
   if (!row || typeof row !== "object") return null;
-  const id = row.addon_id || row.addonId || row.id || row.key || row.crf_addon_id || row.pos_addon_id;
+  const boolValue = (value) => value === true || value === "true" || value === "True" || value === "sí" || value === "Si" || value === "si" || value === 1 || value === "1";
+  const id = row.addon_id || row.addonId || row.id || row.key || row.crf_addon_id || row.pos_addon_id || row.pss_addon_id;
   if (!id) return null;
-  const activeValue = row.active ?? row.activo ?? row.enabled ?? row.pos_activo ?? true;
+  const activeValue = row.active ?? row.activo ?? row.enabled ?? row.pos_activo ?? row.pss_activo ?? true;
   return {
     addon_id: String(id).trim(),
-    nombre: row.nombre || row.name || row.title || row.pos_nombre || "",
-    categoria: row.categoria || row.category || row.pos_categoria || "",
-    precio_texto: row.precio_texto || row.priceText || row.price || row.pos_precio_texto || "A cotizar",
-    precio_min_usd: Number(row.precio_min_usd ?? row.priceMinUsd ?? row.minUsd ?? row.pos_precio_min_usd ?? 0) || null,
-    precio_max_usd: Number(row.precio_max_usd ?? row.priceMaxUsd ?? row.maxUsd ?? row.pos_precio_max_usd ?? 0) || null,
-    requiere_copilot: Boolean(row.requiere_copilot ?? row.requiresCopilot ?? row.pos_requiere_copilot ?? false),
-    notas: row.notas || row.notes || row.pos_notas || "",
-    activo: !(activeValue === false || activeValue === "false" || activeValue === 0 || activeValue === "0")
+    nombre: row.nombre || row.name || row.Name || row.title || row.pos_nombre || row.pss_nombre || row.pss_Name || "",
+    categoria: row.categoria || row.category || row.pos_categoria || row.pss_categoria || "",
+    precio_texto: row.precio_texto || row.priceText || row.price || row.pos_precio_texto || row.pss_precio_texto || "A cotizar",
+    precio_min_usd: Number(row.precio_min_usd ?? row.priceMinUsd ?? row.minUsd ?? row.pos_precio_min_usd ?? row.pss_precio_min_usd ?? 0) || null,
+    precio_max_usd: Number(row.precio_max_usd ?? row.priceMaxUsd ?? row.maxUsd ?? row.pos_precio_max_usd ?? row.pss_precio_max_usd ?? 0) || null,
+    requiere_copilot: boolValue(row.requiere_copilot ?? row.requiresCopilot ?? row.pos_requiere_copilot ?? row.pss_requiere_copilot ?? false),
+    notas: row.notas || row.notes || row.pos_notas || row.pss_notas || "",
+    activo: activeValue === true || activeValue === undefined || activeValue === null ? true : boolValue(activeValue)
   };
 }
 
