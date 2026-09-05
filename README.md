@@ -63,3 +63,11 @@ La app publica una API `POST /api/ai-roadmap` para generar una hoja de ruta pers
 Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_AUTOMATE_AI_ROADMAP_URL` con la URL del trigger HTTP del Flow. Si no está configurada, la API reutiliza `POWER_AUTOMATE_AI_SUMMARY_URL`. Si no hay Flow disponible, el frontend genera una versión personalizada local para no bloquear la propuesta.
 
 El Flow debe devolver JSON con la forma `{ "summary": "...", "items": [...] }`. Cada item debería incluir `tag`, `title`, `date`, `desc`, `tasks`, `owner`, `deliverable`, `risk` e `icon`.
+
+## Comparador de planes con IA
+
+La app publica una API `POST /api/plan-comparison` para comparar el plan recomendado contra una alternativa cercana. El botón aparece en la sección "También podría aplicar" cuando el scoring detecta alternativas. La comparación se guarda en la propuesta, el PDF y el handoff.
+
+Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_AUTOMATE_PLAN_COMPARISON_URL` con la URL del trigger HTTP del Flow. Si no está configurada, la API reutiliza `POWER_AUTOMATE_AI_SUMMARY_URL`. Si el Flow no devuelve una comparación utilizable, el frontend genera una comparación local para no bloquear al comercial.
+
+El Flow debe devolver Markdown con diferencias de alcance, precio, valor para el cliente, riesgos de elegir el plan menor/mayor, condiciones para cambiar y recomendación final para el comercial.

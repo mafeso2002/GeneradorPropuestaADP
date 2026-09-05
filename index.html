@@ -1300,6 +1300,46 @@
       font-size: 13px;
     }
     .alternative-quote strong { color: var(--cp-text); }
+    .comparison-panel {
+      margin-top: 14px;
+      border: 1px solid var(--cp-brand-yellow);
+      border-radius: 16px;
+      padding: 16px;
+      background:
+        radial-gradient(circle at right top, var(--cp-brand-yellow-soft), transparent 12rem),
+        var(--cp-surface);
+    }
+    .comparison-panel h4 { margin: 0 0 8px; }
+    .comparison-panel table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0;
+      font-size: 13px;
+    }
+    .comparison-panel th,
+    .comparison-panel td {
+      border: 1px solid var(--cp-border);
+      padding: 9px;
+      text-align: left;
+      vertical-align: top;
+    }
+    .comparison-panel th {
+      background: var(--cp-brand-yellow-soft);
+      color: var(--cp-brand-dark);
+    }
+    .comparison-source {
+      display: inline-flex;
+      width: fit-content;
+      margin-bottom: 8px;
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: var(--cp-brand-yellow-soft);
+      color: var(--cp-brand-dark);
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
     .plan-option-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3177,6 +3217,7 @@
       aiSummary: null,
       aiRoadmap: null,
       useAiRoadmap: true,
+      aiPlanComparison: null,
       completed: {}
     };
     const steps = [
@@ -4635,6 +4676,106 @@
       }
       return `Plan principal: ${primary.main}. Alternativa: ${alternative.main}.`;
     }
+    function planComparisonKey(primaryKey, alternativeKey) {
+      return `${primaryKey}__${alternativeKey}`;
+    }
+    function currentPlanComparison(primaryKey, alternativeKey) {
+      const comparison = state.aiPlanComparison;
+      if (!comparison || comparison.key !== planComparisonKey(primaryKey, alternativeKey)) return null;
+      return comparison;
+    }
+    function fallbackPlanComparison(primaryKey, alternativeKey) {
+      const plans = planCatalog();
+      const decision = planDecision();
+      const primary = plans[primaryKey];
+      const alternative = plans[alternativeKey];
+      const alternativeScore = decision.ranked.find((item) => item.key === alternativeKey);
+      const primaryQuote = quoteForPlan(primaryKey);
+      const alternativeQuote = quoteForPlan(alternativeKey);
+      const riskLine = alternativeKey === "plan0" || alternativeKey === "plan1"
+        ? "Elegir el plan menor puede dejar afuera acompañamiento, medición o preparación para IA si el alcance real crece."
+        : "Elegir el plan mayor puede sobredimensionar la propuesta si el cliente todavía no validó sponsor, casos de uso o licencias.";
+      return `## Comparación comercial
+
+| Criterio | ${primary.name} | ${alternative.name} |
+| --- | --- | --- |
+| Alcance | ${primary.scope} | ${alternative.scope} |
+| Mejor para | ${primary.bestFor} | ${alternative.bestFor} |
+| Duración | ${primary.duration} | ${alternative.duration} |
+| Cotización base | ${primaryQuote.main} | ${alternativeQuote.main} |
+| Diferencia | Plan recomendado por scoring | ${quoteDifference(primaryKey, alternativeKey)} |
+
+## Cuándo elegir cada uno
+
+- Mantener ${primary.name} si las señales principales del diagnóstico se sostienen: ${decision.reasons.slice(0, 2).join("; ") || primary.bestFor}.
+- Considerar ${alternative.name} si cambia el alcance o pesa más esta lectura: ${alternativeScore && alternativeScore.reasons.length ? alternativeScore.reasons.slice(0, 2).join("; ") : alternative.bestFor}.
+
+## Riesgo comercial
+
+${riskLine}
+
+## Recomendación para el comercial
+
+Usar ${primary.name} como propuesta principal y presentar ${alternative.name} solo como alternativa condicionada a cambios de alcance, presupuesto o decisión interna del cliente.`;
+    }
+    function buildPlanComparisonPayload(primaryKey, alternativeKey) {
+      const plans = planCatalog();
+      const decision = planDecision();
+      const alternativeScore = decision.ranked.find((item) => item.key === alternativeKey);
+      return {
+        source: "GeneradorPropuestaADP",
+        createdAt: new Date().toISOString(),
+        proposal: {
+          company: state.company,
+          primaryPlanKey: primaryKey,
+          primaryPlan: {
+            name: plans[primaryKey].name,
+            scope: plans[primaryKey].scope,
+            duration: plans[primaryKey].duration,
+            bestFor: plans[primaryKey].bestFor,
+            quote: quoteForPlan(primaryKey).main,
+            reasons: decision.reasons
+          },
+          alternativePlanKey: alternativeKey,
+          alternativePlan: {
+            name: plans[alternativeKey].name,
+            scope: plans[alternativeKey].scope,
+            duration: plans[alternativeKey].duration,
+            bestFor: plans[alternativeKey].bestFor,
+            quote: quoteForPlan(alternativeKey).main,
+            difference: quoteDifference(primaryKey, alternativeKey),
+            score: alternativeScore ? alternativeScore.score : 0,
+            reasons: alternativeScore ? alternativeScore.reasons.slice(0, 4) : []
+          },
+          confidence: decision.confidence,
+          confidenceLabel: confidenceLabel(decision.level),
+          selectedAddons: selectedAddonItems().map((item) => ({ title: item.title, price: item.price, description: item.desc })),
+          totalEstimate: proposalTotalEstimate(primaryKey)
+        },
+        answers: {
+          customerContext: { industry: selectedLabel("industry"), users: selectedLabel("users"), departments: selectedDepartments() },
+          qualification: qualificationFields.reduce((acc, field) => ({ ...acc, [field.key]: qualificationValue(field.key) }), {}),
+          operational: operationalFields.reduce((acc, field) => ({ ...acc, [field.key]: discoveryValue(operationalFields, field.key) }), {}),
+          productivity: {
+            communication: selectedLabel("inbox"),
+            meetings: selectedLabel("meeting"),
+            creation: selectedLabel("create"),
+            automation: selectedLabel("automate")
+          }
+        },
+        aiInstructions: {
+          task: "Comparar comercialmente el plan recomendado contra el plan alternativo.",
+          responseFormat: "Responder Markdown con secciones: ## Comparacion comercial, ## Que gana el cliente, ## Riesgos de elegir el menor o mayor, ## Cuando conviene cambiar, ## Recomendacion para el comercial. No inventar precios ni informacion externa."
+        }
+      };
+    }
+    function renderPlanComparison(comparison) {
+      if (!comparison || !comparison.summary) return "";
+      return `<div class="comparison-panel">
+        <span class="comparison-source">${escapeHtml(comparison.source || "Comparación")}</span>
+        ${formatAiSummaryText(comparison.summary)}
+      </div>`;
+    }
     function renderProposalPricePanel(recommendedKey) {
       const quote = quoteForPlan(recommendedKey);
       const totalEstimate = proposalTotalEstimate(recommendedKey);
@@ -4666,6 +4807,8 @@
             <span><strong>Cotización:</strong> ${escapeHtml(quoteForPlan(item.key).main)}</span>
             <span><strong>Diferencia:</strong> ${escapeHtml(quoteDifference(decision.recommendedKey, item.key))}</span>
           </div>
+          <button class="btn action-ai compare-plan-btn" type="button" data-compare-plan="${item.key}" style="margin-top:12px"><span class="btn-icon">${iconSvg("spark")}</span>Comparar con IA</button>
+          ${renderPlanComparison(currentPlanComparison(decision.recommendedKey, item.key))}
         </div>`).join("")}</div>
       </div>`;
     }
@@ -5179,6 +5322,9 @@
       show("plan");
       $("editPlanBtn").addEventListener("click", () => { currentStep = 0; renderStep(); show("wizard"); });
       $("confidenceBadge").addEventListener("click", () => openConfidenceModal(decision, plans));
+      $("plan").querySelectorAll("[data-compare-plan]").forEach((button) => {
+        button.addEventListener("click", () => generatePlanComparison(recommendedKey, button.dataset.comparePlan, mode));
+      });
       $("aiSummaryBtn").addEventListener("click", () => generateAiSummary(recommendedKey));
       $("aiRoadmapBtn").addEventListener("click", () => generateAiRoadmap(recommendedKey, mode));
       if ($("useOriginalRoadmapBtn")) $("useOriginalRoadmapBtn").addEventListener("click", () => {
@@ -5377,6 +5523,14 @@ ${location.href}`
             generatedAt: state.aiRoadmap.generatedAt || "",
             source: state.aiRoadmap.source || "Power Automate AI",
             planKey: state.aiRoadmap.planKey || ""
+          } : null,
+          aiPlanComparison: state.aiPlanComparison ? {
+            key: state.aiPlanComparison.key || "",
+            primaryKey: state.aiPlanComparison.primaryKey || "",
+            alternativeKey: state.aiPlanComparison.alternativeKey || "",
+            summary: state.aiPlanComparison.summary || "",
+            generatedAt: state.aiPlanComparison.generatedAt || "",
+            source: state.aiPlanComparison.source || "Power Automate AI"
           } : null,
           coworkIncluded: state.cowork,
           addons: selectedAddonItems().map((item) => ({
@@ -5598,6 +5752,58 @@ ${location.href}`
         if ($("aiRoadmapBtn")) $("aiRoadmapBtn").disabled = false;
       }
     }
+    async function generatePlanComparison(primaryKey, alternativeKey, mode = "admin") {
+      const button = document.querySelector(`.compare-plan-btn[data-compare-plan="${alternativeKey}"]`);
+      const payload = buildPlanComparisonPayload(primaryKey, alternativeKey);
+      const applyLocalComparison = (message) => {
+        state.aiPlanComparison = {
+          key: planComparisonKey(primaryKey, alternativeKey),
+          primaryKey,
+          alternativeKey,
+          summary: fallbackPlanComparison(primaryKey, alternativeKey),
+          note: message,
+          generatedAt: new Date().toISOString(),
+          source: "Comparación local"
+        };
+        if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
+        showToast("Comparación local generada. Falta conectar el Flow IA para mejorarla.");
+        renderPlan(mode);
+      };
+      if (button) button.disabled = true;
+      showThinking("Comparando planes con IA", "Estoy revisando alcance, precio, riesgos y cuándo conviene elegir cada alternativa.");
+      try {
+        const response = await fetch("/api/plan-comparison", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+        const summary = String(result.summary || result.text || "").trim();
+        if (result.fallbackRequired || !summary) {
+          applyLocalComparison(result.message || "El Flow IA todavía no devolvió una comparación válida.");
+          return;
+        }
+        state.aiPlanComparison = {
+          key: planComparisonKey(primaryKey, alternativeKey),
+          primaryKey,
+          alternativeKey,
+          summary,
+          generatedAt: new Date().toISOString(),
+          source: result.source || "Power Automate AI"
+        };
+        if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
+        showToast("Comparación de planes generada.");
+        renderPlan(mode);
+      } catch (error) {
+        console.info(error);
+        applyLocalComparison(`No se pudo conectar con IA (${error.message}).`);
+      } finally {
+        hideThinking();
+        const refreshed = document.querySelector(`.compare-plan-btn[data-compare-plan="${alternativeKey}"]`);
+        if (refreshed) refreshed.disabled = false;
+      }
+    }
     async function copyHandoffPayload(payload) {
       try {
         await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
@@ -5667,6 +5873,7 @@ ${location.href}`
       const printableAddonRows = selectedAddons.length
         ? selectedAddons.map((addon) => `<div class="price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("")
         : `<div class="price-row"><span>Add-ons seleccionados</span><strong>Sin add-ons</strong></div>`;
+      const comparisonText = state.aiPlanComparison && state.aiPlanComparison.summary ? state.aiPlanComparison.summary : "";
       const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
       const validationSummaryText = state.aiValidation && state.aiValidation.summary ? filterValidationSummaryForProposal(state.aiValidation.summary) : "";
       const decision = planDecision();
@@ -5823,6 +6030,11 @@ ${location.href}`
           <p class="eyebrow">Alternativas posibles</p>
           <h2>Planes a validar si cambia el alcance.</h2>
           <div class="grid-2">${decision.alternatives.map((item) => `<div class="card alternative"><strong>${plans[item.key].name}</strong><p>${item.reasons.slice(0, 3).map(escapeHtml).join(". ") || plans[item.key].bestFor}</p><p><strong>Cotización:</strong> ${quoteForPlan(item.key).main}</p><p><strong>Diferencia:</strong> ${quoteDifference(decision.recommendedKey, item.key)}</p></div>`).join("")}</div>${footer}
+        </section>` : ""}
+        ${comparisonText ? `<section class="slide">
+          <p class="eyebrow">Comparación de planes</p>
+          <h2>Lectura comercial entre plan recomendado y alternativa.</h2>
+          <div class="card ai-card">${formatAiSummaryText(comparisonText)}</div>${footer}
         </section>` : ""}
         ${aiSummaryText ? `<section class="slide">
           <p class="eyebrow">Resumen ejecutivo comercial</p>
@@ -6132,7 +6344,7 @@ ${location.href}`
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, completed: {} });
+      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, aiPlanComparison: null, completed: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
       location.hash = "/onboarding";
