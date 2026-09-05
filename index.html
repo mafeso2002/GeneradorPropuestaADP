@@ -355,6 +355,17 @@
       font-size: 13px;
       font-weight: 650;
     }
+    .license-pill {
+      border-color: var(--cp-danger);
+      background: #fff1f2;
+      color: var(--cp-danger);
+      font-weight: 900;
+    }
+    .license-pill.has-copilot {
+      border-color: var(--cp-success);
+      background: var(--cp-brand-mint);
+      color: #116b2f;
+    }
     .options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
     .option {
       position: relative;
@@ -2448,10 +2459,10 @@
       teamsSharepointStructure: "",
       taskManagement: "",
       firstChange: "",
-      deliveryMode: "",
-      sessionFrequency: "",
-      groupModel: "",
-      successMetric: "",
+      deliveryMode: "remote",
+      sessionFrequency: "weekly",
+      groupModel: "by-area",
+      successMetric: "satisfaction",
       inbox: "",
       meeting: "",
       meetingApp: "Teams",
@@ -3091,6 +3102,7 @@
         ${renderDiscoveryFields(operationalFields)}`;
       }
       if (step.key === "logistics") {
+        ensureLogisticsDefaults();
         body = `<div class="conversation-guide">
           <div class="stage-icon">${iconSvg("calendar")}</div>
           <div>
@@ -3191,8 +3203,9 @@
         body = `<div class="addons-panel">
           <div class="addon-plan-context">
             <div>
-              <span class="badge">Plan probable · ${confidenceLabel(decision.level)} ${decision.confidence}%</span>
+              <span class="confidence-badge ${decision.level}">Plan probable · ${confidenceLabel(decision.level)} ${decision.confidence}%</span>
               <h3>${plan.name}</h3>
+              <div class="chips"><span class="pill license-pill ${hasCopilotLicense() ? "has-copilot" : ""}">${hasCopilotLicense() ? "Tiene M365 Copilot" : "Sin M365 Copilot"}</span></div>
               <p>Los módulos de abajo se separan entre lo que ya cubre el plan, lo recomendado como adicional y lo disponible para cotizar aparte.</p>
             </div>
             <div class="score">${plan.duration}</div>
@@ -3294,6 +3307,7 @@
       return Boolean(state[key]);
     }
     function renderReview() {
+      ensureLogisticsDefaults();
       currentStep = Math.min(currentStep, steps.length - 1);
       renderNav("reviewNav");
       const items = [
@@ -3357,6 +3371,12 @@
       date.setDate(date.getDate() + days);
       return date.toISOString().slice(0, 10);
     }
+    function ensureLogisticsDefaults() {
+      if (!state.deliveryMode) state.deliveryMode = "remote";
+      if (!state.sessionFrequency) state.sessionFrequency = "weekly";
+      if (!state.groupModel) state.groupModel = "by-area";
+      if (!state.successMetric) state.successMetric = "satisfaction";
+    }
     function openConfirmProposalModal() {
       $("confirmProposalModal").classList.remove("hidden");
     }
@@ -3365,6 +3385,7 @@
     }
     function generatePlan() {
       closeConfirmProposalModal();
+      ensureLogisticsDefaults();
       state.planId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
       state.userId = crypto.randomUUID ? crypto.randomUUID() : `user-${Date.now()}`;
       state.completed = {};
@@ -3707,7 +3728,7 @@
               <h2>${mode === "user" ? "Plan recomendado para la iniciativa" : "Propuesta recomendada: " + recommended.name}</h2>
               <div class="client-highlight">${state.company}</div>
               <p class="lead">${selectedLabel("industry")} · ${selectedLabel("users")}</p>
-              <div class="chips">${focus.map((item) => `<span class="pill">${item}</span>`).join("")}<span class="pill">Cowork: ${state.cowork ? "Incluido" : "No incluido"}</span></div>
+              <div class="chips">${focus.map((item) => `<span class="pill">${item}</span>`).join("")}<span class="pill license-pill ${hasCopilotLicense() ? "has-copilot" : ""}">${hasCopilotLicense() ? "Tiene M365 Copilot" : "Sin M365 Copilot"}</span><span class="pill">Cowork: ${state.cowork ? "Incluido" : "No incluido"}</span></div>
               <div class="decision-row">
                 <span class="confidence-badge ${decision.level}">${confidenceLabel(decision.level)} · ${decision.confidence}%</span>
                 <span class="decision-note">${confidenceNote(decision)}</span>
@@ -4379,7 +4400,7 @@ ${location.href}`
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "", department: "", departments: [], userRange: "", m365Maturity: "", copilotLicenses: "", copilotUsage: "", concreteUseCases: "", agentNeed: "", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "", sessionFrequency: "", groupModel: "", successMetric: "", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, aiSummary: null, completed: {} });
+      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "", department: "", departments: [], userRange: "", m365Maturity: "", copilotLicenses: "", copilotUsage: "", concreteUseCases: "", agentNeed: "", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, aiSummary: null, completed: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
       location.hash = "/onboarding";
