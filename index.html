@@ -1,0 +1,2907 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diseñador de Propuestas de Adopción | Possumus</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f8f8fb;
+      --cp-bg-elevated: #ffffff;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f1f3f5;
+      --cp-border: #e4e4e7;
+      --cp-border-strong: #a0a0a0;
+      --cp-text: #2e2d31;
+      --cp-text-muted: #5f6168;
+      --cp-text-soft: #73757d;
+      --cp-accent: #2e2d31;
+      --cp-accent-hover: #434247;
+      --cp-accent-soft: rgba(46, 45, 49, 0.06);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #fcd702;
+      --cp-link: #2e2d31;
+      --cp-shadow: 0 24px 70px rgba(46, 45, 49, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(252, 215, 2, 0.34);
+      --cp-brand-dark: #2e2d31;
+      --cp-brand-yellow: #fcd702;
+      --cp-brand-yellow-soft: #fff7bf;
+      --cp-brand-sky: #eaf4ff;
+      --cp-brand-mint: #eefbf3;
+      --cp-brand-lilac: #f5f0ff;
+      --cp-cowork: #00a351;
+      --cp-cowork-soft: #e8f8ef;
+    }
+    html[data-theme="dark"] {
+      color-scheme: light;
+      --cp-bg: #f8f8fb;
+      --cp-bg-elevated: #ffffff;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f1f3f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #8f8f8f;
+      --cp-text: #2e2d31;
+      --cp-text-muted: #5f6168;
+      --cp-text-soft: #73757d;
+      --cp-accent: #2e2d31;
+      --cp-accent-hover: #434247;
+      --cp-accent-soft: rgba(46, 45, 49, 0.06);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #fcd702;
+      --cp-link: #2e2d31;
+      --cp-shadow: 0 22px 60px rgba(46, 45, 49, 0.16);
+      --cp-overlay: rgba(255, 255, 255, 0.86);
+      --cp-panel: rgba(255, 255, 255, 0.88);
+      --cp-panel-strong: rgba(255, 255, 255, 0.98);
+      --cp-sheen: rgba(255, 255, 255, 0.62);
+      --cp-highlight: rgba(252, 215, 2, 0.36);
+      --cp-brand-dark: #2e2d31;
+      --cp-brand-yellow: #fcd702;
+      --cp-brand-yellow-soft: #fff7bf;
+      --cp-brand-sky: #eaf4ff;
+      --cp-brand-mint: #eefbf3;
+      --cp-brand-lilac: #f5f0ff;
+      --cp-cowork: #00a351;
+      --cp-cowork-soft: #e8f8ef;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 8% -8%, var(--cp-brand-yellow-soft), transparent 25rem),
+        radial-gradient(circle at 95% 5%, var(--cp-surface), transparent 28rem),
+        linear-gradient(180deg, var(--cp-bg), var(--cp-surface));
+      color: var(--cp-text);
+      font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(90deg, transparent 0 94%, var(--cp-brand-yellow-soft) 94% 95%, transparent 95%),
+        linear-gradient(180deg, transparent 0 94%, var(--cp-surface-soft) 94% 95%, transparent 95%);
+      background-size: 56px 56px;
+      z-index: -1;
+    }
+    button, input, select, textarea { font: inherit; }
+    a { color: var(--cp-link); }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 28px;
+      background: var(--cp-panel-strong);
+      border-bottom: 1px solid var(--cp-border);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 5;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; }
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--cp-brand-dark);
+      border: 0;
+      box-shadow: none;
+      overflow: hidden;
+    }
+    .mark img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+    }
+    .shell {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 20px 56px;
+    }
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+      gap: 24px;
+      align-items: stretch;
+      min-height: 520px;
+    }
+    .hero-card, .card, .side, .result-hero, .roadmap-card, .summary-item {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      box-shadow: 0 18px 50px rgba(46, 45, 49, 0.09);
+    }
+    .hero-card {
+      position: relative;
+      overflow: hidden;
+      padding: 56px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background:
+        linear-gradient(90deg, var(--cp-brand-yellow) 0 10px, transparent 10px),
+        radial-gradient(circle at 86% 18%, var(--cp-brand-yellow-soft), transparent 15rem),
+        linear-gradient(135deg, var(--cp-surface), var(--cp-bg-elevated));
+      border: 1px solid var(--cp-border);
+      box-shadow: var(--cp-shadow);
+    }
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      width: 260px;
+      height: 160px;
+      right: -72px;
+      bottom: -36px;
+      border-radius: 999px 0 0 999px;
+      border: 22px solid var(--cp-brand-yellow);
+      opacity: .22;
+      pointer-events: none;
+    }
+    .eyebrow {
+      color: var(--cp-brand-dark);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin: 0 0 12px;
+    }
+    h1, h2, h3, h4 { margin: 0; line-height: 1.12; }
+    h1 { font-size: clamp(36px, 5vw, 64px); letter-spacing: -0.04em; }
+    h2 { font-size: clamp(28px, 4vw, 44px); letter-spacing: -0.03em; }
+    h3 { font-size: 24px; letter-spacing: -0.02em; }
+    h4 { font-size: 19px; }
+    p { color: var(--cp-text-muted); line-height: 1.5; }
+    .lead { font-size: 19px; max-width: 760px; }
+    .form-row { display: grid; grid-template-columns: 1fr 220px; gap: 12px; margin-top: 28px; }
+    label { display: block; font-weight: 650; margin-bottom: 7px; }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--cp-border-strong);
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      border-radius: 0.625rem;
+      padding: 12px 14px;
+      outline-color: var(--cp-accent);
+    }
+    textarea { min-height: 96px; resize: vertical; }
+    .btn {
+      border: 1px solid var(--cp-border-strong);
+      color: var(--cp-text);
+      background: var(--cp-surface);
+      border-radius: 0.625rem;
+      padding: 12px 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform .12s ease, background .12s ease;
+    }
+    .btn:hover { transform: translateY(-1px); background: var(--cp-surface-soft); }
+    .btn.primary {
+      background: var(--cp-accent);
+      border-color: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      box-shadow: 0 10px 24px rgba(46, 45, 49, 0.16);
+    }
+    .btn.primary:hover { background: var(--cp-accent-hover); }
+    .btn.ghost { border-color: var(--cp-border); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+    .side {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: var(--cp-surface);
+    }
+    .mini-stat { border-top: 1px solid var(--cp-border); padding-top: 18px; margin-top: 18px; }
+    .layout { display: grid; grid-template-columns: 310px minmax(0, 1fr); gap: 24px; align-items: start; }
+    .side-nav { padding: 20px; position: sticky; top: 88px; }
+    .side-nav h2 { font-size: 22px; margin-bottom: 6px; }
+    .nav-list { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+    .nav-step {
+      position: relative;
+      text-align: left;
+      border: 1px solid var(--cp-border);
+      background: var(--cp-panel-strong);
+      color: var(--cp-text);
+      border-radius: 0.625rem;
+      padding: 12px 42px 12px 12px;
+      cursor: pointer;
+    }
+    .nav-step.active { border-color: var(--cp-accent); background: var(--cp-accent-soft); }
+    .nav-step.completed {
+      border-color: rgba(0, 163, 81, .32);
+      background:
+        linear-gradient(90deg, var(--cp-cowork) 0 4px, transparent 4px),
+        var(--cp-panel-strong);
+    }
+    .nav-step.completed::after {
+      content: "✓";
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: var(--cp-cowork-soft);
+      color: var(--cp-cowork);
+      font-size: 13px;
+      font-weight: 900;
+    }
+    .nav-step.active.completed {
+      border-color: var(--cp-brand-dark);
+      background:
+        linear-gradient(90deg, var(--cp-brand-yellow) 0 4px, transparent 4px),
+        var(--cp-surface);
+    }
+    .nav-step small { display: block; color: var(--cp-text-muted); margin-top: 4px; }
+    .content-card {
+      padding: 34px;
+      min-height: 560px;
+      background:
+        linear-gradient(180deg, var(--cp-surface), var(--cp-bg));
+    }
+    .step-header { display: flex; justify-content: space-between; gap: 16px; align-items: start; margin-bottom: 24px; }
+    .pill, .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--cp-border);
+      border-radius: 999px;
+      padding: 5px 11px;
+      color: var(--cp-text-muted);
+      background: var(--cp-surface-soft);
+      font-size: 13px;
+      font-weight: 650;
+    }
+    .options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .option {
+      position: relative;
+      text-align: left;
+      min-height: 112px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      padding: 18px;
+      cursor: pointer;
+    }
+    .option:hover, .option.selected {
+      border-color: var(--cp-brand-yellow);
+      background:
+        linear-gradient(90deg, var(--cp-brand-yellow) 0 6px, transparent 6px),
+        var(--cp-surface);
+      box-shadow: 0 14px 32px rgba(46, 45, 49, 0.1);
+    }
+    .option strong { display: block; margin-bottom: 7px; font-size: 17px; }
+    .option span { color: var(--cp-text-muted); line-height: 1.45; }
+    .option-hint {
+      display: inline-flex;
+      width: fit-content;
+      margin-bottom: 9px;
+      border-radius: 999px;
+      padding: 4px 9px;
+      background: var(--cp-surface-soft);
+      color: var(--cp-text-soft);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .conversation-guide {
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      gap: 14px;
+      align-items: start;
+      margin-bottom: 22px;
+      padding: 16px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at right, var(--cp-brand-yellow-soft), transparent 12rem),
+        var(--cp-surface);
+    }
+    .conversation-guide p { margin: 4px 0 0; }
+    .option.with-icon {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 16px;
+      align-items: start;
+      padding-right: 44px;
+    }
+    .option-icon {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--cp-brand-dark);
+      border: 1px solid var(--cp-border);
+    }
+    .option-icon svg {
+      width: 28px;
+      height: 28px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .option-check {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--cp-border-strong);
+      border-radius: 999px;
+      color: var(--cp-accent-fg);
+      background: var(--cp-surface);
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .option.selected .option-check,
+    .dept-card.selected .option-check,
+    .meeting-app-card.selected .option-check {
+      border-color: var(--cp-brand-dark);
+      background: var(--cp-brand-dark);
+      color: var(--cp-brand-dark);
+      color: var(--cp-brand-yellow);
+    }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 28px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 14px; }
+    .chip {
+      border: 1px solid var(--cp-border);
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      border-radius: 999px;
+      padding: 9px 13px;
+      cursor: pointer;
+    }
+    .chip.selected { background: var(--cp-brand-dark); border-color: var(--cp-brand-dark); color: var(--cp-brand-yellow); }
+    .dept-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .dept-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      align-items: center;
+      gap: 14px;
+      min-height: 86px;
+      padding: 16px 44px 16px 16px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      text-align: left;
+      cursor: pointer;
+    }
+    .dept-card:hover, .dept-card.selected {
+      border-color: var(--cp-brand-yellow);
+      background: var(--cp-surface);
+      box-shadow: 0 12px 26px rgba(46, 45, 49, 0.1);
+    }
+    .dept-card strong { font-size: 17px; }
+    .dept-card .option-icon {
+      width: 42px;
+      height: 42px;
+    }
+    .dept-card .option-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+    .dept-card .option-check {
+      top: 16px;
+      right: 16px;
+    }
+    .meeting-app-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .meeting-app-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      align-items: center;
+      gap: 12px;
+      min-height: 74px;
+      padding: 14px 42px 14px 14px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      text-align: left;
+      cursor: pointer;
+    }
+    .meeting-app-card:hover,
+    .meeting-app-card.selected {
+      border-color: var(--cp-brand-yellow);
+      background: var(--cp-surface);
+      box-shadow: 0 12px 26px rgba(46, 45, 49, 0.1);
+    }
+    .meeting-app-card strong { font-size: 17px; }
+    .meeting-app-card .option-icon {
+      width: 38px;
+      height: 38px;
+    }
+    .meeting-app-card .option-icon svg {
+      width: 23px;
+      height: 23px;
+    }
+    .meeting-app-card .option-check {
+      top: 14px;
+      right: 14px;
+    }
+    .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px; border: 1px solid var(--cp-border); border-radius: 16px; }
+    .switch {
+      width: 58px;
+      height: 32px;
+      border-radius: 999px;
+      background: var(--cp-border-strong);
+      position: relative;
+      border: 0;
+      cursor: pointer;
+    }
+    .switch::after {
+      content: "";
+      position: absolute;
+      width: 24px;
+      height: 24px;
+      top: 4px;
+      left: 4px;
+      border-radius: 999px;
+      background: var(--cp-surface);
+      transition: left .16s ease;
+    }
+    .switch.on { background: var(--cp-cowork); }
+    .switch.on::after { left: 30px; }
+    .cowork-hero {
+      position: relative;
+      overflow: hidden;
+      padding: 32px;
+      border: 1px solid var(--cp-border);
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 96% 8%, var(--cp-cowork-soft), transparent 18rem),
+        radial-gradient(circle at 12% 96%, var(--cp-brand-yellow-soft), transparent 16rem),
+        var(--cp-surface);
+    }
+    .cowork-hero::after {
+      content: "";
+      position: absolute;
+      right: -36px;
+      top: -36px;
+      width: 150px;
+      height: 150px;
+      border-radius: 999px;
+      border: 24px solid var(--cp-cowork);
+      opacity: .14;
+      pointer-events: none;
+    }
+    .cowork-hero-header {
+      display: grid;
+      grid-template-columns: 116px 1fr auto;
+      gap: 20px;
+      align-items: start;
+    }
+    .cowork-hero .stage-icon {
+      width: 54px;
+      height: 54px;
+      border-color: var(--cp-cowork);
+      color: var(--cp-cowork);
+      background: var(--cp-cowork-soft);
+    }
+    .cowork-brand-icon {
+      display: grid;
+      place-items: center;
+      width: 112px;
+      height: 112px;
+      border-radius: 0;
+      border: 0;
+      background: transparent;
+      overflow: hidden;
+      box-shadow: none;
+    }
+    .cowork-brand-icon img {
+      width: 108px;
+      height: 108px;
+      object-fit: contain;
+      display: block;
+    }
+    .cowork-hero h3 {
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+      margin-top: 8px;
+    }
+    .cowork-lead {
+      max-width: 820px;
+      margin-top: 16px;
+      font-size: 19px;
+      line-height: 1.45;
+    }
+    .cowork-toggle-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border: 1px solid var(--cp-border);
+      border-radius: 999px;
+      background: var(--cp-surface);
+      box-shadow: 0 12px 26px rgba(46, 45, 49, .08);
+      white-space: nowrap;
+    }
+    .cowork-toggle-card.disabled {
+      opacity: .68;
+      cursor: not-allowed;
+    }
+    .cowork-toggle-card.disabled .switch {
+      cursor: not-allowed;
+      background: var(--cp-border-strong);
+    }
+    .cowork-toggle-card strong {
+      color: var(--cp-text);
+      font-size: 18px;
+    }
+    .cowork-points {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .cowork-point {
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      padding: 16px;
+      background: rgba(255,255,255,.7);
+    }
+    .cowork-point strong { display: block; margin-bottom: 6px; }
+    .cowork-point p { margin: 0; font-size: 14px; }
+    .cowork-note {
+      margin-top: 22px;
+      padding-top: 18px;
+      border-top: 1px solid var(--cp-border);
+      color: var(--cp-text-muted);
+    }
+    .cowork-note strong { color: var(--cp-text); }
+    .cowork-license-warning {
+      margin-top: 18px;
+      padding: 14px 16px;
+      border: 1px solid var(--cp-brand-yellow);
+      border-radius: 16px;
+      background: var(--cp-brand-yellow-soft);
+      color: var(--cp-text);
+      font-weight: 700;
+    }
+    .review-grid { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 18px; }
+    .summary-item {
+      padding: 12px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      border-radius: 14px;
+    }
+    .summary-item p { margin: 2px 0 0; font-size: 14px; line-height: 1.35; }
+    .summary-item.cowork-summary {
+      border-color: var(--cp-cowork);
+      background:
+        linear-gradient(90deg, var(--cp-cowork) 0 6px, transparent 6px),
+        radial-gradient(circle at right, var(--cp-cowork-soft), transparent 13rem),
+        var(--cp-surface);
+    }
+    .summary-item.cowork-summary.not-included {
+      border-color: var(--cp-danger);
+      background:
+        linear-gradient(90deg, var(--cp-danger) 0 6px, transparent 6px),
+        var(--cp-surface);
+    }
+    .summary-item.cowork-summary.not-included .option-icon {
+      border-color: var(--cp-danger);
+      color: var(--cp-danger);
+    }
+    .summary-main {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 12px;
+      align-items: center;
+      min-width: 0;
+    }
+    .summary-main .option-icon {
+      width: 34px;
+      height: 34px;
+    }
+    .summary-main .option-icon svg {
+      width: 19px;
+      height: 19px;
+    }
+    .summary-text {
+      display: grid;
+      grid-template-columns: minmax(150px, .55fr) minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+    }
+    .summary-text strong { display: block; }
+    .summary-text .summary-title { color: var(--cp-text); font-weight: 700; }
+    .summary-text .summary-desc { color: var(--cp-text-muted); }
+    .summary-lines {
+      display: grid;
+      gap: 5px;
+      margin-top: 4px;
+    }
+    .summary-lines p {
+      margin: 0;
+      color: var(--cp-text-muted);
+    }
+    .summary-lines strong {
+      display: inline;
+      color: var(--cp-text);
+      font-weight: 750;
+    }
+    .summary-edit {
+      border: 0;
+      background: transparent;
+      color: var(--cp-text-muted);
+      padding: 4px 6px;
+      font-weight: 650;
+      cursor: pointer;
+      white-space: nowrap;
+      border-radius: 999px;
+    }
+    .summary-edit:hover {
+      color: var(--cp-brand-dark);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      background: var(--cp-surface-soft);
+    }
+    .summary-app-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      width: fit-content;
+      margin-top: 10px;
+      border: 1px solid var(--cp-border);
+      border-radius: 999px;
+      padding: 6px 11px;
+      background: var(--cp-surface-soft);
+      color: var(--cp-text);
+      font-weight: 700;
+      font-size: 14px;
+    }
+    .summary-app-pill .option-icon {
+      width: 24px;
+      height: 24px;
+      background: transparent;
+    }
+    .summary-app-pill .option-icon svg {
+      width: 16px;
+      height: 16px;
+    }
+    .result-hero { padding: 34px; background: linear-gradient(135deg, var(--cp-surface), var(--cp-bg-elevated)); }
+    .result-hero {
+      border: 1px solid var(--cp-border);
+      box-shadow: var(--cp-shadow);
+      background:
+        linear-gradient(90deg, var(--cp-brand-yellow) 0 10px, transparent 10px),
+        radial-gradient(circle at 92% 18%, var(--cp-brand-yellow-soft), transparent 17rem),
+        var(--cp-surface);
+    }
+    .result-top { display: flex; justify-content: space-between; gap: 24px; align-items: start; }
+    .score {
+      display: grid;
+      place-items: center;
+      min-width: 150px;
+      min-height: 96px;
+      padding: 18px;
+      border: 1px solid var(--cp-brand-yellow);
+      border-radius: 16px;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--cp-accent);
+      flex: none;
+      background:
+        linear-gradient(90deg, var(--cp-brand-yellow) 0 6px, transparent 6px),
+        var(--cp-surface);
+    }
+    .client-highlight {
+      display: inline-block;
+      margin: 10px 0 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--cp-brand-dark);
+      color: var(--cp-brand-yellow);
+      font-weight: 900;
+      letter-spacing: .01em;
+    }
+    .proposal-meta {
+      display: grid;
+      grid-template-columns: .55fr .55fr 1.55fr;
+      gap: 10px;
+      margin: 14px 0;
+      align-items: start;
+    }
+    .proposal-meta-card {
+      border: 1px solid var(--cp-border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: var(--cp-surface);
+    }
+    .proposal-meta-card strong {
+      display: block;
+      font-size: 17px;
+      color: var(--cp-text);
+    }
+    .proposal-meta-card span { font-size: 13px; color: var(--cp-text-muted); }
+    .quote-card {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 12px;
+      align-items: start;
+      border-color: var(--cp-brand-yellow);
+      background:
+        radial-gradient(circle at right, var(--cp-brand-yellow-soft), transparent 10rem),
+        var(--cp-surface);
+    }
+    .quote-card strong {
+      font-size: 22px;
+    }
+    .quote-card p { margin-top: 5px; font-size: 13px; }
+    .money-icon {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background: var(--cp-brand-yellow);
+      color: var(--cp-brand-dark);
+      font-weight: 900;
+      font-size: 20px;
+    }
+    .roadmap { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 24px; }
+    .roadmap-card { padding: 20px; }
+    .roadmap-card {
+      background:
+        linear-gradient(180deg, var(--cp-surface), var(--cp-surface-soft));
+      border-top: 6px solid var(--cp-brand-yellow);
+    }
+    .task {
+      display: grid;
+      grid-template-columns: 24px 1fr;
+      gap: 11px;
+      padding: 12px 0;
+      border-top: 1px solid var(--cp-border);
+    }
+    .task-marker {
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      margin-top: 2px;
+      border-radius: 999px;
+      border: 1px solid var(--cp-brand-yellow);
+      color: var(--cp-brand-dark);
+      font-size: 12px;
+      font-weight: 900;
+      background: var(--cp-surface);
+    }
+    .task p { margin: 3px 0 0; }
+    .proposal-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr);
+      gap: 18px;
+      margin-top: 22px;
+    }
+    .proposal-panel,
+    .plan-option-card,
+    .pillar-card,
+    .timeline-item {
+      background: var(--cp-surface);
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      box-shadow: 0 14px 34px rgba(46, 45, 49, 0.08);
+    }
+    .proposal-panel {
+      padding: 22px;
+      background:
+        linear-gradient(90deg, var(--cp-brand-yellow) 0 7px, transparent 7px),
+        var(--cp-surface);
+    }
+    .recommendation-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+    .plan-metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .plan-metric {
+      border: 1px solid var(--cp-border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: var(--cp-surface-soft);
+    }
+    .plan-metric strong {
+      display: block;
+      font-size: 18px;
+      color: var(--cp-text);
+    }
+    .plan-option-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .plan-option-card {
+      position: relative;
+      padding: 18px;
+      overflow: hidden;
+    }
+    .plan-option-card.recommended {
+      border-color: var(--cp-brand-yellow);
+      box-shadow: 0 18px 42px rgba(46, 45, 49, 0.12);
+    }
+    .plan-option-card.recommended::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 7px;
+      background: var(--cp-brand-yellow);
+    }
+    .plan-option-card h4 { margin-top: 12px; }
+    .method-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .pillar-card {
+      padding: 16px;
+      border-top: 5px solid var(--cp-brand-yellow);
+    }
+    .timeline {
+      display: grid;
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .timeline-item {
+      overflow: hidden;
+    }
+    .timeline-item summary {
+      display: grid;
+      grid-template-columns: 52px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 18px;
+      cursor: pointer;
+      list-style: none;
+    }
+    .timeline-item summary::-webkit-details-marker { display: none; }
+    .timeline-item summary::after {
+      content: "+";
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: var(--cp-surface-soft);
+      color: var(--cp-text);
+      font-weight: 900;
+    }
+    .timeline-item[open] summary::after { content: "–"; background: var(--cp-brand-yellow); }
+    .stage-icon {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 16px;
+      background: transparent;
+      color: var(--cp-brand-dark);
+      border: 1px solid var(--cp-border);
+    }
+    .stage-icon svg {
+      width: 26px;
+      height: 26px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .timeline-body {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, .55fr);
+      gap: 18px;
+      padding: 0 18px 18px 84px;
+    }
+    .timeline-body ul {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      color: var(--cp-text-muted);
+      line-height: 1.55;
+    }
+    .commercial-note {
+      border-radius: 16px;
+      padding: 16px;
+      background: var(--cp-surface-soft);
+      border: 1px solid var(--cp-border);
+    }
+    .execution-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .execution-card {
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      padding: 18px;
+      background: var(--cp-surface);
+    }
+    .execution-card ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: var(--cp-text-muted);
+      line-height: 1.5;
+    }
+    .addons-panel,
+    .cowork-selected-panel {
+      margin-top: 18px;
+      padding: 18px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+    }
+    .cowork-selected-panel {
+      border-color: var(--cp-cowork);
+      background:
+        linear-gradient(90deg, var(--cp-cowork) 0 7px, transparent 7px),
+        radial-gradient(circle at right, var(--cp-cowork-soft), transparent 12rem),
+        var(--cp-surface);
+    }
+    .cowork-selected-panel .stage-icon {
+      border-color: var(--cp-cowork);
+      color: var(--cp-cowork);
+      background: var(--cp-cowork-soft);
+    }
+    .addons-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .addon-item {
+      display: grid;
+      grid-template-columns: 36px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 1px solid var(--cp-border);
+      border-radius: 14px;
+      background: var(--cp-surface-soft);
+    }
+    .addon-option-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .addon-option {
+      position: relative;
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      gap: 12px;
+      align-items: start;
+      min-height: 128px;
+      padding: 16px 48px 16px 16px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+      color: var(--cp-text);
+      text-align: left;
+      cursor: pointer;
+    }
+    .addon-option.disabled {
+      opacity: .56;
+      cursor: not-allowed;
+      background: var(--cp-surface-soft);
+    }
+    .addon-option.disabled:hover {
+      border-color: var(--cp-border);
+      box-shadow: none;
+    }
+    .addon-option:hover,
+    .addon-option.selected {
+      border-color: var(--cp-cowork);
+      box-shadow: 0 12px 26px rgba(46, 45, 49, 0.1);
+    }
+    .addon-option.selected {
+      background:
+        linear-gradient(90deg, var(--cp-cowork) 0 6px, transparent 6px),
+        var(--cp-surface);
+    }
+    .addon-option.selected .option-check {
+        border-color: var(--cp-cowork);
+        background: var(--cp-cowork);
+        color: var(--cp-surface);
+    }
+    .addon-price {
+      display: inline-flex;
+      width: fit-content;
+      margin-top: 8px;
+      border-radius: 999px;
+      padding: 4px 9px;
+      background: var(--cp-surface-soft);
+      color: var(--cp-text);
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .addon-requirement {
+      display: inline-flex;
+      width: fit-content;
+      margin-top: 8px;
+      margin-left: 6px;
+      border-radius: 999px;
+      padding: 4px 9px;
+      border: 1px solid var(--cp-border);
+      background: var(--cp-surface);
+      color: var(--cp-text-muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .value-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .value-card {
+      padding: 16px;
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at top right, var(--cp-brand-yellow-soft), transparent 8rem),
+        var(--cp-surface);
+      border: 1px solid var(--cp-border);
+    }
+    .qualification-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .qualification-field {
+      position: relative;
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 12px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      padding: 14px 14px 12px;
+      background:
+        linear-gradient(180deg, var(--cp-surface), var(--cp-bg));
+      transition: border-color .14s ease, box-shadow .14s ease, transform .14s ease;
+    }
+    .qualification-field:has(.help-trigger:hover),
+    .qualification-field:has(.help-trigger:focus) {
+      z-index: 20;
+    }
+    .qualification-field:hover {
+      border-color: var(--cp-brand-yellow);
+      box-shadow: 0 12px 24px rgba(46, 45, 49, 0.08);
+      transform: translateY(-1px);
+    }
+    .qualification-field.answered {
+      border-color: var(--cp-brand-dark);
+      background:
+        linear-gradient(90deg, var(--cp-brand-yellow) 0 5px, transparent 5px),
+        var(--cp-surface);
+    }
+    .qualification-number {
+      position: absolute;
+      top: 10px;
+      right: 46px;
+      color: var(--cp-text-soft);
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .help-trigger {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border: 1px solid var(--cp-border);
+      border-radius: 999px;
+      background: var(--cp-surface);
+      color: var(--cp-text-muted);
+      font-size: 13px;
+      font-weight: 900;
+      cursor: help;
+    }
+    .help-tooltip {
+      position: absolute;
+      z-index: 100;
+      top: 40px;
+      right: 12px;
+      width: min(360px, calc(100vw - 48px));
+      max-height: 320px;
+      overflow: auto;
+      padding: 14px;
+      border: 1px solid var(--cp-border);
+      border-radius: 14px;
+      background: var(--cp-panel-strong);
+      box-shadow: var(--cp-shadow);
+      backdrop-filter: blur(10px);
+      opacity: 0;
+      transform: translateY(-4px);
+      pointer-events: none;
+      transition: opacity .12s ease, transform .12s ease;
+    }
+    .help-trigger:hover + .help-tooltip,
+    .help-trigger:focus + .help-tooltip {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .help-tooltip strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+    .help-tooltip ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--cp-text-muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .help-tooltip li + li { margin-top: 6px; }
+    .qualification-icon {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border: 1px solid var(--cp-border);
+      border-radius: 14px;
+      color: var(--cp-brand-dark);
+      background: var(--cp-surface);
+    }
+    .qualification-icon svg {
+      width: 21px;
+      height: 21px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .qualification-copy {
+      min-width: 0;
+    }
+    .qualification-field p {
+      margin: 3px 0 9px;
+      font-size: 13px;
+      line-height: 1.35;
+      max-width: 46ch;
+    }
+    .qualification-field label {
+      padding-right: 34px;
+      margin-bottom: 0;
+      font-size: 15px;
+      line-height: 1.25;
+    }
+    .qualification-field select {
+      padding: 10px 12px;
+      min-height: 44px;
+      border-color: var(--cp-border);
+      background: var(--cp-surface);
+      font-size: 14px;
+    }
+    .qualification-section {
+      margin-top: 18px;
+    }
+    .qualification-section:first-child { margin-top: 0; }
+    .qualification-section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .qualification-section-header::before {
+      content: "";
+      width: 28px;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--cp-brand-yellow);
+    }
+    .qualification-section-header h3 {
+      font-size: 18px;
+      letter-spacing: -0.01em;
+    }
+    .qualification-section-header p {
+      margin: 0;
+      color: var(--cp-text-muted);
+      font-size: 14px;
+    }
+    .next-step-panel {
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 16px;
+      align-items: start;
+      margin-top: 18px;
+      padding: 18px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+    }
+    .next-step-panel h3 { margin-bottom: 6px; }
+    .next-step-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .next-step-list span {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      color: var(--cp-text-muted);
+    }
+    .next-step-list strong { color: var(--cp-text); }
+    .work-links {
+      margin-top: 18px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+      overflow: hidden;
+    }
+    .work-links summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 18px;
+      cursor: pointer;
+      list-style: none;
+      font-weight: 800;
+    }
+    .work-links summary::-webkit-details-marker { display: none; }
+    .work-links summary::after {
+      content: "+";
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--cp-surface-soft);
+    }
+    .work-links[open] summary::after {
+      content: "–";
+      background: var(--cp-brand-yellow);
+    }
+    .work-links .links {
+      margin: 0;
+      padding: 0 18px 18px;
+    }
+    .pdf-note {
+      margin-left: auto;
+      color: var(--cp-text-muted);
+      font-size: 13px;
+    }
+    .pdf-only { display: none; }
+    .links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
+    .link-card {
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      padding: 16px;
+      background:
+        radial-gradient(circle at 100% 0, var(--cp-brand-yellow-soft), transparent 10rem),
+        var(--cp-surface);
+      overflow-wrap: anywhere;
+    }
+    .delivery-visual {
+      display: grid;
+      place-items: center;
+      width: 112px;
+      height: 112px;
+      margin-bottom: 24px;
+      border-radius: 28px;
+      background: var(--cp-accent-soft);
+      color: var(--cp-accent);
+    }
+    .delivery-visual svg {
+      width: 68px;
+      height: 68px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .generated-list {
+      display: grid;
+      gap: 14px;
+      margin-top: 20px;
+    }
+    .generated-item {
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+    .generated-item .option-icon {
+      width: 34px;
+      height: 34px;
+    }
+    .generated-item .option-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    .generated-item p { margin: 2px 0 0; }
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      background: var(--cp-panel-strong);
+      color: var(--cp-text);
+      border: 1px solid var(--cp-border);
+      border-radius: 0.625rem;
+      padding: 12px 16px;
+      box-shadow: var(--cp-shadow);
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .hidden { display: none !important; }
+    @media (max-width: 860px) {
+      .hero, .layout, .form-row, .review-grid, .roadmap, .links { grid-template-columns: 1fr; }
+      .proposal-grid, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid { grid-template-columns: 1fr; }
+      .cowork-hero-header { grid-template-columns: 96px 1fr; }
+      .cowork-toggle-card { grid-column: 1 / -1; width: fit-content; }
+      .timeline-body { padding-left: 18px; }
+      .hero-card { padding: 32px 22px; }
+      .side-nav { position: static; }
+      .options { grid-template-columns: 1fr; }
+      .dept-grid { grid-template-columns: 1fr; }
+      .meeting-app-grid { grid-template-columns: 1fr; }
+      .result-top { flex-direction: column; }
+    }
+    @media print {
+      .topbar, .side-nav, .toolbar, .btn, .toast { display: none !important; }
+      body { background: var(--cp-surface); }
+      .shell { max-width: none; padding: 0; }
+      .layout { display: block; }
+      .card, .result-hero, .roadmap-card { box-shadow: none; break-inside: avoid; }
+      .screen-only { display: none !important; }
+      .pdf-only { display: block !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><div class="mark"><img alt="Possumus" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADA0lEQVRYhdWXTUhUURTHr1kkBVZQUUFtalErF1O4KGsg591z7AsXRm2KVkFSGELQQtBNBEEQfawCi1ZCUQt3RdIqE1FI5p3zKhIqxCIT0pl77jjyWmiOOjPvvdFx4YG7mnvO73//98y99ym12mK4J16VISeWJjifZriWJt0qBJfFhQaTrN+zIlC/J75WGE4LwQvLOC7cMF1wEE4JIxuCW/IZ95YFLq4+IYRDRaHFxYgwPJ5MxncsbdWjzkZD0CmM2ZLh84Zh/JlK6jMlwScG6rZZwt7lgBe5kRHWLZHgY7211Yahr2zwuYFT4sKVYNuVqjAudJUfnusL4zpHiwqwHpxb7p5HEPHJ749tyF/9cLxKuOFrRDtFCN8J60dCcE8YXgnjyLzfAxdhXX0jT4Ah52IEcNYSdBY6cHy/qTLlHT9kPWgUT7eG1Pnhf8b1CwoIw5sQ66bE082BTZSrdS18K5yTcwl/+us3CYEJToKHUeBKKWWH6g9YxkywAHiQsz+p60ImT0x8cbZHFaCUUoagJ6imYfgwf3LI/uPLUuBKKSWEV0Nq/spNDtkzS9BesgDXSQTWZJz0+2PrZifr5kC7XN1WugOgQwRM+L6qVEopZVmfDXYAn5buAFwP7gH8Pjc54+mawMmEoyOFTq8i4fuqwhC+D2ns17mE/tg6w/A7pA9uRhVgXH0h7DQ0pDsWJcGzkK41KXJOhcIJ4sL4N6RWNkVObFFi4ljoRUQohnTHWG9tdZ7tw/Eq8XSrZZwMhjdMG4I+31cVeeqF4W1Y8mxPjBkXugxBu2XdZj14MnMZRblJMWuLvZAmPV0jjOkoIpY8CLp9VWD1ORd0y4q9CTz85rt6Z2AT+UpVCOn75RZhCMZSQ4mDgfA5Ee1qjWV9WxinygJn/J5Z3PVRwjI0GcLRpcMxKwTdKU7sKhn+P/568a2W4U7gF1FBMA5YN9FY8O+2lBgfjG82rC8J4XPD+GPmrb8AmBLGQSG4m2Y8XDZwsfA/HtkiSb3Pes7+9JCzO++Nt1riH1ln/un62kkzAAAAAElFTkSuQmCC"></div><span>Possumus · Diseñador de Propuestas de Adopción</span></div>
+    <button class="btn ghost" id="resetBtn">Reiniciar</button>
+  </header>
+
+  <div class="shell">
+    <section id="onboarding" class="hero">
+      <div class="hero-card">
+        <p class="eyebrow">Possumus · Adopción de Microsoft 365 Copilot</p>
+        <h1>Elegí la mejor propuesta de adopción para tu cliente.</h1>
+        <p class="lead">Una herramienta pensada para comerciales, sales y equipos de preventa: cargá el contexto del cliente, recorré las preguntas clave y obtené una recomendación clara sobre qué enfoque de adopción de Possumus conviene presentar.</p>
+        <div class="form-row">
+          <div>
+            <label for="company">Nombre de la compañía</label>
+            <input id="company" placeholder="Ej.: Contoso">
+          </div>
+          <div>
+            <label for="startDate">Fecha esperada de inicio</label>
+            <input id="startDate" type="date">
+          </div>
+        </div>
+        <div class="toolbar">
+          <span class="pill">7 pasos + recomendación final</span>
+          <button class="btn primary" id="startBtn">Comenzar</button>
+        </div>
+      </div>
+      <aside class="side">
+        <div>
+          <p class="eyebrow">Cómo funciona</p>
+          <h3>Te guía hasta la propuesta más adecuada</h3>
+          <p>Respondé unas pocas preguntas sobre el tipo de cliente, los usuarios objetivo y los principales desafíos de adopción. Con esas respuestas, la aplicación arma una recomendación accionable para orientar la conversación comercial.</p>
+        </div>
+        <div>
+          <div class="mini-stat"><strong>Qué tenés que cargar</strong><p>Datos básicos del cliente, perfil de usuarios, dolores principales y foco de adopción.</p></div>
+          <div class="mini-stat"><strong>Qué te devuelve</strong><p>Una propuesta sugerida, argumentos para la reunión, focos de valor y un plan de próximos pasos.</p></div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="wizard" class="layout hidden">
+      <aside class="side side-nav">
+        <h2>Construye la propuesta</h2>
+        <p>Un relevamiento guiado para recomendar el plan Possumus más adecuado.</p>
+        <div class="nav-list" id="navList"></div>
+      </aside>
+      <main class="card content-card">
+        <div class="step-header">
+          <div>
+            <span class="badge" id="stepCount"></span>
+            <p class="eyebrow" id="stepKicker"></p>
+            <h2 id="stepTitle"></h2>
+            <p id="stepSubtitle"></p>
+          </div>
+        </div>
+        <div id="stepBody"></div>
+        <div class="toolbar">
+          <button class="btn" id="backBtn">← Atrás</button>
+          <button class="btn primary" id="nextBtn">Continuar</button>
+        </div>
+      </main>
+    </section>
+
+    <section id="review" class="layout hidden">
+      <aside class="side side-nav">
+        <h2>Resumen</h2>
+        <p>Revisa lo elegido antes de generar la propuesta.</p>
+        <div class="nav-list" id="reviewNav"></div>
+      </aside>
+      <main class="card content-card">
+        <p class="eyebrow">Revisar propuesta</p>
+        <h2>Así se perfila la propuesta integral de adopción.</h2>
+        <p>Revisá los criterios relevados con el cliente y generá una recomendación de propuesta Possumus con focos de valor, argumentos y próximos pasos.</p>
+        <div class="review-grid" id="summaryGrid"></div>
+        <div class="toolbar">
+          <button class="btn" id="reviewBackBtn">← Atrás</button>
+          <button class="btn primary" id="buildBtn">Generar propuesta</button>
+        </div>
+      </main>
+    </section>
+
+    <section id="ready" class="hero hidden">
+      <div class="hero-card">
+        <p class="eyebrow">Propuesta lista para revisar</p>
+        <h1>Ya tenés una recomendación para avanzar con el cliente.</h1>
+        <p class="lead">Con el relevamiento cargado durante la conversación, generamos una propuesta integral de adopción Possumus para ordenar el enfoque comercial, los argumentos de valor y los próximos pasos.</p>
+        <div class="toolbar">
+          <button class="btn primary" id="viewPlanBtn">Ver propuesta generada</button>
+        </div>
+      </div>
+      <aside class="side">
+        <div class="delivery-visual">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <rect x="14" y="10" width="34" height="44" rx="5"></rect>
+            <path d="M23 24h18"></path>
+            <path d="M23 32h14"></path>
+            <path d="M23 40h10"></path>
+            <circle cx="47" cy="45" r="9"></circle>
+            <path d="M43 45l3 3 6-7"></path>
+          </svg>
+        </div>
+        <h3>Qué se generó</h3>
+        <p>Un entregable para que sales o preventa pueda continuar la oportunidad con más claridad.</p>
+        <div class="generated-list">
+          <div class="generated-item"><div class="option-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V5"></path><path d="M4 17c4-3 8 3 12 0V5c-4 3-8-3-12 0"></path><path d="M18 7h2v10h-2"></path></svg></div><div><strong>Enfoque recomendado</strong><p>Qué propuesta conviene priorizar según el contexto relevado.</p></div></div>
+          <div class="generated-item"><div class="option-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><path d="M12 8v4l3 2"></path></svg></div><div><strong>Argumentos de valor</strong><p>Mensajes para explicar impacto, adopción y próximos pasos.</p></div></div>
+          <div class="generated-item"><div class="option-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l2 2 4-4"></path><rect x="5" y="4" width="14" height="17" rx="2"></rect></svg></div><div><strong>Hoja de ruta comercial</strong><p>Acciones sugeridas para acompañar la oportunidad desde Possumus.</p></div></div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="plan" class="hidden"></section>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const industries = [
+      ["healthcare", "Salud y clínicas", "El cliente atiende pacientes y necesita reducir carga administrativa, agenda, documentación y seguimiento.", "health"],
+      ["professional", "Servicios profesionales", "El cliente vende conocimiento o servicios por proyecto y busca acelerar entregables, reuniones y comunicaciones.", "services"],
+      ["retail", "Retail y e-commerce", "El cliente gestiona tiendas, operación comercial, inventario, campañas, atención y coordinación de equipos.", "retail"],
+      ["manufacturing", "Manufactura y mayorista", "El cliente coordina producción, compras, logística, proveedores, stock y reportes operativos.", "manufacturing"],
+      ["financial", "Servicios financieros y seguros", "El cliente trabaja con clientes, pólizas, cotizaciones, riesgos, cumplimiento y documentación sensible.", "financial"],
+      ["education", "Educación y capacitación", "El cliente gestiona programas, contenidos, alumnos, reporting académico y comunicación institucional.", "education"]
+    ];
+    const departments = [
+      ["Liderazgo", "leadership"],
+      ["Ventas", "sales"],
+      ["Operaciones", "operations"],
+      ["Finanzas", "finance"],
+      ["RR. HH.", "hr"],
+      ["Marketing", "marketing"],
+      ["Atención al cliente", "support"],
+      ["Gestión de proyectos", "projects"],
+      ["Diseño o creatividad", "creative"]
+    ];
+    const data = {
+      inbox: [
+        ["client-email", "Consultas y respuestas a clientes", "El cliente pierde tiempo respondiendo mensajes, pedidos, reclamos o consultas comerciales con el tono adecuado."],
+        ["follow-up", "Seguimientos comerciales u operativos", "El cliente necesita ordenar próximos pasos después de reuniones, llamadas, demos o interacciones con clientes."],
+        ["prioritization", "Priorización de mensajes y tareas", "El cliente recibe mucho volumen de información y necesita detectar rápido qué requiere atención primero."]
+      ],
+      meetings: [
+        ["client-calls", "Llamadas y revisiones con clientes", "Conversaciones donde se discuten avances, acuerdos, decisiones y próximos pasos con clientes.", "client-meeting"],
+        ["internal-meetings", "Reuniones internas recurrentes", "Sesiones del equipo del cliente sobre entregas, decisiones, prioridades y carga de trabajo.", "team-meeting"],
+        ["leadership-reviews", "Revisiones ejecutivas", "Espacios de dirección donde se necesitan resúmenes, riesgos, decisiones y próximos pasos.", "exec-meeting"]
+      ],
+      create: [
+        ["documents", "Redacción de documentos", "Elegila si el cliente invierte tiempo creando informes, comunicaciones, minutas o documentos desde cero.", null, "Documentos"],
+        ["presentations", "Creación de presentaciones", "Elegila si el cliente necesita armar decks, reportes ejecutivos o materiales para clientes con más velocidad.", null, "Presentaciones"],
+        ["data-analysis", "Análisis de datos", "Elegila si el cliente necesita interpretar planillas, indicadores, encuestas o información operativa.", null, "Datos"],
+        ["proposals", "Creación de propuestas", "Elegila si el cliente prepara propuestas comerciales, respuestas a clientes o materiales de venta recurrentes.", null, "Propuestas"]
+      ],
+      automate: [
+        ["same-questions", "Las mismas preguntas, una y otra vez", "Preguntas repetidas que llegan siempre a pocas personas"],
+        ["checklists", "Reconstruir checklists y guías", "Recrear listas de cumplimiento y orientación interna cada vez"],
+        ["report-packs", "Paquetes de reporte recurrentes", "Armar análisis, narrativa y presentación en cada ciclo"]
+      ],
+      meetingApps: ["Teams", "Zoom", "Google Meet", "Webex", "Otra app o presencial"]
+    };
+    const qualificationFields = [
+      {
+        key: "primaryObjective",
+        icon: "target",
+        group: "Intención comercial",
+        groupHelp: "Qué busca resolver o comprar el cliente en esta conversación.",
+        label: "Objetivo principal de la conversación",
+        help: "Qué está buscando resolver o comprar el cliente.",
+        optionHelp: {
+          "explore-ai": "Elegilo si el cliente quiere entender oportunidades, casos de uso y ROI antes de invertir en licencias o despliegues.",
+          "digital-productivity": "Elegilo si el dolor principal es mejorar hábitos de Microsoft 365: colaboración, documentos, reuniones, correo y productividad diaria.",
+          "copilot-roi": "Elegilo si ya hay interés concreto en Copilot y la conversación apunta a demostrar valor, adopción y retorno rápido.",
+          "integral-transformation": "Elegilo si la conversación combina productividad digital, IA, cambio organizacional, varias áreas y necesidad de acompañamiento sostenido."
+        },
+        options: [
+          ["explore-ai", "Explorar IA y construir business case"],
+          ["digital-productivity", "Mejorar productividad digital Microsoft 365"],
+          ["copilot-roi", "Acelerar uso/ROI de Microsoft 365 Copilot"],
+          ["integral-transformation", "Programa integral Microsoft 365 + IA"]
+        ]
+      },
+      {
+        key: "copilotLicenses",
+        icon: "license",
+        group: "Intención comercial",
+        groupHelp: "Qué busca resolver o comprar el cliente en esta conversación.",
+        label: "Licenciamiento Copilot actual",
+        help: "Señal clave para saber si conviene explorar IA, preparar adopción o acelerar uso de Copilot.",
+        optionHelp: {
+          none: "El cliente todavía no tiene licencias Copilot. Conviene validar valor, casos de uso y business case antes de recomendar despliegue.",
+          chat: "Usa capacidades gratuitas o sin licencia completa. Sirve para empezar a explorar IA, pero no habilita todos los escenarios con datos corporativos.",
+          trial: "Tiene una prueba o compra reciente. Conviene acelerar activación, casos por rol y medición para justificar continuidad.",
+          licensed: "Ya cuenta con Microsoft 365 Copilot. El foco debería estar en adopción, ROI, medición, escalado o transformación."
+        },
+        options: [
+          ["none", "No tiene licencias Copilot"],
+          ["chat", "Usa Copilot Chat sin licencia M365 Copilot"],
+          ["trial", "Tiene trial o compra reciente"],
+          ["licensed", "Ya tiene Microsoft 365 Copilot"]
+        ]
+      },
+      {
+        key: "m365Maturity",
+        icon: "maturity",
+        group: "Readiness tecnológico",
+        groupHelp: "Qué tan preparada está la organización para capturar valor.",
+        label: "Madurez de uso Microsoft 365",
+        help: "Qué tan consolidados están Outlook, Teams, OneDrive, SharePoint y Office.",
+        optionHelp: {
+          low: "Uso inicial o desordenado. Antes de Copilot puede hacer falta fortalecer hábitos base de Microsoft 365.",
+          medium: "Hay uso parcial, pero no uniforme. Puede requerir adopción guiada para ordenar prácticas y preparar IA.",
+          high: "Microsoft 365 está consolidado. Es buen escenario para acelerar Copilot, medición y casos de mayor valor."
+        },
+        options: [
+          ["low", "Baja / uso inicial"],
+          ["medium", "Media / uso parcial"],
+          ["high", "Alta / uso consolidado"]
+        ]
+      },
+      {
+        key: "userRange",
+        icon: "users-mix",
+        group: "Alcance y escala",
+        groupHelp: "Tamaño de la oportunidad y etapa de despliegue.",
+        label: "Alcance inicial estimado",
+        help: "No es para cerrar precio, sino para orientar escala del plan.",
+        optionHelp: {
+          small: "Alcance acotado. Suele encajar con piloto, exploración o adopción rápida en grupos chicos.",
+          medium: "Alcance intermedio. Puede requerir una ola o programa más estructurado con varias audiencias.",
+          large: "Alcance amplio. Normalmente requiere gestión del cambio, olas, comunicación y medición sostenida."
+        },
+        options: [
+          ["small", "Hasta 45 usuarios"],
+          ["medium", "46 a 300 usuarios"],
+          ["large", "Más de 300 usuarios"]
+        ]
+      },
+      {
+        key: "projectStage",
+        icon: "roadmap",
+        group: "Alcance y escala",
+        groupHelp: "Tamaño de la oportunidad y etapa de despliegue.",
+        label: "Etapa del proyecto",
+        help: "Dónde está parado el cliente hoy.",
+        optionHelp: {
+          evaluation: "El cliente está evaluando si avanzar. Todavía necesita evidencia, casos de uso y claridad de valor.",
+          "recent-buy": "Ya compró o está preparando el despliegue. Conviene ordenar activación, comunicación y preparación técnica.",
+          pilot: "Hay un grupo piloto o una prueba en marcha. Conviene medir resultados y preparar decisión de escalado.",
+          scale: "El cliente quiere desplegar a más áreas o usuarios. Requiere programa, gobierno, adopción y medición."
+        },
+        options: [
+          ["evaluation", "Evaluación inicial"],
+          ["recent-buy", "Compra reciente / preparación"],
+          ["pilot", "Piloto"],
+          ["scale", "Despliegue escalado"]
+        ]
+      },
+      {
+        key: "sponsor",
+        icon: "leadership",
+        group: "Cambio y acompañamiento",
+        groupHelp: "Capacidad interna para sostener la adopción.",
+        label: "Sponsor ejecutivo",
+        help: "Nivel de patrocinio para impulsar cambio y adopción.",
+        optionHelp: {
+          yes: "Hay liderazgo identificado. Mejora la viabilidad de adopción, comunicación, priorización y escalado.",
+          partial: "Hay interés, pero falta cerrar ownership. Conviene incluir actividades de alineación y sponsor.",
+          no: "No hay sponsor claro. Es una señal de riesgo; puede requerir una etapa previa de sensibilización o business case."
+        },
+        options: [
+          ["yes", "Sí, identificado"],
+          ["partial", "Parcial / en definición"],
+          ["no", "No identificado"]
+        ]
+      },
+      {
+        key: "governance",
+        icon: "shield",
+        group: "Readiness tecnológico",
+        groupHelp: "Qué tan preparada está la organización para capturar valor.",
+        label: "Gobierno, datos y seguridad",
+        help: "Preparación de SharePoint, permisos, sensibilidad, retención e IA responsable.",
+        optionHelp: {
+          low: "Hay riesgo de datos desordenados, permisos abiertos o baja confianza. Conviene sumar readiness técnico.",
+          medium: "Hay definiciones parciales. Puede avanzar, pero con revisión de gobierno y datos como parte del plan.",
+          high: "El entorno está ordenado y confiable. Permite focalizar más en adopción, casos de uso y valor."
+        },
+        options: [
+          ["low", "Bajo / requiere revisión"],
+          ["medium", "Parcialmente definido"],
+          ["high", "Definido y confiable"]
+        ]
+      },
+      {
+        key: "accompaniment",
+        icon: "support",
+        group: "Cambio y acompañamiento",
+        groupHelp: "Capacidad interna para sostener la adopción.",
+        label: "Acompañamiento esperado",
+        help: "Qué nivel de servicio parece necesitar el cliente.",
+        optionHelp: {
+          training: "El cliente busca sesiones puntuales. Útil si el alcance es acotado y ya hay madurez interna.",
+          "adoption-program": "El cliente necesita diagnóstico, comunicación, formación y medición. Es el punto medio más habitual.",
+          "change-management": "El cliente requiere acompañamiento integral, sponsors, champions, comunicación y medición sostenida."
+        },
+        options: [
+          ["training", "Capacitación puntual"],
+          ["adoption-program", "Programa de adopción"],
+          ["change-management", "Gestión del cambio integral"]
+        ]
+      }
+    ];
+    const state = {
+      company: "",
+      startDate: "",
+      industry: "",
+      usersMode: "",
+      department: "",
+      departments: [],
+      userRange: "",
+      m365Maturity: "",
+      copilotLicenses: "",
+      projectStage: "",
+      sponsor: "",
+      governance: "",
+      accompaniment: "",
+      primaryObjective: "",
+      inbox: "",
+      meeting: "",
+      meetingApp: "Teams",
+      create: "",
+      automate: "",
+      cowork: true,
+      coworkReviewed: false,
+      selectedAddons: [],
+      addonsReviewed: false,
+      planId: "",
+      userId: "",
+      completed: {}
+    };
+    const steps = [
+      { key: "industry", label: "Paso 1 · Contexto del cliente", kicker: "Relevamiento comercial", title: "¿En qué tipo de cliente estás trabajando?", subtitle: "Mientras conversás con el cliente, elegí el contexto que mejor represente su negocio. Esto ayuda a orientar la propuesta de adopción de Possumus con ejemplos, dolores y argumentos relevantes." },
+      { key: "users", label: "Paso 2 · Alcance de usuarios", kicker: "Relevamiento de alcance", title: "¿A qué grupo de usuarios conviene orientar la propuesta?", subtitle: "Mientras hablás con el cliente, identificá si la adopción debería empezar por un área prioritaria o por perfiles de distintas áreas. No hace falta definir una cantidad cerrada en esta etapa." },
+      { key: "qualification", label: "Paso 3 · Readiness y plan recomendado", kicker: "Readiness y oportunidad", title: "¿Qué necesitamos saber para recomendar el plan correcto?", subtitle: "Estas preguntas califican la oportunidad: objetivo, licencias, madurez, escala y capacidad de cambio. Con esa información se identifica la propuesta de adopción más adecuada para el cliente." },
+      { key: "inbox", label: "Paso 4 · Dolor en comunicaciones", kicker: "Relevamiento de productividad", title: "¿Qué problema de comunicación aparece más seguido?", subtitle: "Usá esta pregunta para guiar la conversación y elegí la opción que mejor represente el impacto que el cliente quiere resolver." },
+      { key: "meeting", label: "Paso 5 · Reuniones y seguimiento", kicker: "Relevamiento de reuniones", title: "¿Qué tipo de reuniones le consumen más tiempo al cliente?", subtitle: "Identificá dónde aparece más valor: preparación previa, toma de notas, resumen, decisiones, responsables o seguimiento posterior." },
+      { key: "create", label: "Paso 6 · Crea en menos tiempo", kicker: "Crea en menos tiempo", title: "¿Qué tarda más en crear o analizar el equipo del cliente?", subtitle: "Identificá tareas de contenido, análisis o documentación que puedan convertirse en casos de valor para la propuesta." },
+      { key: "automate", label: "Paso 7 · Automatiza trabajo repetitivo", kicker: "Automatiza trabajo repetitivo", title: "¿Qué trabajo repetitivo consume más tiempo?", subtitle: "Identificá qué tareas repetitivas aparecen como oportunidad para mejorar productividad, estandarizar respuestas o acelerar entregables." },
+      { key: "cowork", label: "Copilot Cowork · Recomendado", kicker: "Mejora opcional", title: "¿Conviene incluir Copilot Cowork en la propuesta?", subtitle: "Cowork puede fortalecer la propuesta cuando el cliente necesita resolver tareas más grandes, de varios pasos, que combinan investigación, análisis y generación de entregables." },
+      { key: "addons", label: "Add-ons · Módulos sugeridos", kicker: "Módulos opcionales", title: "¿Qué add-ons querés sumar a la propuesta?", subtitle: "Según el plan recomendado y lo relevado, seleccioná los módulos opcionales que conviene cotizar aparte." }
+    ];
+    let currentStep = 0;
+
+    const $ = (id) => document.getElementById(id);
+    const find = (collection, key) => collection.find((item) => item[0] === key) || ["", "", ""];
+    const todayIso = new Date().toISOString().slice(0, 10);
+    $("startDate").value = todayIso;
+
+    function showToast(message) {
+      $("toast").textContent = message;
+      $("toast").classList.add("show");
+      setTimeout(() => $("toast").classList.remove("show"), 1800);
+    }
+    function show(section) {
+      ["onboarding", "wizard", "review", "ready", "plan"].forEach((id) => $(id).classList.add("hidden"));
+      $(section).classList.remove("hidden");
+      window.scrollTo(0, 0);
+    }
+    function scrollToStepTop() {
+      requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
+    }
+    function optionButton(item, selectedKey, onClick) {
+      const [key, title, desc, icon, hint] = item;
+      const selected = selectedKey === key ? " selected" : "";
+      const iconMarkup = icon ? `<div class="option-icon">${iconSvg(icon)}</div>` : "";
+      const checkMarkup = icon ? `<div class="option-check">${selected ? "✓" : ""}</div>` : "";
+      const iconClass = icon ? " with-icon" : "";
+      return `<button class="option${iconClass}${selected}" data-key="${key}">${iconMarkup}<div>${hint ? `<div class="option-hint">${hint}</div>` : ""}<strong>${title}</strong><span>${desc}</span></div>${checkMarkup}</button>`;
+    }
+    function iconSvg(name) {
+      const icons = {
+        health: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M9 5V3h6v2"></path><path d="M12 9v7"></path><path d="M8.5 12.5h7"></path></svg>',
+        services: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"></circle><path d="M4 20a5 5 0 0 1 10 0"></path><path d="M17 5l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2z"></path></svg>',
+        retail: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="20" r="1.5"></circle><circle cx="18" cy="20" r="1.5"></circle><path d="M3 4h3l3 12h9l3-8H8"></path></svg>',
+        manufacturing: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V9l5 3V9l5 3V8h4l2 12H4z"></path><path d="M8 17h2"></path><path d="M14 17h2"></path></svg>',
+        financial: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"></rect><circle cx="12" cy="12" r="2.5"></circle><path d="M6 9h2"></path><path d="M16 15h2"></path></svg>',
+        education: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10l9-5 9 5-9 5-9-5z"></path><path d="M7 12v5c3 2 7 2 10 0v-5"></path><path d="M21 10v6"></path></svg>',
+        "users-mix": '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="8" r="2"></circle><circle cx="17" cy="8" r="2"></circle><circle cx="12" cy="15" r="2"></circle><path d="M3.5 18a4 4 0 0 1 7 0"></path><path d="M13.5 18a4 4 0 0 1 7 0"></path></svg>',
+        "users-dept": '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="11" rx="2"></rect><path d="M8 7V5h8v2"></path><path d="M8 12h8"></path><path d="M12 12v3"></path></svg>',
+        leadership: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="7" r="3"></circle><path d="M5 20a7 7 0 0 1 14 0"></path><path d="M16.5 5.5l1-2 1 2 2 1-2 1-1 2-1-2-2-1 2-1z"></path></svg>',
+        sales: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="11" rx="2"></rect><path d="M8 7V5h8v2"></path><path d="M8 13h5"></path><path d="M15 14h4"></path><circle cx="17" cy="14" r="2.2"></circle></svg>',
+        operations: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 6l4 4-9 9H5v-4l9-9z"></path><path d="M15 5l4 4"></path><circle cx="17" cy="17" r="2"></circle><path d="M17 14v1"></path><path d="M17 19v1"></path><path d="M14 17h1"></path><path d="M19 17h1"></path></svg>',
+        finance: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="16" height="10" rx="2"></rect><circle cx="12" cy="12" r="2"></circle><path d="M7 19h10"></path></svg>',
+        hr: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="12" height="17" rx="2"></rect><path d="M9 9l2 2 4-4"></path><path d="M9 15h6"></path></svg>',
+        marketing: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l10-5v10L5 13z"></path><path d="M5 13v5l4-2"></path><path d="M18 8l2-2"></path><path d="M19 13h3"></path><path d="M18 18l2 2"></path></svg>',
+        support: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 14v-2a7 7 0 0 1 14 0v2"></path><rect x="3" y="13" width="4" height="6" rx="2"></rect><rect x="17" y="13" width="4" height="6" rx="2"></rect><path d="M17 19c0 2-2 3-5 3"></path></svg>',
+        projects: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2"></circle><circle cx="18" cy="6" r="2"></circle><circle cx="12" cy="18" r="2"></circle><path d="M8 7l3 8"></path><path d="M16 7l-3 8"></path><path d="M8 6h8"></path></svg>',
+        creative: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="4" width="11" height="14" rx="2"></rect><path d="M8 8h5"></path><path d="M8 12h4"></path><path d="M17 14l1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2z"></path></svg>'
+        ,
+        "client-meeting": '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="13" rx="2"></rect><path d="M8 9h8"></path><path d="M8 13h5"></path><path d="M7 21l3-3"></path><path d="M17 21l-3-3"></path></svg>',
+        "team-meeting": '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="2.5"></circle><circle cx="16" cy="8" r="2.5"></circle><path d="M4 20a4 4 0 0 1 8 0"></path><path d="M12 20a4 4 0 0 1 8 0"></path></svg>',
+        "exec-meeting": '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"></rect><path d="M8 15l3-3 2 2 3-5"></path><path d="M8 19v-2"></path><path d="M12 19v-4"></path><path d="M16 19v-7"></path></svg>',
+        teams: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="6" width="10" height="9" rx="2"></rect><rect x="4" y="9" width="8" height="9" rx="2"></rect><circle cx="9" cy="5" r="2"></circle><circle cx="17" cy="5" r="1.6"></circle></svg>',
+        zoom: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="7" width="12" height="10" rx="2"></rect><path d="M16 10l4-2v8l-4-2"></path></svg>',
+        "google-meet": '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="11" height="12" rx="2"></rect><path d="M15 10l5-3v10l-5-3"></path><path d="M7 9h4"></path><path d="M7 13h3"></path></svg>',
+        webex: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8c2-3 8-3 10 0"></path><path d="M5 12c3 5 11 5 14 0"></path><path d="M8 16c2 2 6 2 8 0"></path></svg>',
+        "other-meeting": '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="12" rx="2"></rect><path d="M8 21l4-4 4 4"></path><path d="M9 10h6"></path><path d="M9 13h4"></path></svg>',
+        calendar: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M8 3v4"></path><path d="M16 3v4"></path><path d="M4 10h16"></path><path d="M8 14h2"></path><path d="M14 14h2"></path></svg>',
+        mail: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="16" height="12" rx="2"></rect><path d="M5 8l7 5 7-5"></path></svg>',
+        automation: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4"></path><path d="M12 17v4"></path><path d="M3 12h4"></path><path d="M17 12h4"></path><circle cx="12" cy="12" r="5"></circle><path d="M10 12l1.5 1.5L15 10"></path></svg>',
+        cowork: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.5c2.2-2.2 5.8-2.2 8 0s2.2 5.8 0 8l-3 3c-1.5 1.5-3.9 1.5-5.4 0s-1.5-3.9 0-5.4l2.8-2.8"></path><path d="M15.5 18.5c-2.2 2.2-5.8 2.2-8 0s-2.2-5.8 0-8l3-3c1.5-1.5 3.9-1.5 5.4 0s1.5 3.9 0 5.4l-2.8 2.8"></path><circle cx="7" cy="7" r="1.5"></circle><circle cx="17" cy="17" r="1.5"></circle></svg>',
+        rocket: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 4c3 1 5 3 6 6l-7 7-5-5 6-8z"></path><path d="M7 12l-3 1 1-3"></path><path d="M12 17l-1 3 3-1"></path><circle cx="15" cy="9" r="1.5"></circle></svg>',
+        spark: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"></path><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8L18 15z"></path></svg>',
+        wave: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 16c3 0 3-3 6-3s3 3 6 3 3-3 6-3"></path><path d="M3 10c3 0 3-3 6-3s3 3 6 3 3-3 6-3"></path></svg>',
+        "calendar-cycle": '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M8 3v4"></path><path d="M16 3v4"></path><path d="M4 10h16"></path><path d="M9 15a3 3 0 0 1 5-2"></path><path d="M15 13v3h-3"></path></svg>',
+        diagnostic: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="5"></circle><path d="M14 14l5 5"></path><path d="M8 10h4"></path><path d="M10 8v4"></path></svg>',
+        training: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h10a3 3 0 0 1 3 3v10H7a3 3 0 0 1-3-3V6z"></path><path d="M8 10h5"></path><path d="M8 14h4"></path><path d="M18 8h2v11"></path></svg>',
+        communication: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6h14v10H9l-4 4V6z"></path><path d="M8 10h8"></path><path d="M8 13h5"></path></svg>',
+        measurement: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16"></path><rect x="6" y="11" width="3" height="6"></rect><rect x="11" y="7" width="3" height="10"></rect><rect x="16" y="4" width="3" height="13"></rect></svg>',
+        "proposal-doc": '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"></path><path d="M14 3v5h5"></path><path d="M10 13h6"></path><path d="M10 17h4"></path><path d="M5 7v14"></path></svg>',
+        target: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="4"></circle><path d="M12 2v3"></path><path d="M12 19v3"></path><path d="M2 12h3"></path><path d="M19 12h3"></path></svg>',
+        license: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"></rect><path d="M8 10h8"></path><path d="M8 14h5"></path><path d="M16 15l1 1 2-3"></path></svg>',
+        maturity: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19h16"></path><path d="M7 16v-4"></path><path d="M12 16V8"></path><path d="M17 16V5"></path><path d="M5 9l4-3 4 2 5-4"></path></svg>',
+        roadmap: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="6" r="2"></circle><circle cx="18" cy="18" r="2"></circle><path d="M8 6h4a3 3 0 0 1 0 6h-1a3 3 0 0 0 0 6h5"></path></svg>',
+        shield: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3z"></path><path d="M9 12l2 2 4-5"></path></svg>'
+        ,
+        "client-context": '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"></rect><circle cx="10" cy="11" r="2"></circle><path d="M7 17a4 4 0 0 1 6 0"></path><path d="M15 10h2"></path><path d="M15 14h2"></path></svg>'
+      };
+      return icons[name] || "";
+    }
+    function appIcon(app) {
+      if (app === "Teams") return "teams";
+      if (app === "Zoom") return "zoom";
+      if (app === "Google Meet") return "google-meet";
+      if (app === "Webex") return "webex";
+      return "other-meeting";
+    }
+    function selectedLabel(key) {
+      if (key === "industry") return find(industries, state.industry)[1];
+      if (key === "users") {
+        const selected = selectedDepartments();
+        if (!state.usersMode || !selected.length) return "";
+        return state.usersMode === "mix" ? `Perfiles de distintas áreas · ${selected.join(", ")}` : `Área prioritaria · ${selected[0]}`;
+      }
+      if (key === "qualification") return qualificationSummary();
+      if (key === "inbox") return find(inboxOptions(), state.inbox)[1];
+      if (key === "meeting") return find(data.meetings, state.meeting)[1];
+      if (key === "create") return find(createOptions(), state.create)[1];
+      if (key === "automate") return find(data.automate, state.automate)[1];
+      if (key === "cowork") return state.cowork ? "Sí" : "No";
+      if (key === "addons") return selectedAddonItems().map((item) => item.title).join(", ");
+      return "";
+    }
+    function inboxOptions() {
+      const optionsByIndustry = {
+        healthcare: [
+          ["patient-admin", "Consultas administrativas y derivaciones", "Elegila si el cliente habla de mensajes de pacientes, derivaciones, autorizaciones o pedidos administrativos que consumen tiempo.", null, "Atención y operación"],
+          ["patient-followup", "Recordatorios y seguimiento de pacientes", "Elegila si el dolor está en responder con claridad, empatía y próximos pasos concretos después de cada interacción.", null, "Seguimiento"],
+          ["approvals", "Aprobaciones y coordinación interna", "Elegila si aparecen aprobaciones, turnos, responsables o pedidos entre áreas que frenan el trabajo.", null, "Aprobaciones"],
+          ["mass-communications", "Comunicaciones masivas", "Elegila si el cliente envía mensajes frecuentes a pacientes, equipos o sedes y necesita consistencia.", null, "Comunicación masiva"]
+        ],
+        professional: [
+          ["client-queries", "Consultas y respuestas de clientes", "Elegila si el cliente menciona consultas por correo que requieren responder rápido, con buen tono y contexto.", null, "Atención comercial"],
+          ["client-followup", "Seguimientos después de reuniones", "Elegila si el dolor es convertir llamadas, demos o reuniones en próximos pasos claros para cada parte.", null, "Seguimiento"],
+          ["status-reports", "Reportes de estado", "Elegila si invierten tiempo redactando avances, minutas o actualizaciones para clientes y equipos.", null, "Reporting"],
+          ["document-attachments", "Documentación y adjuntos", "Elegila si necesitan resumir, revisar o responder correos con documentos y adjuntos.", null, "Documentación"]
+        ],
+        retail: [
+          ["store-requests", "Pedidos de tiendas, clientes o sucursales", "Elegila si hay mucho intercambio operativo y necesitan ordenar mensajes urgentes, pedidos o reclamos.", null, "Operación diaria"],
+          ["vendor-threads", "Hilos con proveedores o casa central", "Elegila si el problema son conversaciones largas sobre stock, promociones, entregas o incidencias.", null, "Proveedores"],
+          ["approvals", "Aprobaciones comerciales", "Elegila si necesitan destrabar aprobaciones de promociones, stock, campañas o excepciones.", null, "Aprobaciones"],
+          ["daily-priority", "Priorización diaria", "Elegila si el cliente necesita detectar rápido qué mensajes requieren acción inmediata.", null, "Priorización"]
+        ],
+        manufacturing: [
+          ["supplier-production", "Correos de producción, compras o proveedores", "Elegila si necesitan encontrar rápido estado, bloqueos y compromisos en conversaciones operativas.", null, "Operación"],
+          ["operational-priority", "Priorización de temas críticos", "Elegila si reciben avisos, pedidos y escalaciones que compiten por atención y requieren orden diario.", null, "Priorización"],
+          ["work-orders", "Órdenes de trabajo", "Elegila si necesitan dar seguimiento a órdenes, activos, mantenimientos o contratistas.", null, "Seguimiento"],
+          ["compliance-followup", "Inspecciones y cumplimiento", "Elegila si deben convertir hallazgos, requisitos o inspecciones en acciones claras.", null, "Cumplimiento"]
+        ],
+        financial: [
+          ["client-quotes", "Solicitudes y presupuestos de clientes", "Elegila si trabajan solicitudes comerciales, cotizaciones o respuestas que deben salir rápido y bien fundamentadas.", null, "Comercial"],
+          ["compliance-threads", "Hilos de cumplimiento y documentación", "Elegila si releen cadenas largas para encontrar requisitos, pendientes, documentos o riesgos relevantes.", null, "Cumplimiento"],
+          ["approvals", "Aprobaciones internas", "Elegila si necesitan ordenar validaciones, excepciones, responsables y próximos pasos.", null, "Aprobaciones"],
+          ["status-reports", "Reportes de estado", "Elegila si dedican tiempo a actualizar estado de cuentas, casos, riesgos o gestiones.", null, "Reporting"]
+        ],
+        education: [
+          ["student-family", "Consultas de alumnos, familias o clientes", "Elegila si necesitan responder dudas frecuentes con claridad, consistencia y buen seguimiento.", null, "Atención"],
+          ["program-updates", "Hilos de programas, cursos o reportes", "Elegila si deben ordenar comunicaciones largas sobre contenidos, avances, fechas y próximos pasos.", null, "Programas"],
+          ["mass-communications", "Comunicaciones masivas", "Elegila si preparan mensajes para alumnos, familias, docentes o participantes.", null, "Comunicación masiva"],
+          ["meeting-coordination", "Coordinación de reuniones", "Elegila si pierden tiempo coordinando reuniones, agendas, recordatorios y materiales.", null, "Coordinación"]
+        ]
+      };
+      return optionsByIndustry[state.industry] || data.inbox.slice(0, 2);
+    }
+    function createOptions() {
+      const optionsByIndustry = {
+        healthcare: [
+          ["clinical-docs", "Documentación clínica y administrativa", "Elegila si el cliente necesita redactar indicaciones, resúmenes, informes o documentación repetitiva.", null, "Documentación"],
+          ["patient-materials", "Materiales para pacientes", "Elegila si preparan instrucciones, comunicaciones o recursos claros para pacientes y familias.", null, "Comunicación"],
+          ["operations-analysis", "Análisis de turnos, demanda o atención", "Elegila si quieren entender patrones, demanda, satisfacción o puntos de dolor del servicio.", null, "Datos"],
+          ["training-content", "Materiales de capacitación interna", "Elegila si el equipo crea guías, procesos o contenidos para formar usuarios o personal.", null, "Capacitación"]
+        ],
+        professional: [
+          ["contracts", "Contratos y acuerdos", "Elegila si revisan documentos, acuerdos o entregables y necesitan producir primeros borradores.", null, "Documentos"],
+          ["proposals", "Propuestas y materiales para clientes", "Elegila si preparan propuestas comerciales, presentaciones o respuestas a oportunidades.", null, "Propuestas"],
+          ["research", "Investigación y análisis de contexto", "Elegila si necesitan investigar temas, clientes, mercado, regulaciones o antecedentes.", null, "Investigación"],
+          ["reports", "Informes y reportes ejecutivos", "Elegila si invierten tiempo armando informes de avance, resultados o recomendaciones.", null, "Reporting"]
+        ],
+        retail: [
+          ["campaign-materials", "Campañas y materiales comerciales", "Elegila si crean promociones, comunicaciones, piezas comerciales o mensajes para tiendas.", null, "Marketing"],
+          ["sales-analysis", "Análisis de ventas, stock o promociones", "Elegila si necesitan interpretar planillas, tendencias, demanda o performance comercial.", null, "Datos"],
+          ["store-guides", "Guías operativas para tiendas", "Elegila si producen instructivos, checklists o comunicaciones para equipos de tienda.", null, "Operación"],
+          ["customer-insights", "Análisis de consultas o reclamos", "Elegila si quieren detectar temas frecuentes, oportunidades o puntos de dolor de clientes.", null, "Clientes"]
+        ],
+        manufacturing: [
+          ["production-reports", "Reportes de producción u operación", "Elegila si generan informes de planta, compras, logística, mantenimiento o proveedores.", null, "Reporting"],
+          ["process-docs", "Procedimientos y documentación técnica", "Elegila si redactan instructivos, procesos, checklists o documentación operativa.", null, "Procesos"],
+          ["supplier-comparison", "Comparación de proveedores o cotizaciones", "Elegila si analizan alternativas, presupuestos, riesgos o condiciones comerciales.", null, "Comparación"],
+          ["incident-analysis", "Análisis de incidentes o desvíos", "Elegila si necesitan resumir causas, acciones, responsables y aprendizajes.", null, "Análisis"]
+        ],
+        financial: [
+          ["contracts", "Contratos, pólizas o acuerdos", "Elegila si revisan documentos y necesitan producir borradores o respuestas consistentes.", null, "Documentos"],
+          ["compliance", "Regulaciones y cumplimiento", "Elegila si deben interpretar reglas, requisitos, políticas o impacto normativo.", null, "Cumplimiento"],
+          ["data-analysis", "Análisis de datos comerciales o de riesgo", "Elegila si trabajan indicadores, carteras, siniestros, cotizaciones o performance.", null, "Datos"],
+          ["executive-reports", "Reportes ejecutivos", "Elegila si preparan informes para dirección, comités, clientes o áreas internas.", null, "Reporting"]
+        ],
+        education: [
+          ["curriculum", "Contenidos educativos o programas", "Elegila si crean clases, cursos, programas, actividades o materiales de aprendizaje.", null, "Contenido"],
+          ["student-analysis", "Análisis de alumnos o encuestas", "Elegila si necesitan interpretar feedback, desempeño, satisfacción o indicadores académicos.", null, "Datos"],
+          ["institutional-docs", "Documentos institucionales", "Elegila si redactan comunicaciones, políticas, informes o documentación administrativa.", null, "Documentos"],
+          ["presentations", "Presentaciones y materiales de difusión", "Elegila si preparan decks, webinars, comunicaciones o materiales para audiencias.", null, "Presentaciones"]
+        ]
+      };
+      return optionsByIndustry[state.industry] || data.create;
+    }
+    function addOnCatalog() {
+      return [
+        { id: "excel", title: "Excel intermedio / avanzado", desc: "Formación específica para análisis, reportes y modelos en Excel.", icon: "measurement", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "cowork", title: "Agents & Cowork", desc: "Módulo para procesos de varios pasos, agentes y automatización asistida.", icon: "cowork", price: "A cotizar", requiresCopilot: true },
+        { id: "role-cases", title: "Casos de uso por rol", desc: "Diseño de escenarios específicos por área, rol o audiencia. En planes sin licencia queda acotado a Copilot Chat.", icon: "users-mix", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "prompt-library", title: "Prompt Library propia", desc: "Biblioteca de prompts adaptada al negocio del cliente. En planes sin licencia queda acotada a Copilot Chat.", icon: "spark", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "leaders", title: "Casos para líderes", desc: "Escenarios de Copilot para dirección, seguimiento, decisiones y reporting.", icon: "leadership", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "webinar", title: "Webinar / kickoff ejecutivo", desc: "Evento de lanzamiento, alineación o cierre ejecutivo.", icon: "communication", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "champions", title: "Programa Champions", desc: "Activación y acompañamiento de referentes internos.", icon: "training", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "office-hours", title: "Office Hours / acompañamiento", desc: "Espacios de consulta, acompañamiento en piso y soporte post-sesión.", icon: "support", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "readiness", title: "Readiness técnico", desc: "Revisión de SharePoint, oversharing, Purview, permisos y preparación para IA.", icon: "shield", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "change", title: "Gestión del cambio", desc: "Comunicación interna, sponsors, adopción, medición y acompañamiento del cambio.", icon: "communication", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "support-desk", title: "Mesa de ayuda post-programa", desc: "Acompañamiento posterior para consultas, adopción y continuidad.", icon: "support", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "dashboard", title: "Copilot Dashboard / reporte de adopción", desc: "Medición, seguimiento y lectura ejecutiva de adopción con datos de Copilot.", icon: "diagnostic", price: "A cotizar", requiresCopilot: true },
+        { id: "copilot-studio", title: "Agentes a medida con Copilot Studio", desc: "Diseño de agentes y automatizaciones avanzadas sobre procesos específicos.", icon: "automation", price: "A cotizar", requiresCopilot: true },
+        { id: "copilot-excel", title: "Copilot en Excel y análisis de datos", desc: "Escenarios de análisis con Copilot sobre datos corporativos.", icon: "measurement", price: "A cotizar", requiresCopilot: true }
+      ];
+    }
+    function suggestedAddonIds() {
+      const ids = new Set();
+      if (state.cowork) ids.add("cowork");
+      if (["data-analysis", "sales-analysis", "student-analysis", "operations-analysis"].includes(state.create) || state.primaryObjective === "integral-transformation") ids.add("excel");
+      if (state.primaryObjective === "copilot-roi" || state.primaryObjective === "integral-transformation") ids.add("role-cases");
+      if (state.primaryObjective === "copilot-roi") ids.add("prompt-library");
+      if (state.sponsor === "yes") ids.add("webinar");
+      if (state.accompaniment !== "training") ids.add("champions");
+      if (state.governance !== "high") ids.add("readiness");
+      if (state.accompaniment === "change-management") ids.add("change");
+      if (state.copilotLicenses === "licensed" || state.copilotLicenses === "trial") ids.add("dashboard");
+      return Array.from(ids).filter((id) => isAddonEnabled(addOnCatalog().find((item) => item.id === id)));
+    }
+    function hasCopilotLicense() {
+      return state.copilotLicenses === "licensed" || state.copilotLicenses === "trial";
+    }
+    function isAddonEnabled(addon) {
+      return Boolean(addon) && (!addon.requiresCopilot || hasCopilotLicense());
+    }
+    function selectedAddonItems() {
+      const selected = state.selectedAddons && state.selectedAddons.length ? state.selectedAddons : suggestedAddonIds();
+      return addOnCatalog().filter((item) => selected.includes(item.id));
+    }
+    function shouldShowAddonsStep() {
+      return true;
+    }
+    function selectedDepartments() {
+      if (Array.isArray(state.departments) && state.departments.length) return state.departments;
+      return state.department ? [state.department] : [];
+    }
+    function qualificationValue(key) {
+      const field = qualificationFields.find((item) => item.key === key);
+      const option = field && field.options.find((item) => item[0] === state[key]);
+      return option ? option[1] : "";
+    }
+    function qualificationSummary() {
+      const objective = qualificationValue("primaryObjective");
+      const licenses = qualificationValue("copilotLicenses");
+      if (!objective && !licenses) return "";
+      return [objective, licenses].filter(Boolean).join(" · ");
+    }
+    function renderNav(targetId = "navList") {
+      $(targetId).innerHTML = visibleSteps().map((s) => {
+        const i = steps.indexOf(s);
+        const label = selectedLabel(s.key);
+        const completed = isStepComplete(s.key);
+        return `<button class="nav-step ${i === currentStep ? "active" : ""} ${completed ? "completed" : ""}" data-index="${i}">
+          <strong>${s.label}</strong>${label ? `<small>${label}</small>` : ""}
+        </button>`;
+      }).join("");
+      $(targetId).querySelectorAll(".nav-step").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const index = btn.dataset.index;
+          currentStep = Number(index);
+          renderStep();
+          show("wizard");
+          scrollToStepTop();
+        });
+      });
+    }
+    function visibleSteps() {
+      return steps;
+    }
+    function nextStepIndex(fromIndex) {
+      for (let i = fromIndex + 1; i < steps.length; i += 1) {
+        return i;
+      }
+      return -1;
+    }
+    function previousStepIndex(fromIndex) {
+      for (let i = fromIndex - 1; i >= 0; i -= 1) {
+        return i;
+      }
+      return -1;
+    }
+    function isStepComplete(key) {
+      if (key === "users") return Boolean(state.usersMode) && selectedDepartments().length > 0;
+      if (key === "qualification") return qualificationFields.every((field) => Boolean(state[field.key]));
+      if (key === "cowork") return Boolean(state.coworkReviewed);
+      if (key === "addons") return Boolean(state.addonsReviewed);
+      return Boolean(state[key]);
+    }
+    function renderStep() {
+      const step = steps[currentStep];
+      const numberedSteps = visibleSteps().filter((item) => item.key !== "cowork" && item.key !== "addons");
+      const visibleNumber = numberedSteps.findIndex((item) => item.key === step.key) + 1;
+      $("stepCount").textContent = step.key === "cowork" ? "Mejora opcional" : step.key === "addons" ? "Módulos opcionales" : `Paso ${visibleNumber} de ${numberedSteps.length}`;
+      $("stepKicker").textContent = step.key === "cowork" || step.key === "addons" ? "" : step.kicker;
+      $("stepKicker").classList.toggle("hidden", step.key === "cowork" || step.key === "addons");
+      $("stepTitle").textContent = step.title;
+      $("stepSubtitle").textContent = step.subtitle;
+      renderNav();
+      let body = "";
+      if (step.key === "industry") {
+        body = `<div class="options">${industries.map((item) => optionButton(item, state.industry, "industry")).join("")}</div>`;
+      }
+      if (step.key === "users") {
+        body = `<div class="options">
+          <button class="option with-icon ${state.usersMode === "mix" ? "selected" : ""}" data-mode="mix">
+            <div class="option-icon">${iconSvg("users-mix")}</div>
+            <div><strong>Perfiles de distintas áreas</strong><span>El cliente necesita una adopción transversal, con referentes o usuarios clave de varios equipos.</span></div>
+            <div class="option-check">${state.usersMode === "mix" ? "✓" : ""}</div>
+          </button>
+          <button class="option with-icon ${state.usersMode === "department" ? "selected" : ""}" data-mode="department">
+            <div class="option-icon">${iconSvg("users-dept")}</div>
+            <div><strong>Un área prioritaria</strong><span>El cliente tiene un equipo, función o dolor principal donde conviene concentrar la propuesta inicial.</span></div>
+            <div class="option-check">${state.usersMode === "department" ? "✓" : ""}</div>
+          </button>
+        </div>
+        <div class="dept-grid">${departments.map(([dept, icon]) => {
+          const selected = selectedDepartments().includes(dept);
+          return `<button class="dept-card ${selected ? "selected" : ""}" data-dept="${dept}">
+            <div class="option-icon">${iconSvg(icon)}</div>
+            <strong>${dept}</strong>
+            <div class="option-check">${selected ? "✓" : ""}</div>
+          </button>`;
+        }).join("")}</div>`;
+      }
+      if (step.key === "qualification") {
+        const groups = [
+          ["Intención comercial", qualificationFields.filter((field) => field.group === "Intención comercial")],
+          ["Readiness tecnológico", qualificationFields.filter((field) => field.group === "Readiness tecnológico")],
+          ["Alcance y escala", qualificationFields.filter((field) => field.group === "Alcance y escala")],
+          ["Cambio y acompañamiento", qualificationFields.filter((field) => field.group === "Cambio y acompañamiento")]
+        ];
+        let questionIndex = 0;
+        body = groups.map(([groupName, fields]) => `<section class="qualification-section">
+          <div class="qualification-section-header">
+            <div>
+              <h3>${groupName}</h3>
+              <p>${fields[0].groupHelp}</p>
+            </div>
+          </div>
+          <div class="qualification-grid">${fields.map((field) => {
+            questionIndex += 1;
+            const helpItems = field.options.map(([value, label]) => `<li><strong>${label}:</strong> ${field.optionHelp[value]}</li>`).join("");
+            return `<div class="qualification-field ${state[field.key] ? "answered" : ""}">
+              <div class="qualification-number">${String(questionIndex).padStart(2, "0")}</div>
+              <button class="help-trigger" type="button" aria-label="Ayuda sobre ${field.label}">?</button>
+              <div class="help-tooltip" role="tooltip">
+                <strong>Cómo elegir</strong>
+                <ul>${helpItems}</ul>
+              </div>
+              <div class="qualification-icon">${iconSvg(field.icon)}</div>
+              <div class="qualification-copy">
+                <label for="${field.key}">${field.label}</label>
+                <p>${field.help}</p>
+                <select id="${field.key}" data-qualification="${field.key}">
+                  <option value="">Seleccionar...</option>
+                  ${field.options.map(([value, label]) => `<option value="${value}" ${state[field.key] === value ? "selected" : ""}>${label}</option>`).join("")}
+                </select>
+              </div>
+            </div>`;
+          }).join("")}</div>
+        </section>`).join("");
+      }
+      if (step.key === "inbox") body = `<div class="conversation-guide">
+        <div class="stage-icon">${iconSvg("mail")}</div>
+        <div>
+          <strong>Pregunta sugerida para hacerle al cliente</strong>
+          <p>“Pensando en comunicaciones del día a día, ¿dónde se pierde más tiempo: responder, dar seguimiento, aprobar, priorizar o preparar actualizaciones?”</p>
+        </div>
+      </div>
+      <div class="options">${inboxOptions().map((item) => optionButton(item, state.inbox)).join("")}</div>`;
+      if (step.key === "meeting") {
+        body = `<div class="options">${data.meetings.map((item) => optionButton(item, state.meeting)).join("")}</div>
+        <div style="margin-top:24px">
+          <h3>¿Con qué herramienta gestiona las reuniones el cliente?</h3>
+          <p>Seleccioná la opción más parecida a su forma actual de trabajar. Esto ajusta las recomendaciones de la semana 2.</p>
+          <div class="meeting-app-grid">${data.meetingApps.map((app) => {
+            const selected = state.meetingApp === app;
+            return `<button class="meeting-app-card ${selected ? "selected" : ""}" data-app="${app}">
+              <div class="option-icon">${iconSvg(appIcon(app))}</div>
+              <strong>${app}</strong>
+              <div class="option-check">${selected ? "✓" : ""}</div>
+            </button>`;
+          }).join("")}</div>
+        </div>`;
+      }
+      if (step.key === "create") body = `<div class="conversation-guide">
+        <div class="stage-icon">${iconSvg("creative")}</div>
+        <div>
+          <strong>Pregunta sugerida para hacerle al cliente</strong>
+          <p>“Cuando tienen que crear, analizar o documentar algo, ¿qué entregable les lleva más tiempo o se repite con más frecuencia?”</p>
+        </div>
+      </div>
+      <div class="options">${createOptions().map((item) => optionButton(item, state.create)).join("")}</div>`;
+      if (step.key === "automate") {
+        body = `<div class="options">${data.automate.map((item) => optionButton(item, state.automate)).join("")}</div>`;
+      }
+      if (step.key === "cowork") {
+        const canUseCowork = hasCopilotLicense();
+        if (!canUseCowork) state.cowork = false;
+        body = `<div class="cowork-hero">
+          <div class="cowork-hero-header">
+            <div class="cowork-brand-icon"><img src="copilot-cowork-icon.webp" alt="Copilot Cowork"></div>
+            <div>
+              <p class="eyebrow">Mejora opcional</p>
+              <h3>Sumar Cowork a la propuesta</h3>
+            </div>
+            <div class="cowork-toggle-card ${canUseCowork ? "" : "disabled"}">
+              <button class="switch ${state.cowork ? "on" : ""}" id="coworkSwitch" aria-label="Copilot Cowork" ${canUseCowork ? "" : "disabled"}></button>
+              <strong>${state.cowork ? "On" : "Off"}</strong>
+            </div>
+          </div>
+          <p class="cowork-lead">${canUseCowork ? "Activá esta opción cuando el cliente mencione procesos complejos, entregables que cruzan varias herramientas o tareas que requieren investigación, análisis y armado de documentos." : "Cowork requiere licencia o trial de Microsoft 365 Copilot. Para este escenario puede quedar como oportunidad futura o como parte de una conversación de licenciamiento."}</p>
+          ${canUseCowork ? "" : `<div class="cowork-license-warning">No se puede activar Cowork porque en la calificación se indicó que el cliente no tiene licencia/trial de Microsoft 365 Copilot.</div>`}
+          <div class="cowork-points">
+            <div class="cowork-point">
+              <strong>Cuándo recomendarlo</strong>
+              <p>Reportes recurrentes, propuestas, análisis de información, investigación o tareas multi-paso.</p>
+            </div>
+            <div class="cowork-point">
+              <strong>Qué agrega</strong>
+              <p>Un add-on de Agents & Cowork dentro de la propuesta final, cotizable por separado.</p>
+            </div>
+            <div class="cowork-point">
+              <strong>Mensaje comercial</strong>
+              <p>“El equipo revisa el resultado, pero evita empezar desde cero.”</p>
+            </div>
+          </div>
+          <div class="cowork-note">
+            <strong>Nota:</strong> según el material comercial, los add-ons se suman a cualquier plan y se cotizan por separado.
+          </div>
+        </div>`;
+      }
+      if (step.key === "addons") {
+        if (!state.selectedAddons.length) state.selectedAddons = suggestedAddonIds();
+        const selected = new Set(state.selectedAddons);
+        body = `<div class="addons-panel">
+          <h3>Add-ons sugeridos para ${planCatalog()[recommendedPlanKey()].name}</h3>
+          <p>Todos los planes pueden llevar add-ons. Los de comunicación, gobierno, Excel y cambio aplican siempre; los de IA avanzada requieren licencia de Microsoft 365 Copilot.</p>
+          <div class="addon-option-grid">${addOnCatalog().map((addon) => {
+            const isSelected = selected.has(addon.id);
+            const enabled = isAddonEnabled(addon);
+            const requirement = addon.requiresCopilot ? "Requiere licencia Copilot" : addon.requirement;
+            return `<button class="addon-option ${isSelected ? "selected" : ""} ${enabled ? "" : "disabled"}" data-addon="${addon.id}" ${enabled ? "" : "disabled"}>
+              <div class="stage-icon">${iconSvg(addon.icon)}</div>
+              <div>
+                <strong>${addon.title}</strong>
+                <p>${addon.desc}</p>
+                <span class="addon-price"><span class="money-icon" style="width:22px;height:22px;font-size:13px;margin-right:6px">$</span> ${addon.price}</span>
+                <span class="addon-requirement">${requirement}</span>
+              </div>
+              <div class="option-check">${isSelected ? "✓" : ""}</div>
+            </button>`;
+          }).join("")}</div>
+        </div>`;
+      }
+      $("stepBody").innerHTML = body;
+      $("stepBody").querySelectorAll(".option[data-key]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const key = btn.dataset.key;
+          if (step.key === "industry") {
+            if (state.industry !== key) {
+              state.inbox = "";
+              state.create = "";
+            }
+            state.industry = key;
+          }
+          if (step.key === "inbox") state.inbox = key;
+          if (step.key === "meeting") state.meeting = key;
+          if (step.key === "create") state.create = key;
+          if (step.key === "automate") state.automate = key;
+          renderStep();
+        });
+      });
+      $("stepBody").querySelectorAll("[data-mode]").forEach((btn) => btn.addEventListener("click", () => {
+        state.usersMode = btn.dataset.mode;
+        if (!selectedDepartments().length) state.departments = [];
+        if (state.usersMode === "department") {
+          const selected = selectedDepartments()[0] || state.department || "";
+          state.department = selected;
+          state.departments = selected ? [selected] : [];
+        }
+        renderStep();
+      }));
+      $("stepBody").querySelectorAll("[data-dept]").forEach((btn) => btn.addEventListener("click", () => {
+        const dept = btn.dataset.dept;
+        if (state.usersMode === "mix") {
+          const selected = new Set(selectedDepartments());
+          if (selected.has(dept)) selected.delete(dept);
+          else selected.add(dept);
+          state.departments = Array.from(selected);
+          state.department = state.departments[0] || "";
+        } else {
+          if (!state.usersMode) state.usersMode = "department";
+          state.department = dept;
+          state.departments = [dept];
+        }
+        renderStep();
+      }));
+      $("stepBody").querySelectorAll("[data-app]").forEach((btn) => btn.addEventListener("click", () => { state.meetingApp = btn.dataset.app; renderStep(); }));
+      $("stepBody").querySelectorAll("[data-addon]").forEach((btn) => btn.addEventListener("click", () => {
+        const addon = addOnCatalog().find((item) => item.id === btn.dataset.addon);
+        if (!isAddonEnabled(addon)) return;
+        const selected = new Set(state.selectedAddons);
+        if (selected.has(btn.dataset.addon)) selected.delete(btn.dataset.addon);
+        else selected.add(btn.dataset.addon);
+        state.selectedAddons = Array.from(selected);
+        renderStep();
+      }));
+      $("stepBody").querySelectorAll("[data-qualification]").forEach((select) => select.addEventListener("change", () => {
+        state[select.dataset.qualification] = select.value;
+        if (select.dataset.qualification === "copilotLicenses" && !hasCopilotLicense()) {
+          state.cowork = false;
+          state.selectedAddons = state.selectedAddons.filter((id) => id !== "cowork" && id !== "dashboard" && id !== "copilot-studio" && id !== "copilot-excel");
+        }
+        select.closest(".qualification-field").classList.toggle("answered", Boolean(select.value));
+        renderNav();
+      }));
+      const sw = $("coworkSwitch");
+      if (sw) sw.addEventListener("click", () => {
+        if (!hasCopilotLicense()) return;
+        state.cowork = !state.cowork;
+        renderStep();
+        scrollToStepTop();
+      });
+      $("backBtn").disabled = previousStepIndex(currentStep) === -1;
+      $("nextBtn").textContent = nextStepIndex(currentStep) === -1 ? "Revisar propuesta" : "Continuar";
+    }
+    function canContinue() {
+      const key = steps[currentStep].key;
+      if (key === "users") return Boolean(state.usersMode) && selectedDepartments().length > 0;
+      if (key === "cowork") return true;
+      if (key === "addons") return true;
+      if (key === "qualification") return qualificationFields.every((field) => Boolean(state[field.key]));
+      return Boolean(state[key]);
+    }
+    function renderReview() {
+      currentStep = Math.min(currentStep, steps.length - 1);
+      renderNav("reviewNav");
+      const items = [
+        { label: "Contexto del cliente", title: selectedLabel("industry"), desc: find(industries, state.industry)[2], edit: 0, icon: "client-context" },
+        { label: "Alcance de usuarios", title: selectedLabel("users"), desc: state.usersMode === "mix" ? "Adopción transversal con referentes de varias áreas" : "Foco inicial en un equipo o función con mayor oportunidad de impacto", edit: 1, icon: state.usersMode === "mix" ? "users-mix" : "users-dept" },
+        { label: "Calificación comercial", title: qualificationSummary(), desc: `Inicio: ${formatDate(state.startDate)} · ${qualificationValue("m365Maturity")} · ${qualificationValue("userRange")} · Sponsor: ${qualificationValue("sponsor")}`, edit: 2, icon: "diagnostic" },
+        {
+          label: "Necesidades detectadas",
+          title: "Comunicación, reuniones, creación y automatización",
+          desc: "",
+          edit: 3,
+          icon: "spark",
+          lines: [
+            ["Comunicación", selectedLabel("inbox")],
+            ["Reuniones", `${selectedLabel("meeting")} · ${state.meetingApp}`],
+            ["Crear/analizar", selectedLabel("create")],
+            ["Automatizar", selectedLabel("automate")]
+          ]
+        }
+      ];
+      items.push({ label: "Add-ons", title: selectedAddonItems().length ? selectedAddonItems().map((item) => item.title).join(", ") : "Sin add-ons seleccionados", desc: "Módulos opcionales para cotizar por separado", edit: 8, icon: "proposal-doc" });
+      items.push({ label: "Copilot Cowork", title: state.cowork ? "Seleccionado como add-on" : "No incluido en la recomendación", desc: state.cowork ? "Capacidad para tareas complejas, multi-paso y de mayor valor" : "Requiere licencia/trial de Microsoft 365 Copilot o decisión comercial de incluirlo como add-on futuro.", edit: 7, icon: "cowork" });
+      $("summaryGrid").innerHTML = items.map((item) => `<div class="summary-item ${item.label === "Copilot Cowork" ? `cowork-summary ${state.cowork ? "" : "not-included"}` : ""}">
+        <div class="summary-main">
+          <div class="option-icon">${iconSvg(item.icon)}</div>
+          <div class="summary-text">
+            <strong>${item.label}</strong>
+            <div>
+              <p class="summary-title">${item.title || "Pendiente"}</p>
+              <p class="summary-desc">${item.desc || ""}</p>
+              ${item.lines ? `<div class="summary-lines">${item.lines.map(([label, value]) => `<p><strong>${label}:</strong> ${value}</p>`).join("")}</div>` : ""}
+              ${item.app ? `<div class="summary-app-pill"><div class="option-icon">${iconSvg(appIcon(item.app))}</div>${item.app}</div>` : ""}
+            </div>
+          </div>
+        </div>
+        ${item.edit === null ? "" : `<button class="summary-edit" data-edit="${item.edit}">Editar</button>`}
+      </div>`).join("");
+      $("summaryGrid").querySelectorAll("[data-edit]").forEach((btn) => btn.addEventListener("click", () => { currentStep = Number(btn.dataset.edit); renderStep(); show("wizard"); }));
+    }
+    function formatDate(iso) {
+      if (!iso) return "";
+      const [y, m, d] = iso.split("-");
+      return `${d}/${m}/${y}`;
+    }
+    function addDays(iso, days) {
+      const date = new Date(`${iso}T00:00:00`);
+      date.setDate(date.getDate() + days);
+      return date.toISOString().slice(0, 10);
+    }
+    function generatePlan() {
+      state.planId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
+      state.userId = crypto.randomUUID ? crypto.randomUUID() : `user-${Date.now()}`;
+      state.completed = {};
+      localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
+      localStorage.setItem(`copilot-user-${state.userId}`, state.planId);
+      location.hash = `/done/${state.planId}`;
+      show("ready");
+    }
+    function loadPlan(id) {
+      const stored = localStorage.getItem(`copilot-plan-${id}`);
+      if (stored) Object.assign(state, JSON.parse(stored));
+    }
+    function loadUserPlan(userId) {
+      const planId = localStorage.getItem(`copilot-user-${userId}`);
+      if (planId) loadPlan(planId);
+    }
+    function readinessScore() {
+      let score = 56;
+      if (state.company) score += 6;
+      if (state.startDate) score += 6;
+      if (state.usersMode === "department") score += 5;
+      if (state.meetingApp === "Teams") score += 7;
+      if (state.cowork) score += 8;
+      return Math.min(score + [state.industry, state.inbox, state.meeting, state.create, state.automate].filter(Boolean).length * 3, 96);
+    }
+    function planCatalog() {
+      return {
+        plan0: {
+          name: "Plan 0 · Envisioning IA",
+          badge: "Exploración y business case",
+          duration: "4 semanas",
+          durationDays: 28,
+          effort: "Piloto controlado",
+          shortScope: "Hasta 15",
+          scope: "1 grupo piloto · Art of the Possible · business case",
+          price: "USD 3.500",
+          icon: "rocket",
+          desc: "Permite descubrir dónde la IA genera valor real, priorizar casos de uso y decidir si avanzar con licenciamiento de Copilot.",
+          bestFor: "Cuando el cliente aún no tiene Microsoft 365 Copilot, quiere explorar IA, validar casos de uso o construir un business case antes de invertir.",
+          execution: ["Art of the Possible abierto hasta 50 asistentes", "Piloto controlado con hasta 15 personas", "Revisión inicial de seguridad, SharePoint, Purview y oversharing", "Sesiones prácticas con Copilot Chat"],
+          deliverables: ["Mapa de oportunidades por área", "Casos de uso priorizados", "Quick wins", "Business case", "Recomendación de licenciamiento y próximo plan"]
+        },
+        plan1: {
+          name: "Plan 1 · Productividad Digital",
+          badge: "Adopción Microsoft 365",
+          duration: "30/60/90 días u olas anuales",
+          durationDays: 90,
+          effort: "Por ola",
+          shortScope: "Según ola",
+          scope: "Olas Express, Estándar o Completa · hasta 600 colaboradores/año",
+          price: "Según ola seleccionada",
+          icon: "wave",
+          desc: "Consolida hábitos de trabajo digital en Microsoft 365 e introduce una primera experiencia con Copilot Chat.",
+          bestFor: "Cuando el cliente necesita mejorar adopción de Microsoft 365, tiene madurez baja o media y Copilot todavía no es el foco principal.",
+          execution: ["Olas Express, Estándar o Completa", "Grupos de 15 a 25 personas", "Workshops de Outlook, Teams, OneDrive, SharePoint, tareas y formularios", "Introducción a Copilot Chat"],
+          deliverables: ["Diagnóstico de madurez digital", "Segmentación de audiencias", "KPIs de adopción", "Campañas y materiales", "Reportes ejecutivos por ola"]
+        },
+        plan2: {
+          name: "Plan 2 · IA aplicada al trabajo",
+          badge: "Microsoft 365 Copilot",
+          duration: "30 días",
+          durationDays: 30,
+          effort: "Copilot in 30",
+          shortScope: "Hasta 45",
+          scope: "Hasta 45 usuarios con licencias propias · 2 o 3 grupos de 15",
+          price: "USD 5.900",
+          icon: "spark",
+          desc: "Acelera el uso efectivo de Microsoft 365 Copilot con datos corporativos, casos por rol, prompts y medición.",
+          bestFor: "Cuando el cliente ya tiene licencias o trial de Copilot, Microsoft 365 está consolidado y busca demostrar ROI rápido.",
+          execution: ["Preparación técnica y funcional", "Casos por rol con datos corporativos", "Copilot en Word, Excel, Outlook y Teams", "Medición con Copilot Dashboard"],
+          deliverables: ["Casos de uso por rol", "Biblioteca de prompts", "Encuesta de resultados", "Plan de escalado", "Recomendación de conversión o expansión de licencias"]
+        },
+        plan3: {
+          name: "Plan 3 · Productividad Digital + IA",
+          badge: "Programa integral",
+          duration: "6 meses",
+          durationMonths: 6,
+          effort: "2 olas de 3 meses",
+          shortScope: "Hasta 300",
+          scope: "Hasta 300 colaboradores · hasta 20 grupos de 15 personas",
+          price: "A cotizar según alcance",
+          icon: "calendar-cycle",
+          desc: "Integra adopción de Microsoft 365 y Microsoft 365 Copilot en un único programa con gestión del cambio y medición.",
+          bestFor: "Cuando el cliente necesita transformación integral, varias áreas, escala organizacional y acompañamiento sostenido.",
+          execution: ["2 olas de 3 meses", "Hasta 20 grupos de 15 personas", "Recorrido Microsoft 365 + recorrido Copilot", "Champions, webinars, comunicación y medición"],
+          deliverables: ["Diagnóstico inicial", "Formación integral Microsoft 365", "Formación integral Copilot", "Reportes de avance por ola", "Plan de mejora continua"]
+        }
+      };
+    }
+    function planEndDate(plan) {
+      const start = state.startDate || todayIso;
+      if (plan.durationMonths) return formatDate(addMonths(start, plan.durationMonths));
+      return formatDate(addDays(start, plan.durationDays || 30));
+    }
+    function addMonths(iso, months) {
+      const date = new Date(`${iso}T00:00:00`);
+      const day = date.getDate();
+      date.setMonth(date.getMonth() + months);
+      if (date.getDate() !== day) date.setDate(0);
+      return date.toISOString().slice(0, 10);
+    }
+    function quoteForPlan(key) {
+      if (key === "plan0") return { main: "USD 3.500", detail: "Precio base del Plan 0. IVA no incluido." };
+      if (key === "plan2") return { main: "USD 5.900", detail: "Precio base del Plan 2. IVA no incluido." };
+      if (key === "plan1") {
+        if (state.userRange === "small") return { main: "USD 3.300 a 4.200 + IVA", detail: "Ola Express: 1 a 2 grupos, hasta 50 usuarios." };
+        if (state.userRange === "medium") return { main: "USD 4.700 a 7.900 + IVA", detail: "Ola Estándar o Completa según cantidad final de grupos." };
+        return { main: "USD 30.000 + IVA", detail: "Programa anual de 4 olas, hasta 600 usuarios." };
+      }
+      return { main: "A cotizar según alcance", detail: "El PPT no publica precio base para Plan 3. Se cotiza por cantidad de grupos, olas, add-ons y nivel de acompañamiento." };
+    }
+    function addOnsForPlan(key) {
+      return selectedAddonItems().map((item) => [item.title, item.desc, item.icon, item.price]);
+    }
+    function recommendedPlanKey() {
+      const deptCount = selectedDepartments().length;
+      const hasCopilot = state.copilotLicenses === "trial" || state.copilotLicenses === "licensed";
+      const noCopilot = state.copilotLicenses === "none" || state.copilotLicenses === "chat";
+      const scale = state.userRange === "large" || deptCount >= 4 || state.projectStage === "scale";
+      const integral = state.primaryObjective === "integral-transformation" || state.accompaniment === "change-management";
+      const m365NeedsWork = state.m365Maturity === "low" || state.m365Maturity === "medium";
+      const copilotPriority = state.primaryObjective === "copilot-roi" || state.primaryObjective === "integral-transformation";
+      if (scale || (hasCopilot && m365NeedsWork && copilotPriority) || (integral && hasCopilot)) return "plan3";
+      if (hasCopilot && state.m365Maturity === "high") return "plan2";
+      if (noCopilot && state.primaryObjective === "explore-ai") return "plan0";
+      if (m365NeedsWork && state.primaryObjective === "digital-productivity") return "plan1";
+      if (noCopilot && copilotPriority) return "plan0";
+      if (hasCopilot) return "plan2";
+      return "plan1";
+    }
+    function recommendationReason(key) {
+      const areaText = state.usersMode === "mix"
+        ? `hay varias áreas involucradas (${selectedDepartments().join(", ")})`
+        : `hay un área prioritaria (${selectedDepartments()[0] || state.department})`;
+      const license = qualificationValue("copilotLicenses").toLowerCase();
+      const maturity = qualificationValue("m365Maturity").toLowerCase();
+      if (key === "plan0") return `Recomendamos Plan 0 porque ${areaText}, el cliente está en etapa de exploración o sin licencias Copilot consolidadas (${license}) y necesita construir evidencia antes de avanzar.`;
+      if (key === "plan1") return `Recomendamos Plan 1 porque ${areaText}, la madurez Microsoft 365 es ${maturity} y la prioridad es fortalecer hábitos digitales antes de acelerar Copilot.`;
+      if (key === "plan2") return `Recomendamos Plan 2 porque ${areaText}, el cliente ya tiene Copilot o trial (${license}) y puede demostrar valor real con casos por rol, prompts y medición en 30 días.`;
+      return `Recomendamos Plan 3 porque ${areaText}, hay escala, complejidad o necesidad de gestión del cambio integral para trabajar Microsoft 365 y Copilot en una misma iniciativa.`;
+    }
+    function methodologyPillars() {
+      return [
+        ["Diagnóstico", "Encuestas de madurez, entrevistas, revisión de uso Microsoft 365 y definición de oportunidades.", "diagnostic"],
+        ["Formación", "Sesiones aplicadas al trabajo real, práctica guiada y materiales de aprendizaje.", "training"],
+        ["Comunicación", "Campañas internas, convocatorias, quick wins, historias de éxito y recursos de acompañamiento.", "communication"],
+        ["Medición", "KPIs de adopción, participación, satisfacción, uso y reportes ejecutivos periódicos.", "measurement"]
+      ];
+    }
+    function proposalRoadmap(planKey) {
+      const start = state.startDate || todayIso;
+      const inbox = find(inboxOptions(), state.inbox)[1];
+      const meeting = find(data.meetings, state.meeting)[1];
+      const create = find(createOptions(), state.create)[1];
+      const automate = find(data.automate, state.automate)[1];
+      if (planKey === "plan3") {
+        return [
+          { tag: "Ola 1 · 3 meses", title: "Productividad digital + base IA", date: formatDate(start), icon: "diagnostic", desc: "Diagnóstico, comunicación y formación integral de Microsoft 365 con introducción a IA.", tasks: ["Encuestas, entrevistas y segmentación de audiencias", `Escenarios de productividad: ${inbox.toLowerCase()} y ${meeting.toLowerCase()}`, "Definición de champions, KPIs y plan de comunicación"] },
+          { tag: "Ola 2 · 3 meses", title: "Microsoft 365 Copilot aplicado", date: formatDate(addDays(start, 90)), icon: "spark", desc: "Profundización en Copilot, casos por rol y medición de valor real.", tasks: [`Casos con datos corporativos: ${create.toLowerCase()}`, `Automatización y agentes: ${automate.toLowerCase()}`, "Reporte ejecutivo y plan de mejora continua"] }
+        ];
+      }
+      if (planKey === "plan1") {
+        return [
+          { tag: "Etapa 1", title: "Diagnóstico de madurez digital", date: formatDate(start), icon: "diagnostic", desc: "Relevar uso actual de Microsoft 365, brechas y audiencias prioritarias.", tasks: ["Encuestas de madurez y entrevistas", "Revisión de uso de Outlook, Teams, OneDrive y SharePoint", "Segmentación de grupos y KPIs de adopción"] },
+          { tag: "Etapa 2", title: "Formación Microsoft 365", date: formatDate(addDays(start, 21)), icon: "training", desc: "Consolidar hábitos digitales con sesiones prácticas por grupo.", tasks: [`Comunicación y correo: ${inbox.toLowerCase()}`, `Colaboración y reuniones: ${meeting.toLowerCase()}`, "Archivos, tareas, formularios y Copilot Chat introductorio"] },
+          { tag: "Etapa 3", title: "Comunicación y activación", date: formatDate(addDays(start, 45)), icon: "communication", desc: "Acompañar el cambio con campañas, recursos y quick wins.", tasks: ["Campaña de lanzamiento y recordatorios", "Materiales de aprendizaje y buenas prácticas", "Historias de éxito y champions"] },
+          { tag: "Etapa 4", title: "Medición de adopción", date: formatDate(addDays(start, 75)), icon: "measurement", desc: "Medir participación, satisfacción y avance por ola.", tasks: ["Reporte ejecutivo de adopción", "Encuesta de satisfacción", "Recomendación de siguiente ola o evolución a IA"] }
+        ];
+      }
+      if (planKey === "plan2") {
+        return [
+          { tag: "Semana 0", title: "Preparación técnica y funcional", date: formatDate(addDays(start, -7)), icon: "diagnostic", desc: "Preparar el entorno y los casos de uso para Microsoft 365 Copilot.", tasks: ["Confirmar licencias, usuarios y fechas", "Revisar datos, permisos, SharePoint y seguridad", "Preparar comunicación y canal de adopción"] },
+          { tag: "Semana 1", title: "Comunicación y lanzamiento", date: formatDate(start), icon: "communication", desc: "Activar a los usuarios con mensajes claros y primeros escenarios.", tasks: ["Mensaje de bienvenida", "Biblioteca inicial de prompts", `Primer caso: ${inbox.toLowerCase()}`] },
+          { tag: "Semana 2", title: "Formación práctica por rol", date: formatDate(addDays(start, 7)), icon: "training", desc: "Trabajar Copilot en Word, Excel, Outlook, Teams y casos reales.", tasks: [`Reuniones: ${meeting.toLowerCase()} en ${state.meetingApp}`, `Creación/análisis: ${create.toLowerCase()}`, "Prácticas guiadas con prompts por rol"] },
+          { tag: "Semana 3", title: "Medición y feedback", date: formatDate(addDays(start, 14)), icon: "measurement", desc: "Medir uso, satisfacción y valor percibido.", tasks: ["Revisión de Copilot Dashboard", "Encuesta de resultados", "Identificación de casos de valor y blockers"] },
+          { tag: "Semana 4", title: "Escalado y decisión", date: formatDate(addDays(start, 21)), icon: "spark", desc: "Preparar recomendación de continuidad y expansión.", tasks: [`Automatización: ${automate.toLowerCase()}`, "Plan de escalado y conversión de licencias", "Recomendación ejecutiva para día 31"] }
+        ];
+      }
+      return [
+        { tag: "Semana 1", title: "Diagnóstico y preparación", date: formatDate(start), icon: "diagnostic", desc: "Entender el potencial de IA y preparar el piloto de exploración.", tasks: ["Art of the Possible abierto", "Identificación de casos de uso por rol", "Revisión inicial de seguridad, SharePoint, Purview y oversharing"] },
+        { tag: "Semana 2", title: "Formación práctica con Copilot Chat", date: formatDate(addDays(start, 7)), icon: "training", desc: "Probar IA en escenarios reales sin requerir licencias Microsoft 365 Copilot.", tasks: [`Escenario de comunicación: ${inbox.toLowerCase()}`, `Escenario de reuniones: ${meeting.toLowerCase()}`, "Prompts y quick wins por rol"] },
+        { tag: "Semana 3", title: "Priorización de oportunidades", date: formatDate(addDays(start, 14)), icon: "spark", desc: "Ordenar casos de uso, valor esperado y requisitos para escalar.", tasks: [`Oportunidad de creación/análisis: ${create.toLowerCase()}`, `Oportunidad de automatización: ${automate.toLowerCase()}`, "Mapa de oportunidades y quick wins"] },
+        { tag: "Semana 4", title: "Business case y decisión", date: formatDate(addDays(start, 21)), icon: "measurement", desc: "Cerrar evidencia para decidir licenciamiento y siguiente plan.", tasks: ["Encuesta de resultados", "Business case y recomendación de licenciamiento", "Plan siguiente: Plan 1, 2 o 3"] }
+      ];
+    }
+    function renderPlan(mode = "admin") {
+      if (!state.planId) state.planId = "preview";
+      const adminLink = `${location.origin}${location.pathname}#/admin/${state.planId}`;
+      const userLink = `${location.origin}${location.pathname}#/user/${state.userId || "users"}`;
+      const score = readinessScore();
+      const focus = [selectedLabel("inbox"), selectedLabel("meeting"), selectedLabel("create"), selectedLabel("automate")].filter(Boolean);
+      const plans = planCatalog();
+      const recommendedKey = recommendedPlanKey();
+      const recommended = plans[recommendedKey];
+      const roadmapItems = proposalRoadmap(recommendedKey);
+      const quote = quoteForPlan(recommendedKey);
+      const addons = addOnsForPlan(recommendedKey);
+      $("plan").innerHTML = `
+        <div class="result-hero">
+          <div class="result-top">
+            <div>
+              <p class="eyebrow">POSSUMUS · PROPUESTA INTEGRAL DE ADOPCIÓN</p>
+              <h2>${mode === "user" ? "Plan recomendado para la iniciativa" : "Propuesta recomendada: " + recommended.name}</h2>
+              <div class="client-highlight">${state.company}</div>
+              <p class="lead">${selectedLabel("industry")} · ${selectedLabel("users")}</p>
+              <div class="chips">${focus.map((item) => `<span class="pill">${item}</span>`).join("")}<span class="pill">Cowork: ${state.cowork ? "Incluido" : "No incluido"}</span></div>
+            </div>
+            <div class="score">${recommended.duration}</div>
+          </div>
+          <div class="proposal-meta">
+            <div class="proposal-meta-card"><strong>${formatDate(state.startDate)}</strong><span>Inicio estimado</span></div>
+            <div class="proposal-meta-card"><strong>${planEndDate(recommended)}</strong><span>Fin estimado</span></div>
+            <div class="proposal-meta-card quote-card"><div class="money-icon">$</div><div><strong>${quote.main}</strong><span>Cotización de referencia</span><p>${quote.detail}</p></div></div>
+          </div>
+          <div class="proposal-grid">
+            <div class="proposal-panel">
+              <div class="recommendation-title">
+                <div class="stage-icon">${iconSvg(recommended.icon)}</div>
+                <div>
+                  <span class="badge">${recommended.badge}</span>
+                  <h3>${recommended.name}</h3>
+                </div>
+              </div>
+              <p><strong>Análisis comercial:</strong> ${recommendationReason(recommendedKey)}</p>
+              <p>${recommended.desc}</p>
+              <div class="plan-metric-row">
+                <div class="plan-metric"><strong>${recommended.duration}</strong><span>Duración</span></div>
+                <div class="plan-metric"><strong>${recommended.effort}</strong><span>Modelo</span></div>
+                <div class="plan-metric"><strong>${recommended.shortScope}</strong><span>${recommended.scope}</span></div>
+              </div>
+            </div>
+            <div class="proposal-panel">
+              <h3>Qué incluye este plan</h3>
+              <div class="execution-grid" style="grid-template-columns:1fr">
+                <div class="execution-card">
+                  <strong>Ejecución</strong>
+                  <ul>${recommended.execution.map((item) => `<li>${item}</li>`).join("")}</ul>
+                </div>
+                <div class="execution-card">
+                  <strong>Entregables</strong>
+                  <ul>${recommended.deliverables.map((item) => `<li>${item}</li>`).join("")}</ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          ${state.cowork ? `<div class="cowork-selected-panel">
+            <div class="recommendation-title">
+              <div class="cowork-brand-icon"><img src="copilot-cowork-icon.webp" alt="Copilot Cowork"></div>
+              <div>
+                <span class="badge">Add-on seleccionado</span>
+                <h3>Copilot Cowork / Agents & Cowork</h3>
+              </div>
+            </div>
+            <p>Se incluye como add-on recomendado porque el relevamiento detectó procesos complejos, tareas de varios pasos o necesidad de automatización asistida.</p>
+          </div>` : ""}
+          ${addons.length ? `<div class="addons-panel">
+            <h3>Add-ons y módulos sugeridos</h3>
+            <p>Según el PPT, los add-ons se suman a cualquier plan y se cotizan por separado.</p>
+            <div class="addons-grid">${addons.map(([title, desc, icon, price]) => `<div class="addon-item"><div class="stage-icon">${iconSvg(icon)}</div><div><strong>${title}</strong><p>${desc}</p><span class="addon-price"><span class="money-icon" style="width:22px;height:22px;font-size:13px;margin-right:6px">$</span> ${price}</span></div></div>`).join("")}</div>
+          </div>` : ""}
+          <div class="toolbar">
+            <button class="btn" id="editPlanBtn">Editar datos</button>
+            <span class="pdf-note">Incluye portada, presentación de Possumus, metodología y plan generado.</span>
+            <button class="btn primary" id="printBtn">Generar PDF</button>
+          </div>
+        </div>
+        <h2 style="margin-top:28px">Criterios que definieron el plan</h2>
+        <p>La recomendación se calcula con las preguntas del relevamiento: objetivo, licenciamiento, madurez, alcance, etapa, sponsor, gobierno y nivel de acompañamiento.</p>
+        <div class="plan-option-grid">
+          <article class="plan-option-card recommended">
+            <div class="stage-icon">${iconSvg(recommended.icon)}</div>
+            <h4>${recommended.name}</h4>
+            <span class="badge">${recommended.duration} · ${recommended.effort}</span>
+            <p>${recommended.bestFor}</p>
+          </article>
+          <article class="plan-option-card">
+            <div class="stage-icon">${iconSvg("diagnostic")}</div>
+            <h4>Readiness comercial</h4>
+            <p>${qualificationValue("primaryObjective")} · ${qualificationValue("copilotLicenses")} · ${qualificationValue("m365Maturity")}</p>
+          </article>
+          <article class="plan-option-card">
+            <div class="stage-icon">${iconSvg("users-mix")}</div>
+            <h4>Alcance relevado y alcance del plan</h4>
+            <p>Inicial relevado: ${qualificationValue("userRange")} · Sponsor: ${qualificationValue("sponsor")} · ${qualificationValue("accompaniment")}</p>
+            <p>Plan recomendado: ${recommended.scope}</p>
+          </article>
+        </div>
+        <h2 style="margin-top:28px">Metodología de adopción</h2>
+        <div class="method-grid">${methodologyPillars().map(([title, desc, icon]) => `<article class="pillar-card">
+          <div class="stage-icon">${iconSvg(icon)}</div>
+          <h4>${title}</h4>
+          <p>${desc}</p>
+        </article>`).join("")}</div>
+        <h2 style="margin-top:28px">Hoja de ruta recomendada</h2>
+        <p>Las etapas se pueden expandir o contraer para usar la propuesta durante una reunión comercial.</p>
+        <div class="timeline">${roadmapItems.map((week, wi) => `<details class="timeline-item">
+          <summary>
+            <div class="stage-icon">${iconSvg(week.icon)}</div>
+            <div>
+              <span class="badge">${week.tag} · ${week.date}</span>
+              <h3 style="margin-top:8px">${week.title}</h3>
+              <p>${week.desc}</p>
+            </div>
+          </summary>
+          <div class="timeline-body">
+            <div style="grid-column:1 / -1">
+              <strong>Actividades sugeridas</strong>
+              ${week.tasks.map((task, ti) => {
+            const id = `${wi}-${ti}`;
+            return `<div class="task"><span class="task-marker">${ti + 1}</span><span><strong>${task}</strong><p>${taskPrompt(week.tag, task)}</p></span></div>`;
+          }).join("")}
+            </div>
+          </div>
+        </details>`).join("")}</div>
+        <div class="proposal-panel" style="margin-top:18px">
+          <h3>Por qué Possumus</h3>
+          <p>Adopción no es solo capacitación: combinamos liderazgo, cambio humano, preparación técnica y medición para convertir Microsoft 365 Copilot en uso sostenido y resultados visibles.</p>
+        </div>`;
+      show("plan");
+      $("editPlanBtn").addEventListener("click", () => { currentStep = 0; renderStep(); show("wizard"); });
+      $("printBtn").addEventListener("click", () => generateProposalPdf(recommendedKey));
+    }
+    function generateProposalPdf(recommendedKey = recommendedPlanKey()) {
+      const html = buildPrintableProposal(recommendedKey);
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) {
+        showToast("El navegador bloqueó la ventana de PDF. Habilitá pop-ups para generar la propuesta.");
+        return;
+      }
+      printWindow.document.open();
+      printWindow.document.write(html);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => printWindow.print(), 450);
+    }
+    function buildPrintableProposal(recommendedKey) {
+      const plans = planCatalog();
+      const plan = plans[recommendedKey];
+      const roadmapItems = proposalRoadmap(recommendedKey);
+      const focus = [selectedLabel("inbox"), selectedLabel("meeting"), selectedLabel("create"), selectedLabel("automate")].filter(Boolean);
+      const generatedAt = new Date().toLocaleDateString("es-AR");
+      const quote = quoteForPlan(recommendedKey);
+      const addons = addOnsForPlan(recommendedKey);
+      const css = `
+        <style>
+          @page { size: A4 landscape; margin: 0; }
+          * { box-sizing: border-box; }
+          body { margin: 0; color: #2e2d31; font-family: "Segoe UI", Aptos, Calibri, Arial, sans-serif; background: #ffffff; }
+          .slide { position: relative; width: 297mm; min-height: 210mm; padding: 18mm 20mm; page-break-after: always; overflow: hidden; background: #ffffff; }
+          .slide::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 7mm; background: #fcd702; }
+          .slide::after { content: ""; position: absolute; right: -30mm; top: -30mm; width: 86mm; height: 86mm; border: 12mm solid #fcd702; border-radius: 999px; opacity: .28; }
+          .dark { background: #2e2d31; color: #ffffff; }
+          .dark::after { opacity: .65; }
+          .eyebrow { margin: 0 0 9mm; font-size: 10pt; font-weight: 800; text-transform: uppercase; letter-spacing: .11em; color: #737373; }
+          .dark .eyebrow { color: #fcd702; }
+          h1 { margin: 0; max-width: 220mm; font-size: 42pt; line-height: 1.02; letter-spacing: -0.04em; }
+          h2 { margin: 0 0 6mm; font-size: 30pt; line-height: 1.08; letter-spacing: -0.03em; }
+          h3 { margin: 0 0 3mm; font-size: 17pt; }
+          p { margin: 0 0 4mm; font-size: 13pt; line-height: 1.42; color: #5f6168; }
+          .dark p { color: #e9ecef; }
+          .hero-bottom { position: absolute; left: 20mm; right: 20mm; bottom: 18mm; display: flex; justify-content: space-between; align-items: end; gap: 12mm; }
+          .brand { display: inline-flex; align-items: center; gap: 4mm; font-weight: 900; font-size: 17pt; }
+          .logo { display: grid; place-items: center; width: 13mm; height: 13mm; border-radius: 3mm; background: #fcd702; color: #2e2d31; font-weight: 900; }
+          .meta { display: flex; flex-wrap: wrap; gap: 3mm; margin-top: 8mm; }
+          .pill { border: 1px solid #d8d8d8; border-radius: 99px; padding: 2.5mm 4mm; background: #f8f8fb; font-size: 10.5pt; font-weight: 700; color: #444444; }
+          .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; margin-top: 8mm; }
+          .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; margin-top: 8mm; }
+          .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5mm; margin-top: 8mm; }
+          .card { border: 1px solid #dedede; border-radius: 5mm; padding: 6mm; background: #ffffff; box-shadow: 0 4mm 14mm rgba(46,45,49,.08); }
+          .card.yellow { background: #fff7bf; border-color: #fcd702; }
+          .card strong { display: block; margin-bottom: 2mm; font-size: 16pt; color: #2e2d31; }
+          .metric strong { font-size: 23pt; }
+          .quote { border-color: #fcd702; background: #fff7bf; }
+          .quote strong { font-size: 27pt; }
+          .cowork-pdf { border-color: #00a351; background: #e8f8ef; }
+          .timeline { display: grid; gap: 4mm; margin-top: 6mm; }
+          .stage { display: grid; grid-template-columns: 35mm 1fr; gap: 5mm; border: 1px solid #dedede; border-radius: 5mm; padding: 5mm; background: #ffffff; break-inside: avoid; }
+          .stage-tag { color: #2e2d31; font-weight: 900; font-size: 13pt; }
+          ul { margin: 3mm 0 0; padding-left: 5mm; color: #5f6168; font-size: 11.5pt; line-height: 1.42; }
+          .footer { position: absolute; left: 20mm; right: 20mm; bottom: 8mm; display: flex; justify-content: space-between; color: #999999; font-size: 9pt; }
+          .accent { color: #2e2d31; background: linear-gradient(180deg, transparent 56%, #fcd702 56%); }
+        </style>`;
+      const footer = `<div class="footer"><span>Possumus · Propuesta de adopción</span><span>${generatedAt}</span></div>`;
+      return `<!doctype html><html lang="es"><head><meta charset="UTF-8"><title>Propuesta de adopción - ${state.company}</title>${css}</head><body>
+        <section class="slide dark">
+          <p class="eyebrow">Possumus · Microsoft Solutions Partner</p>
+          <h1>Propuesta integral de adopción Microsoft 365 Copilot</h1>
+          <div class="hero-bottom">
+            <div>
+              <p style="font-size:24pt;color:#ffffff;font-weight:900">${state.company}</p>
+              <p>Inicio estimado: ${formatDate(state.startDate)} · Fin estimado: ${planEndDate(plan)}</p>
+              <p>Documento generado a partir del relevamiento comercial realizado por sales/preventa.</p>
+            </div>
+            <div class="brand"><span class="logo">P</span><span>Possumus</span></div>
+          </div>
+        </section>
+        <section class="slide">
+          <p class="eyebrow">Quiénes somos</p>
+          <h2>Somos Possumus: tecnología, adopción y cambio humano.</h2>
+          <div class="grid-3">
+            <div class="card yellow"><strong>Microsoft Solutions Partner</strong><p>Especialistas en soluciones Microsoft Cloud, productividad, IA, datos, seguridad y software.</p></div>
+            <div class="card"><strong>Adopción con impacto</strong><p>No solo implementamos tecnología: acompañamos hasta que las personas la usan y generan valor.</p></div>
+            <div class="card"><strong>Enfoque medible</strong><p>Trabajamos con diagnóstico, formación, comunicación y medición para sostener resultados.</p></div>
+          </div>${footer}
+        </section>
+        <section class="slide">
+          <p class="eyebrow">Adopción ≠ capacitación</p>
+          <h2>El éxito de Copilot requiere liderazgo, cambio humano y preparación técnica.</h2>
+          <div class="grid-2">
+            <div class="card"><strong>Sin gestión del cambio</strong><p>La adopción suele ser más lenta, con menor dominio y menor materialización de beneficios.</p></div>
+            <div class="card yellow"><strong>Con gestión del cambio</strong><p>Aumenta la probabilidad de uso sostenido, aprendizaje aplicado y resultados visibles para el negocio.</p></div>
+          </div>
+          <div class="meta">${focus.map(item => `<span class="pill">${item}</span>`).join("")}<span class="pill">Cowork: ${state.cowork ? "Incluido" : "No incluido"}</span></div>${footer}
+        </section>
+        <section class="slide">
+          <p class="eyebrow">Metodología Possumus</p>
+          <h2>Cuatro pilares para convertir IA en hábitos de trabajo.</h2>
+          <div class="grid-4">${methodologyPillars().map(([title, desc]) => `<div class="card"><strong>${title}</strong><p>${desc}</p></div>`).join("")}</div>${footer}
+        </section>
+        <section class="slide">
+          <p class="eyebrow">Recomendación generada</p>
+          <h2>Plan recomendado: <span class="accent">${plan.name}</span></h2>
+          <p>${recommendationReason(recommendedKey)}</p>
+          <div class="grid-4">
+            <div class="card metric yellow"><strong>$</strong><p>Cotización de referencia</p></div>
+            <div class="card metric quote"><strong>${quote.main}</strong><p>${quote.detail}</p></div>
+            <div class="card metric"><strong>${plan.duration}</strong><p>Duración · ${formatDate(state.startDate)} a ${planEndDate(plan)}</p></div>
+            <div class="card metric"><strong>${plan.shortScope}</strong><p>${plan.scope}</p></div>
+          </div>
+          <div class="grid-2">
+            <div class="card"><strong>Contexto relevado</strong><p>${selectedLabel("industry")} · ${selectedLabel("users")}</p><p>${focus.join(" · ")}</p></div>
+            <div class="card"><strong>Alcance de referencia</strong><p>${plan.scope}</p><p>${plan.bestFor}</p></div>
+          </div>${footer}
+        </section>
+        <section class="slide">
+          <p class="eyebrow">Ejecución del plan recomendado</p>
+          <h2>Qué hace Possumus durante ${plan.name}</h2>
+          <div class="grid-2">
+            <div class="card yellow"><strong>Ejecución</strong><ul>${plan.execution.map(item => `<li>${item}</li>`).join("")}</ul></div>
+            <div class="card"><strong>Entregables</strong><ul>${plan.deliverables.map(item => `<li>${item}</li>`).join("")}</ul></div>
+          </div>
+          <div class="card" style="margin-top:8mm"><strong>Rol del equipo Possumus</strong><p>Acompañar el diagnóstico, facilitar sesiones, orientar casos de uso, activar comunicación, medir avance y cerrar una recomendación ejecutiva accionable.</p></div>${footer}
+        </section>
+        ${addons.length ? `<section class="slide">
+          <p class="eyebrow">Add-ons y módulos focalizados</p>
+          <h2>Módulos sugeridos para complementar ${plan.name}</h2>
+          <p>Según la presentación, los add-ons se suman a cualquier plan y se cotizan por separado.</p>
+          <div class="grid-2">${addons.map(([title, desc, icon, price]) => `<div class="card ${title.includes("Cowork") ? "cowork-pdf" : ""}"><strong>${title}</strong><p>${desc}</p><p><strong>${price}</strong></p></div>`).join("")}</div>${footer}
+        </section>` : ""}
+        <section class="slide">
+          <p class="eyebrow">Hoja de ruta propuesta</p>
+          <h2>Actividades sugeridas para ${plan.name}</h2>
+          <div class="timeline">${roadmapItems.map(item => `<div class="stage">
+            <div><div class="stage-tag">${item.tag}</div><p>${item.date}</p></div>
+            <div><h3>${item.title}</h3><p>${item.desc}</p><ul>${item.tasks.map(task => `<li>${task}</li>`).join("")}</ul></div>
+          </div>`).join("")}</div>${footer}
+        </section>
+        <section class="slide dark">
+          <p class="eyebrow">Próximo paso</p>
+          <h1>Validar alcance, sponsor y modelo comercial para avanzar.</h1>
+          <div class="hero-bottom">
+            <div><p>Esta propuesta puede ajustarse por áreas, cantidad de grupos, sesiones, olas y profundidad de acompañamiento.</p></div>
+            <div class="brand"><span class="logo">P</span><span>Possumus</span></div>
+          </div>
+        </section>
+      </body></html>`;
+    }
+    function analysisText(score) {
+      if (score >= 85) return "La preparación es alta: hay fecha, foco claro, usuarios definidos y un camino de adopción medible.";
+      if (score >= 70) return "La preparación es buena: conviene reforzar sponsor, medición semanal y comunicación de expectativas.";
+      return "La preparación es inicial: antes del lanzamiento conviene cerrar responsables, métricas y canal de seguimiento.";
+    }
+    function commercialNote(tag, planKey) {
+      if (planKey === "plan0") return "Usá esta etapa para construir evidencia y justificar una conversación posterior de licenciamiento o adopción.";
+      if (planKey === "plan1") return "Usá esta etapa para reforzar que Microsoft 365 necesita hábitos, comunicación y medición antes de sumar más complejidad.";
+      if (planKey === "plan2") return "Usá esta etapa para demostrar ROI de Copilot con casos reales, medición y decisión de escalado.";
+      if (planKey === "plan3") return "Usá esta etapa para mostrar una transformación integral con gestión del cambio, productividad digital e IA aplicada.";
+      return "Usá esta etapa para aterrizar el valor en casos reales del cliente y capturar evidencia para justificar el siguiente paso.";
+    }
+    function taskPrompt(tag, task) {
+      if (tag.includes("Ola") || tag.includes("Etapa")) return "Guía comercial: conectar esta actividad con un resultado medible de adopción, participación o eficiencia.";
+      if (tag === "Semana 0") return "Guía comercial: cerrar condiciones de arranque, sponsor, audiencia y comunicación inicial.";
+      if (tag === "Semana 1") return "Prompt sugerido: resume este hilo, identifica puntos abiertos y redacta una respuesta clara con próximos pasos.";
+      if (tag === "Semana 2") return "Prompt sugerido: desde estas notas, crea decisiones, acciones con responsables y un correo de seguimiento.";
+      if (tag === "Semana 3") return "Prompt sugerido: crea un primer borrador estructurado y marca supuestos que debo validar.";
+      if (tag === "Semana 4") return "Prompt sugerido: convierte esta tarea recurrente en un flujo reutilizable con entradas, pasos y salida esperada.";
+      if (tag === "Día 30") return "Prompt sugerido: resume resultados, adopción, historias de éxito y recomendación de próximos pasos.";
+      return "Acción de sponsor/admin para preparar el lanzamiento.";
+    }
+
+    $("startBtn").addEventListener("click", () => {
+      state.company = $("company").value.trim();
+      state.startDate = $("startDate").value;
+      if (!state.company || !state.startDate) {
+        showToast("Completa compañía y fecha de inicio.");
+        return;
+      }
+      currentStep = 0;
+      renderStep();
+      show("wizard");
+    });
+    $("backBtn").addEventListener("click", () => {
+      const previous = previousStepIndex(currentStep);
+      if (previous !== -1) { currentStep = previous; renderStep(); scrollToStepTop(); }
+    });
+    $("nextBtn").addEventListener("click", () => {
+      if (!canContinue()) { showToast("Selecciona una opción para continuar."); return; }
+      const key = steps[currentStep].key;
+      if (key === "cowork") state.coworkReviewed = true;
+      if (key === "addons") state.addonsReviewed = true;
+      const next = nextStepIndex(currentStep);
+      if (next !== -1) { currentStep = next; renderStep(); scrollToStepTop(); return; }
+      renderReview();
+      show("review");
+    });
+    $("reviewBackBtn").addEventListener("click", () => { currentStep = steps.length - 1; renderStep(); show("wizard"); });
+    $("buildBtn").addEventListener("click", generatePlan);
+    $("viewPlanBtn").addEventListener("click", () => { location.hash = `/admin/${state.planId}`; renderPlan("admin"); });
+    $("resetBtn").addEventListener("click", () => {
+      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "", department: "", departments: [], userRange: "", m365Maturity: "", copilotLicenses: "", projectStage: "", sponsor: "", governance: "", accompaniment: "", primaryObjective: "", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", completed: {} });
+      $("company").value = "";
+      $("startDate").value = todayIso;
+      location.hash = "/onboarding";
+      show("onboarding");
+    });
+    window.addEventListener("hashchange", route);
+    function route() {
+      const hash = location.hash.replace(/^#/, "");
+      const [, routeName, id] = hash.split("/");
+      if (routeName === "admin") { loadPlan(id); renderPlan("admin"); return; }
+      if (routeName === "user") { loadUserPlan(id); renderPlan("user"); return; }
+      if (routeName === "done") { loadPlan(id); show("ready"); return; }
+      show("onboarding");
+    }
+    route();
+  </script>
+</body>
+</html>
