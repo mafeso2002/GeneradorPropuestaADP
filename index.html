@@ -870,6 +870,14 @@
     .validation-actions .btn {
       background: var(--cp-surface);
     }
+    .validation-actions .btn.action-ai {
+      background: var(--cp-brand-yellow);
+      color: var(--cp-brand-dark);
+    }
+    .validation-actions .btn.action-mail {
+      background: var(--cp-cowork);
+      color: #ffffff;
+    }
     .validation-result {
       display: grid;
       gap: 12px;
@@ -1421,19 +1429,46 @@
     .addon-plan-context p { margin: 0; }
     .addon-section {
       margin-top: 18px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-surface);
+      overflow: hidden;
     }
     .addon-section-header {
       display: flex;
-      align-items: end;
+      align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 10px;
+      padding: 16px 18px;
+      cursor: pointer;
+      list-style: none;
+      font-weight: 800;
+    }
+    .addon-section-header::-webkit-details-marker { display: none; }
+    .addon-section-header::after {
+      content: "+";
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: var(--cp-surface-soft);
+      color: var(--cp-text);
+      font-weight: 900;
+      flex: none;
+    }
+    .addon-section[open] .addon-section-header::after {
+      content: "–";
+      background: var(--cp-brand-yellow);
     }
     .addon-section-header h4 { margin: 0; }
     .addon-section-header span {
       color: var(--cp-text-muted);
       font-size: 13px;
       font-weight: 700;
+    }
+    .addon-section-body {
+      padding: 0 18px 18px;
     }
     .addon-status {
       display: inline-flex;
@@ -2180,7 +2215,7 @@
         <div id="validationPanel"></div>
         <div class="toolbar">
           <button class="btn" id="reviewBackBtn">← Atrás</button>
-          <button class="btn action-mail" id="buildBtn">Generar propuesta</button>
+          <button class="btn action-mail" id="buildBtn"><span class="btn-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"></path><path d="M14 3v5h5"></path><path d="M10 13h6"></path><path d="M10 17h4"></path><path d="M5 7v14"></path></svg></span>Generar propuesta</button>
         </div>
       </main>
     </section>
@@ -3209,16 +3244,18 @@
     }
     function renderAddonSection(title, description, addons, selected, planKey) {
       if (!addons.length) return "";
-      return `<section class="addon-section">
-        <div class="addon-section-header">
+      return `<details class="addon-section">
+        <summary class="addon-section-header">
           <div>
             <h4>${title}</h4>
             <span>${description}</span>
           </div>
           <span>${addons.length} módulo${addons.length === 1 ? "" : "s"}</span>
+        </summary>
+        <div class="addon-section-body">
+          <div class="addon-option-grid">${addons.map((addon) => renderAddonOption(addon, selected, planKey)).join("")}</div>
         </div>
-        <div class="addon-option-grid">${addons.map((addon) => renderAddonOption(addon, selected, planKey)).join("")}</div>
-      </section>`;
+      </details>`;
     }
     function shouldShowAddonsStep() {
       return true;
@@ -3586,7 +3623,12 @@
         scrollToStepTop();
       });
       $("backBtn").disabled = previousStepIndex(currentStep) === -1;
-      $("nextBtn").textContent = nextStepIndex(currentStep) === -1 ? "Revisar propuesta" : "Continuar";
+      const isLastStep = nextStepIndex(currentStep) === -1;
+      $("nextBtn").classList.toggle("action-mail", isLastStep);
+      $("nextBtn").classList.toggle("primary", !isLastStep);
+      $("nextBtn").innerHTML = isLastStep
+        ? `<span class="btn-icon">${iconSvg("proposal-doc")}</span>Revisar propuesta`
+        : "Continuar";
     }
     function canContinue() {
       const key = steps[currentStep].key;
@@ -3663,15 +3705,19 @@
     function validationStatusLabel(validation) {
       return validation && (validation.statusLabel || validation.status) ? (validation.statusLabel || validation.status) : "Validación IA";
     }
+    function isValidationConsistent(validation) {
+      return validationStatusClass(validationStatusLabel(validation)) === "consistent";
+    }
     function renderValidationPanel() {
       const validation = state.aiValidation && state.aiValidation.validation;
       const summary = state.aiValidation && state.aiValidation.summary ? state.aiValidation.summary : "";
       const changes = validationAddonChanges();
       const statusClass = summary ? validationStatusClass(validationStatusLabel(validation)) : "";
+      const consistent = summary && isValidationConsistent(validation);
       $("validationPanel").innerHTML = `<div class="validation-panel ${statusClass}">
-        <span class="ai-badge">Segunda mirada IA</span>
-        <h3>Validación IA del diagnóstico</h3>
-        <p>Antes de generar la propuesta, la IA revisa la consistencia entre respuestas, plan recomendado, confianza, add-ons y riesgos comerciales. La validación es consultiva: no modifica la propuesta automáticamente.</p>
+        <span class="ai-badge">Visión de IA</span>
+        <h3>Mejorá la propuesta con una visión de IA</h3>
+        <p>Antes de generar la propuesta, la IA revisa si las respuestas, el plan recomendado, la confianza y los add-ons están alineados comercialmente. La validación es consultiva y el comercial decide si aplica cambios.</p>
         ${state.aiValidation && state.aiValidation.generatedAt ? `<p class="decision-note">Última validación: ${new Date(state.aiValidation.generatedAt).toLocaleString("es-AR")}</p>` : ""}
         <label for="validationNotes">Notas comerciales adicionales para la IA</label>
         <textarea id="validationNotes" placeholder="Ej.: El cliente aclaró que por ahora solo quiere Excel.">${escapeHtml(state.validationNotes || "")}</textarea>
@@ -3680,14 +3726,15 @@
           ${formatAiSummaryText(summary)}
         </div>` : ""}
         <div class="validation-actions">
-          <button class="btn action-ai" id="validateDiagnosisBtn">${summary ? "Revalidar diagnóstico" : "Validar diagnóstico con IA"}</button>
+          ${consistent ? `<button class="btn action-mail" id="validationGenerateBtn"><span class="btn-icon">${iconSvg("proposal-doc")}</span>Generar propuesta</button>` : `<button class="btn action-ai" id="validateDiagnosisBtn"><span class="btn-icon">${iconSvg("spark")}</span>${summary ? "Revalidar diagnóstico" : "Validar diagnóstico con IA"}</button>
           ${summary ? `<button class="btn" id="editFromValidationBtn">Editar respuestas</button>
-          <button class="btn action-mail" id="applyValidationAddonsBtn" ${changes.add.length || changes.remove.length ? "" : "disabled"}>Aplicar add-ons sugeridos</button>` : ""}
+          ${changes.add.length || changes.remove.length ? `<button class="btn action-mail" id="applyValidationAddonsBtn">Aplicar add-ons sugeridos</button>` : ""}` : ""}`}
         </div>
         <div class="handoff-status" id="validationStatus"></div>
       </div>`;
       $("validationNotes").addEventListener("input", (event) => { state.validationNotes = event.target.value; });
-      $("validateDiagnosisBtn").addEventListener("click", validateDiagnosisWithAi);
+      if ($("validateDiagnosisBtn")) $("validateDiagnosisBtn").addEventListener("click", validateDiagnosisWithAi);
+      if ($("validationGenerateBtn")) $("validationGenerateBtn").addEventListener("click", openConfirmProposalModal);
       if ($("editFromValidationBtn")) $("editFromValidationBtn").addEventListener("click", () => {
         currentStep = stepIndexByKey("qualification");
         renderStep();
