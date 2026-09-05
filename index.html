@@ -1469,6 +1469,36 @@
       margin-top: 18px;
     }
     .modal-card textarea { min-height: 190px; }
+    .confirm-modal-card {
+      width: min(560px, 100%);
+    }
+    .confirm-modal-card .modal-header {
+      margin-bottom: 8px;
+    }
+    .confirm-visual {
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      flex: none;
+      background: var(--cp-brand-yellow);
+      color: var(--cp-brand-dark);
+      box-shadow: 0 16px 32px rgba(46, 45, 49, .12);
+    }
+    .confirm-visual svg {
+      width: 30px;
+      height: 30px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .confirm-copy {
+      margin: 10px 0 0;
+      color: var(--cp-text-muted);
+    }
     .ai-summary-panel {
       margin-top: 18px;
       padding: 22px;
@@ -1495,6 +1525,41 @@
     .ai-summary-empty h3 { margin: 10px 0 6px; }
     .ai-summary-panel h3 { margin-top: 10px; }
     .ai-summary-panel p { margin-bottom: 0; color: var(--cp-text); }
+    .ai-summary-content {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+    .ai-summary-section {
+      border: 1px solid var(--cp-border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,.72);
+    }
+    .ai-summary-section h4 {
+      margin: 0 0 6px;
+      font-size: 16px;
+    }
+    .ai-summary-section p { margin: 0; }
+    .ai-summary-section ul {
+      margin: 8px 0 0;
+      padding-left: 20px;
+      color: var(--cp-text);
+    }
+    .ai-summary-section li { margin: 4px 0; }
+    .ai-source-list {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--cp-border);
+      color: var(--cp-text-muted);
+      font-size: 13px;
+    }
+    .ai-source-list strong { color: var(--cp-text); }
+    .ai-source-list a {
+      color: var(--cp-link);
+      text-decoration: none;
+      font-weight: 700;
+    }
     .ai-badge {
       display: inline-flex;
       align-items: center;
@@ -1758,7 +1823,23 @@
     <div class="thinking-card">
       <div class="thinking-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"></path><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8L18 15z"></path></svg></div>
       <h3>Generando resumen con IA</h3>
-      <p>Estoy pensando la mejor síntesis comercial con las respuestas del relevamiento.</p>
+      <p>Estoy buscando contexto público de la empresa y pensando la mejor síntesis comercial con las respuestas del relevamiento.</p>
+    </div>
+  </div>
+  <div id="confirmProposalModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirmProposalTitle">
+    <div class="modal-card confirm-modal-card">
+      <div class="modal-header">
+        <div class="confirm-visual"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"></path><path d="M14 3v5h5"></path><path d="M10 13h6"></path><path d="M10 17h4"></path><path d="M5 7v14"></path></svg></div>
+        <div>
+          <span class="ai-badge">Confirmar propuesta</span>
+          <h3 id="confirmProposalTitle">¿Estás seguro de generar la propuesta?</h3>
+          <p class="confirm-copy">Si confirmás, pasamos directo a la propuesta final. Si elegís no, volvés al resumen para seguir editando.</p>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="cancelProposalBtn">No, seguir editando</button>
+        <button class="btn primary" id="confirmProposalBtn">Sí, generar propuesta</button>
+      </div>
     </div>
   </div>
   <div id="handoffModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="handoffModalTitle">
@@ -2197,6 +2278,44 @@
     }
     function formatGeneratedText(value) {
       return escapeHtml(value).replace(/\n{2,}/g, "<br><br>").replace(/\n/g, "<br>");
+    }
+    function inlineMarkdown(value) {
+      return escapeHtml(value)
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*([^*]+)\*/g, "<strong>$1</strong>");
+    }
+    function formatAiSummaryText(value) {
+      const lines = String(value || "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      if (!lines.length) return "";
+      const sections = [];
+      let current = null;
+      lines.forEach((line) => {
+        const headingMatch = line.match(/^#{1,4}\s+(.+)$/) || line.match(/^\*\*([^*]+)\*\*:?\s*$/);
+        if (headingMatch) {
+          current = { title: headingMatch[1].replace(/:$/, ""), items: [] };
+          sections.push(current);
+          return;
+        }
+        if (!current) {
+          current = { title: "Lectura ejecutiva", items: [] };
+          sections.push(current);
+        }
+        current.items.push(line);
+      });
+      return `<div class="ai-summary-content">${sections.map((section) => {
+        const bullets = [];
+        const paragraphs = [];
+        section.items.forEach((line) => {
+          const bulletMatch = line.match(/^[-•]\s+(.+)$/);
+          if (bulletMatch) bullets.push(bulletMatch[1]);
+          else paragraphs.push(line);
+        });
+        return `<div class="ai-summary-section">
+          <h4>${inlineMarkdown(section.title)}</h4>
+          ${paragraphs.map((line) => `<p>${inlineMarkdown(line)}</p>`).join("")}
+          ${bullets.length ? `<ul>${bullets.map((line) => `<li>${inlineMarkdown(line)}</li>`).join("")}</ul>` : ""}
+        </div>`;
+      }).join("")}</div>`;
     }
     function stripHtml(value) {
       const temp = document.createElement("div");
@@ -2911,7 +3030,14 @@
       date.setDate(date.getDate() + days);
       return date.toISOString().slice(0, 10);
     }
+    function openConfirmProposalModal() {
+      $("confirmProposalModal").classList.remove("hidden");
+    }
+    function closeConfirmProposalModal() {
+      $("confirmProposalModal").classList.add("hidden");
+    }
     function generatePlan() {
+      closeConfirmProposalModal();
       state.planId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
       state.userId = crypto.randomUUID ? crypto.randomUUID() : `user-${Date.now()}`;
       state.completed = {};
@@ -3111,6 +3237,9 @@
       const quote = quoteForPlan(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
       const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
+      const aiSources = state.aiSummary && state.aiSummary.companyResearch && Array.isArray(state.aiSummary.companyResearch.sources)
+        ? state.aiSummary.companyResearch.sources
+        : [];
       const operationalSummary = [
         discoveryValue(operationalFields, "m365Tools"),
         discoveryValue(operationalFields, "informationLocation"),
@@ -3181,9 +3310,10 @@
                 </div>
                 <button class="btn action-ai" id="aiSummaryBtn"><span class="btn-icon">${iconSvg("spark")}</span>Regenerar IA</button>
               </div>
-              <p>${formatGeneratedText(aiSummaryText)}</p>` : `<span class="ai-badge">Resumen con IA</span>
+              ${formatAiSummaryText(aiSummaryText)}
+              ${aiSources.length ? `<div class="ai-source-list"><strong>Contexto público consultado:</strong> ${aiSources.map((source) => source.url ? `<a href="${escapeHtml(source.url)}" target="_blank" rel="noopener">${escapeHtml(source.title || "Fuente")}</a>` : escapeHtml(source.title || "Fuente")).join(" · ")}</div>` : ""}` : `<span class="ai-badge">Resumen con IA</span>
               <h3>Resumen ejecutivo comercial</h3>
-              <p>Generá una síntesis comercial con madurez, foco recomendado, plan sugerido y argumentos para el cliente.</p>`}
+              <p>Generá una síntesis comercial con madurez, foco recomendado, plan sugerido y argumentos para el cliente. La IA intentará sumar contexto público real de la empresa antes de redactar.</p>`}
             </div>
             ${aiSummaryText ? "" : `<button class="btn action-ai" id="aiSummaryBtn"><span class="btn-icon">${iconSvg("spark")}</span>Mejorar con IA</button>`}
           </div>
@@ -3348,6 +3478,20 @@ ${location.href}`
       return {
         source: "GeneradorPropuestaADP",
         createdAt: new Date().toISOString(),
+        aiInstructions: {
+          usePublicCompanyResearch: true,
+          researchGuidance: `Antes de redactar, si el backend devuelve companyResearch con fuentes publicas, usalo para contextualizar a ${state.company}. No inventes datos: si no hay fuentes confiables, aclaralo de forma breve y basa la recomendacion en el relevamiento.`,
+          outputFormat: [
+            "## Perfil del cliente",
+            "Definicion breve de la empresa/sector usando datos publicos disponibles y el contexto relevado.",
+            "## Lectura comercial",
+            "Madurez, dolores principales y oportunidad detectada.",
+            "## Recomendacion Possumus",
+            "Plan recomendado, por que aplica y como se relaciona con la realidad del cliente.",
+            "## Argumentos para la reunion",
+            "- 3 bullets comerciales concretos para presentar al cliente."
+          ]
+        },
         email: emailOverride || buildDefaultHandoffEmail(recommendedKey),
         proposal: {
           planId: state.planId || "",
@@ -3451,7 +3595,8 @@ ${location.href}`
         state.aiSummary = {
           text: summary,
           generatedAt: new Date().toISOString(),
-          source: result.source || "Power Automate AI"
+          source: result.source || "Power Automate AI",
+          companyResearch: result.companyResearch || null
         };
         if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
         showToast("Resumen IA generado.");
@@ -3576,6 +3721,10 @@ ${location.href}`
           .cowork-pdf { border-color: #00a351; background: #e8f8ef; }
           .ai-card { border-color: #fcd702; background: #fff7bf; }
           .ai-badge { display: inline-block; margin-bottom: 4mm; border: 1px solid #fcd702; border-radius: 99px; padding: 2mm 4mm; color: #2e2d31; font-size: 9pt; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; }
+          .ai-summary-content { display: grid; gap: 4mm; }
+          .ai-summary-section { border: 1px solid #f4d500; border-radius: 4mm; padding: 4mm; background: #ffffff; }
+          .ai-summary-section h4 { margin: 0 0 2mm; font-size: 14pt; }
+          .ai-summary-section p { margin: 0 0 2mm; font-size: 11.5pt; }
           .timeline { display: grid; gap: 4mm; margin-top: 6mm; }
           .stage { display: grid; grid-template-columns: 35mm 1fr; gap: 5mm; border: 1px solid #dedede; border-radius: 5mm; padding: 5mm; background: #ffffff; break-inside: avoid; }
           .stage-tag { color: #2e2d31; font-weight: 900; font-size: 13pt; }
@@ -3640,7 +3789,7 @@ ${location.href}`
         ${aiSummaryText ? `<section class="slide">
           <p class="eyebrow">Resumen ejecutivo comercial</p>
           <h2>Lectura ejecutiva generada con IA.</h2>
-          <div class="card ai-card"><span class="ai-badge">Generado con IA</span><p>${formatGeneratedText(aiSummaryText)}</p></div>${footer}
+          <div class="card ai-card"><span class="ai-badge">Generado con IA</span>${formatAiSummaryText(aiSummaryText)}</div>${footer}
         </section>` : ""}
         <section class="slide">
           <p class="eyebrow">Ejecución del plan recomendado</p>
@@ -3729,7 +3878,12 @@ ${location.href}`
       show("review");
     });
     $("reviewBackBtn").addEventListener("click", () => { currentStep = steps.length - 1; renderStep(); show("wizard"); });
-    $("buildBtn").addEventListener("click", generatePlan);
+    $("buildBtn").addEventListener("click", openConfirmProposalModal);
+    $("cancelProposalBtn").addEventListener("click", closeConfirmProposalModal);
+    $("confirmProposalBtn").addEventListener("click", generatePlan);
+    $("confirmProposalModal").addEventListener("click", (event) => {
+      if (event.target === $("confirmProposalModal")) closeConfirmProposalModal();
+    });
     $("closeHandoffModalBtn").addEventListener("click", closeHandoffModal);
     $("cancelHandoffBtn").addEventListener("click", closeHandoffModal);
     $("handoffModal").addEventListener("click", (event) => {
