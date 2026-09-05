@@ -1373,6 +1373,33 @@
     }
     .handoff-status.success { color: var(--cp-success); }
     .handoff-status.error { color: var(--cp-danger); }
+    .ai-summary-panel {
+      margin-top: 18px;
+      padding: 22px;
+      border: 1px solid var(--cp-brand-yellow);
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at right top, var(--cp-brand-yellow-soft), transparent 12rem),
+        var(--cp-surface);
+      box-shadow: 0 14px 34px rgba(46, 45, 49, 0.08);
+    }
+    .ai-summary-panel h3 { margin-top: 10px; }
+    .ai-summary-panel p { margin-bottom: 0; color: var(--cp-text); }
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      width: fit-content;
+      border: 1px solid var(--cp-brand-yellow);
+      border-radius: 999px;
+      padding: 5px 11px;
+      background: var(--cp-brand-yellow-soft);
+      color: var(--cp-brand-dark);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
     .pdf-only { display: none; }
     .links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
     .link-card {
@@ -1951,6 +1978,7 @@
       userId: "",
       commercialName: "",
       commercialEmail: "",
+      aiSummary: null,
       completed: {}
     };
     const steps = [
@@ -1972,6 +2000,17 @@
     const find = (collection, key) => collection.find((item) => item[0] === key) || ["", "", ""];
     const todayIso = new Date().toISOString().slice(0, 10);
     $("startDate").value = todayIso;
+    function escapeHtml(value) {
+      return String(value || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+    function formatGeneratedText(value) {
+      return escapeHtml(value).replace(/\n{2,}/g, "<br><br>").replace(/\n/g, "<br>");
+    }
 
     function showToast(message) {
       $("toast").textContent = message;
@@ -2881,6 +2920,7 @@
       const quote = quoteForPlan(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
       const commercialLabel = state.commercialEmail ? `${state.commercialName || "Comercial"} · ${state.commercialEmail}` : "Sin comercial asociado";
+      const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
       const operationalSummary = [
         discoveryValue(operationalFields, "m365Tools"),
         discoveryValue(operationalFields, "informationLocation"),
@@ -2943,6 +2983,11 @@
               </div>
             </div>
           </div>
+          ${aiSummaryText ? `<div class="ai-summary-panel">
+            <span class="ai-badge">Generado con IA</span>
+            <h3>Resumen ejecutivo comercial</h3>
+            <p>${formatGeneratedText(aiSummaryText)}</p>
+          </div>` : ""}
           ${state.cowork ? `<div class="cowork-selected-panel">
             <div class="recommendation-title">
               <div class="cowork-brand-icon"><img src="copilot-cowork-icon.webp" alt="Copilot Cowork"></div>
@@ -2961,8 +3006,10 @@
           <div class="toolbar">
             <button class="btn" id="editPlanBtn">Editar datos</button>
             <span class="pdf-note">Incluye portada, presentación de Possumus, metodología y plan generado.</span>
+            <button class="btn primary" id="aiSummaryBtn">${aiSummaryText ? "Regenerar resumen IA" : "Mejorar con IA"}</button>
             <button class="btn primary" id="printBtn">Generar PDF</button>
             <button class="btn primary" id="handoffBtn">Enviar handoff</button>
+            <div class="handoff-status" id="aiSummaryStatus"></div>
             <div class="handoff-status" id="handoffStatus"></div>
           </div>
         </div>
@@ -3030,6 +3077,7 @@
         </div>`;
       show("plan");
       $("editPlanBtn").addEventListener("click", () => { currentStep = 0; renderStep(); show("wizard"); });
+      $("aiSummaryBtn").addEventListener("click", () => generateAiSummary(recommendedKey));
       $("printBtn").addEventListener("click", () => generateProposalPdf(recommendedKey));
       $("handoffBtn").addEventListener("click", () => sendHandoff(recommendedKey));
     }
@@ -3056,6 +3104,11 @@
           recommendedPlanScope: recommended.scope,
           quote: quote.main,
           quoteDetail: quote.detail,
+          aiSummary: state.aiSummary ? {
+            text: state.aiSummary.text || "",
+            generatedAt: state.aiSummary.generatedAt || "",
+            source: state.aiSummary.source || "Power Automate AI"
+          } : null,
           coworkIncluded: state.cowork,
           addons: selectedAddonItems().map((item) => ({
             id: item.id,
@@ -3117,6 +3170,39 @@
         }
       };
     }
+    async function generateAiSummary(recommendedKey = recommendedPlanKey()) {
+      const button = $("aiSummaryBtn");
+      const status = $("aiSummaryStatus");
+      const payload = buildHandoffPayload(recommendedKey);
+      button.disabled = true;
+      status.className = "handoff-status";
+      status.textContent = "Generando resumen ejecutivo con IA...";
+      try {
+        const response = await fetch("/api/ai-summary", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+        const summary = String(result.summary || result.text || "").trim();
+        if (!summary) throw new Error("El Flow no devolvió un resumen.");
+        state.aiSummary = {
+          text: summary,
+          generatedAt: new Date().toISOString(),
+          source: result.source || "Power Automate AI"
+        };
+        if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
+        showToast("Resumen IA generado.");
+        renderPlan("admin");
+      } catch (error) {
+        console.error(error);
+        status.className = "handoff-status error";
+        status.textContent = `No se pudo generar el resumen IA: ${error.message}`;
+      } finally {
+        button.disabled = false;
+      }
+    }
     async function copyHandoffPayload(payload) {
       try {
         await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
@@ -3174,6 +3260,7 @@
       const quote = quoteForPlan(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
       const commercialLabel = state.commercialEmail ? `${state.commercialName || "Comercial"} · ${state.commercialEmail}` : "Sin comercial asociado";
+      const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
       const operationalSummary = [
         discoveryValue(operationalFields, "m365Tools"),
         discoveryValue(operationalFields, "informationLocation"),
@@ -3219,6 +3306,8 @@
           .quote { border-color: #fcd702; background: #fff7bf; }
           .quote strong { font-size: 27pt; }
           .cowork-pdf { border-color: #00a351; background: #e8f8ef; }
+          .ai-card { border-color: #fcd702; background: #fff7bf; }
+          .ai-badge { display: inline-block; margin-bottom: 4mm; border: 1px solid #fcd702; border-radius: 99px; padding: 2mm 4mm; color: #2e2d31; font-size: 9pt; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; }
           .timeline { display: grid; gap: 4mm; margin-top: 6mm; }
           .stage { display: grid; grid-template-columns: 35mm 1fr; gap: 5mm; border: 1px solid #dedede; border-radius: 5mm; padding: 5mm; background: #ffffff; break-inside: avoid; }
           .stage-tag { color: #2e2d31; font-weight: 900; font-size: 13pt; }
@@ -3280,6 +3369,11 @@
             <div class="card"><strong>Logística y medición</strong><p>${logisticsSummary.join(" · ")}</p></div>
           </div>${footer}
         </section>
+        ${aiSummaryText ? `<section class="slide">
+          <p class="eyebrow">Resumen ejecutivo comercial</p>
+          <h2>Lectura ejecutiva generada con IA.</h2>
+          <div class="card ai-card"><span class="ai-badge">Generado con IA</span><p>${formatGeneratedText(aiSummaryText)}</p></div>${footer}
+        </section>` : ""}
         <section class="slide">
           <p class="eyebrow">Ejecución del plan recomendado</p>
           <h2>Qué hace Possumus durante ${plan.name}</h2>
@@ -3372,7 +3466,7 @@
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "", department: "", departments: [], userRange: "", m365Maturity: "", copilotLicenses: "", projectStage: "", sponsor: "", governance: "", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "", sessionFrequency: "", groupModel: "", successMetric: "", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, completed: {} });
+      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "", department: "", departments: [], userRange: "", m365Maturity: "", copilotLicenses: "", projectStage: "", sponsor: "", governance: "", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "", sessionFrequency: "", groupModel: "", successMetric: "", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, aiSummary: null, completed: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
       location.hash = "/onboarding";
