@@ -55,3 +55,11 @@ La app publica una API `POST /api/ai-summary` para pedir a Power Automate un res
 Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_AUTOMATE_AI_SUMMARY_URL` con la URL del trigger HTTP del Flow de IA. El Flow debe devolver JSON con la forma `{ "summary": "..." }`. Para que el frontend lo muestre mejor, conviene que el resumen venga en Markdown con secciones `## Contexto de la empresa`, `## Lectura comercial`, `## Recomendacion Possumus`, `## Estimacion asistida de presupuesto` y `## Argumentos para la reunion`.
 
 La estimación asistida puede activarse o desactivarse desde el bloque "Resumen con IA". Usa el rango base del plan, confianza del algoritmo, alcance, modalidad, madurez, licencias y add-ons. Si la confianza es baja, la IA no debe cerrar rango y debe pedir validación con preventa/adopción.
+
+## Roadmap personalizado con IA
+
+La app publica una API `POST /api/ai-roadmap` para generar una hoja de ruta personalizada a partir del plan recomendado, diagnóstico, industria, área, madurez, licencias, add-ons, modalidad y fecha de inicio. El resultado reemplaza la hoja de ruta base en la propuesta, el PDF y el handoff.
+
+Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_AUTOMATE_AI_ROADMAP_URL` con la URL del trigger HTTP del Flow. Si no está configurada, la API reutiliza `POWER_AUTOMATE_AI_SUMMARY_URL`. Si no hay Flow disponible, el frontend genera una versión personalizada local para no bloquear la propuesta.
+
+El Flow debe devolver JSON con la forma `{ "summary": "...", "items": [...] }`. Cada item debería incluir `tag`, `title`, `date`, `desc`, `tasks`, `owner`, `deliverable`, `risk` e `icon`.

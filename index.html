@@ -1332,6 +1332,37 @@
       gap: 14px;
       margin-top: 18px;
     }
+    .roadmap-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 16px;
+      padding: 14px 16px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at right top, var(--cp-brand-yellow-soft), transparent 12rem),
+        var(--cp-surface);
+    }
+    .roadmap-toolbar p { margin: 4px 0 0; }
+    .roadmap-ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      width: fit-content;
+      margin-bottom: 8px;
+      border: 1px solid var(--cp-brand-yellow);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: var(--cp-brand-yellow-soft);
+      color: var(--cp-brand-dark);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .roadmap-toolbar .btn { white-space: nowrap; }
     .timeline-item {
       overflow: hidden;
     }
@@ -3012,6 +3043,7 @@
       validationNotes: "",
       aiValidation: null,
       aiSummary: null,
+      aiRoadmap: null,
       completed: {}
     };
     const steps = [
@@ -4583,6 +4615,104 @@
         { tag: "Semana 4", title: "Business case y decisión", date: formatDate(addDays(start, 21)), icon: "measurement", desc: "Cerrar evidencia para decidir licenciamiento y siguiente plan.", tasks: ["Encuesta de resultados", "Business case y recomendación de licenciamiento", "Plan siguiente: Plan 1, 2 o 3"] }
       ];
     }
+    function normalizeRoadmapItems(items, planKey = recommendedPlanKey()) {
+      const fallback = proposalRoadmap(planKey);
+      if (!Array.isArray(items) || !items.length) return fallback;
+      return items.slice(0, 6).map((item, index) => {
+        const fallbackItem = fallback[index] || fallback[fallback.length - 1] || {};
+        const tasks = Array.isArray(item.tasks || item.activities)
+          ? (item.tasks || item.activities).map((task) => typeof task === "string" ? task : (task.title || task.activity || "")).filter(Boolean)
+          : [];
+        return {
+          tag: String(item.tag || item.phase || fallbackItem.tag || `Etapa ${index + 1}`).trim(),
+          title: String(item.title || item.name || fallbackItem.title || `Etapa ${index + 1}`).trim(),
+          date: String(item.date || item.when || fallbackItem.date || "").trim(),
+          icon: item.icon || fallbackItem.icon || "roadmap",
+          desc: String(item.desc || item.description || item.objective || fallbackItem.desc || "").trim(),
+          tasks: tasks.length ? tasks.slice(0, 5) : (fallbackItem.tasks || []).slice(0, 5),
+          owner: item.owner || item.responsible || "",
+          deliverable: item.deliverable || item.output || "",
+          risk: item.risk || item.watchout || ""
+        };
+      }).filter((item) => item.title && item.desc && item.tasks.length);
+    }
+    function roadmapForPlan(planKey = recommendedPlanKey()) {
+      const aiRoadmap = state.aiRoadmap;
+      if (aiRoadmap && aiRoadmap.planKey === planKey && Array.isArray(aiRoadmap.items) && aiRoadmap.items.length) {
+        return normalizeRoadmapItems(aiRoadmap.items, planKey);
+      }
+      return proposalRoadmap(planKey);
+    }
+    function fallbackPersonalizedRoadmap(planKey = recommendedPlanKey()) {
+      const base = proposalRoadmap(planKey);
+      const industry = selectedLabel("industry");
+      const departmentsText = selectedDepartments().join(", ") || state.department || "el área prioritaria";
+      const hasCopilot = hasCopilotLicense();
+      const addons = selectedAddonItems().map((item) => item.title);
+      return base.map((item, index) => {
+        const tasks = item.tasks.slice(0, 3);
+        if (index === 0) {
+          tasks.unshift(`Alinear sponsor, responsables y alcance para ${departmentsText}`);
+        }
+        if (index === 1) {
+          tasks.unshift(`Trabajar escenarios reales de ${industry.toLowerCase()} con ${departmentsText}`);
+        }
+        if (index === base.length - 1) {
+          tasks.push(hasCopilot ? "Medir adopción de Copilot y oportunidades de escalado" : "Definir decisión de licenciamiento o siguiente ola de adopción");
+        }
+        if (addons.length && index === Math.min(2, base.length - 1)) {
+          tasks.push(`Incorporar add-ons seleccionados: ${addons.slice(0, 2).join(", ")}`);
+        }
+        return {
+          ...item,
+          title: `${item.title} para ${state.company || "el cliente"}`,
+          desc: `${item.desc} Foco específico: ${departmentsText}, ${industry.toLowerCase()}, ${qualificationValue("primaryObjective").toLowerCase()}.`,
+          tasks: [...new Set(tasks)].slice(0, 5),
+          owner: index === 0 ? "Comercial + adopción Possumus" : "Equipo Possumus + referentes del cliente",
+          deliverable: index === base.length - 1 ? "Cierre ejecutivo y recomendación de continuidad" : "Materiales, acuerdos y evidencias de avance",
+          risk: index === 0 && state.sponsor === "no" ? "Sin sponsor confirmado, validar ownership antes de calendarizar." : ""
+        };
+      });
+    }
+    function buildAiRoadmapPayload(recommendedKey = recommendedPlanKey()) {
+      const plans = planCatalog();
+      const decision = planDecision();
+      return {
+        source: "GeneradorPropuestaADP",
+        createdAt: new Date().toISOString(),
+        proposal: {
+          company: state.company,
+          startDate: state.startDate,
+          startDateFormatted: formatDate(state.startDate),
+          recommendedPlanKey: recommendedKey,
+          recommendedPlanName: plans[recommendedKey].name,
+          recommendedPlanDuration: plans[recommendedKey].duration,
+          recommendedPlanScope: plans[recommendedKey].scope,
+          confidence: decision.confidence,
+          confidenceLabel: confidenceLabel(decision.level),
+          reasons: decision.reasons,
+          templateRoadmap: proposalRoadmap(recommendedKey),
+          addons: selectedAddonItems().map((item) => ({ title: item.title, description: item.desc, price: item.price }))
+        },
+        answers: {
+          customerContext: { industry: selectedLabel("industry"), users: selectedLabel("users"), departments: selectedDepartments() },
+          qualification: qualificationFields.reduce((acc, field) => ({ ...acc, [field.key]: qualificationValue(field.key) }), {}),
+          operational: operationalFields.reduce((acc, field) => ({ ...acc, [field.key]: discoveryValue(operationalFields, field.key) }), {}),
+          productivity: {
+            communication: selectedLabel("inbox"),
+            meetings: selectedLabel("meeting"),
+            meetingApp: state.meetingApp,
+            creation: selectedLabel("create"),
+            automation: selectedLabel("automate")
+          },
+          logistics: logisticsFields.reduce((acc, field) => ({ ...acc, [field.key]: discoveryValue(logisticsFields, field.key) }), {})
+        },
+        aiInstructions: {
+          task: "Personalizar la hoja de ruta comercial y de adopcion para este cliente.",
+          responseFormat: "Responder JSON valido con { summary, items }. items debe tener 4 a 6 etapas con tag, title, date, desc, tasks (3 a 5 bullets), owner, deliverable, risk e icon. Usar los datos del relevamiento; no inventar informacion externa. Mantener fechas y duracion razonables para el plan recomendado."
+        }
+      };
+    }
     function renderPlan(mode = "admin") {
       if (!state.planId) state.planId = "preview";
       const adminLink = `${location.origin}${location.pathname}#/admin/${state.planId}`;
@@ -4593,7 +4723,7 @@
       const decision = planDecision();
       const recommendedKey = decision.recommendedKey;
       const recommended = plans[recommendedKey];
-      const roadmapItems = proposalRoadmap(recommendedKey);
+      const roadmapItems = roadmapForPlan(recommendedKey);
       const quote = quoteForPlan(recommendedKey);
       const totalEstimate = proposalTotalEstimate(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
@@ -4787,23 +4917,31 @@
         <details class="proposal-accordion">
           <summary><div class="stage-icon">${iconSvg("roadmap")}</div><div><h2>Hoja de ruta recomendada</h2><p>Etapas sugeridas para presentar y ejecutar la propuesta.</p></div></summary>
           <div class="proposal-accordion-body">
-            <p>Las etapas se pueden expandir o contraer para usar la propuesta durante una reunión comercial.</p>
+            <div class="roadmap-toolbar">
+              <div>
+                ${state.aiRoadmap && state.aiRoadmap.planKey === recommendedKey ? `<span class="roadmap-ai-badge">${iconSvg("spark")} Roadmap personalizado con IA</span>` : ""}
+                <strong>${state.aiRoadmap && state.aiRoadmap.planKey === recommendedKey ? "Hoja de ruta adaptada al cliente" : "Hoja de ruta base del plan"}</strong>
+                <p>${state.aiRoadmap && state.aiRoadmap.planKey === recommendedKey ? "La IA ajustó etapas, foco, actividades y riesgos según el diagnóstico." : "Podés personalizarla con IA para adaptar etapas, actividades y entregables al cliente."}</p>
+                <div class="handoff-status" id="aiRoadmapStatus"></div>
+              </div>
+              <button class="btn action-ai" id="aiRoadmapBtn"><span class="btn-icon">${iconSvg("roadmap")}</span>${state.aiRoadmap && state.aiRoadmap.planKey === recommendedKey ? "Regenerar roadmap con IA" : "Personalizar roadmap con IA"}</button>
+            </div>
             <div class="timeline">${roadmapItems.map((week, wi) => `<details class="timeline-item">
               <summary>
                 <div class="stage-icon">${iconSvg(week.icon)}</div>
                 <div>
-                  <span class="badge">${week.tag} · ${week.date}</span>
-                  <h3 style="margin-top:8px">${week.title}</h3>
-                  <p>${week.desc}</p>
+                  <span class="badge">${escapeHtml(week.tag)} · ${escapeHtml(week.date)}</span>
+                  <h3 style="margin-top:8px">${escapeHtml(week.title)}</h3>
+                  <p>${escapeHtml(week.desc)}</p>
                 </div>
               </summary>
               <div class="timeline-body">
                 <div style="grid-column:1 / -1">
                   <strong>Actividades sugeridas</strong>
                   ${week.tasks.map((task, ti) => {
-            const id = `${wi}-${ti}`;
-            return `<div class="task"><span class="task-marker">${ti + 1}</span><span><strong>${task}</strong><p>${taskPrompt(week.tag, task)}</p></span></div>`;
+            return `<div class="task"><span class="task-marker">${ti + 1}</span><span><strong>${escapeHtml(task)}</strong><p>${escapeHtml(taskPrompt(week.tag, task))}</p></span></div>`;
           }).join("")}
+                  ${week.owner || week.deliverable || week.risk ? `<div class="task"><span class="task-marker">IA</span><span>${week.owner ? `<strong>Responsable sugerido: ${escapeHtml(week.owner)}</strong>` : ""}${week.deliverable ? `<p>Entregable: ${escapeHtml(week.deliverable)}</p>` : ""}${week.risk ? `<p>Riesgo a cuidar: ${escapeHtml(week.risk)}</p>` : ""}</span></div>` : ""}
                 </div>
               </div>
             </details>`).join("")}</div>
@@ -4814,6 +4952,7 @@
       $("editPlanBtn").addEventListener("click", () => { currentStep = 0; renderStep(); show("wizard"); });
       $("confidenceBadge").addEventListener("click", () => openConfidenceModal(decision, plans));
       $("aiSummaryBtn").addEventListener("click", () => generateAiSummary(recommendedKey));
+      $("aiRoadmapBtn").addEventListener("click", () => generateAiRoadmap(recommendedKey, mode));
       const budgetSwitch = $("budgetEstimateSwitch");
       if (budgetSwitch) budgetSwitch.addEventListener("click", () => {
         state.includeBudgetEstimate = !state.includeBudgetEstimate;
@@ -4929,7 +5068,7 @@ ${location.href}`
       const recommended = plans[recommendedKey];
       const quote = quoteForPlan(recommendedKey);
       const totalEstimate = proposalTotalEstimate(recommendedKey);
-      const roadmapItems = proposalRoadmap(recommendedKey);
+      const roadmapItems = roadmapForPlan(recommendedKey);
       const focus = [selectedLabel("inbox"), selectedLabel("meeting"), selectedLabel("create"), selectedLabel("automate")].filter(Boolean);
       const decision = planDecision();
       return {
@@ -4991,6 +5130,12 @@ ${location.href}`
             text: state.aiSummary.text || "",
             generatedAt: state.aiSummary.generatedAt || "",
             source: state.aiSummary.source || "Power Automate AI"
+          } : null,
+          aiRoadmap: state.aiRoadmap ? {
+            summary: state.aiRoadmap.summary || "",
+            generatedAt: state.aiRoadmap.generatedAt || "",
+            source: state.aiRoadmap.source || "Power Automate AI",
+            planKey: state.aiRoadmap.planKey || ""
           } : null,
           coworkIncluded: state.cowork,
           addons: selectedAddonItems().map((item) => ({
@@ -5156,6 +5301,56 @@ ${location.href}`
         if ($("aiSummaryBtn")) $("aiSummaryBtn").disabled = false;
       }
     }
+    async function generateAiRoadmap(recommendedKey = recommendedPlanKey(), mode = "admin") {
+      const button = $("aiRoadmapBtn");
+      const status = $("aiRoadmapStatus");
+      const payload = buildAiRoadmapPayload(recommendedKey);
+      if (button) button.disabled = true;
+      if (status) {
+        status.className = "handoff-status";
+        status.textContent = "Personalizando roadmap con IA...";
+      }
+      showThinking("Personalizando roadmap con IA", "Estoy adaptando etapas, actividades, responsables y riesgos al diagnóstico del cliente.");
+      try {
+        const response = await fetch("/api/ai-roadmap", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+        const rawItems = result.items || result.roadmap || (result.aiRoadmap && result.aiRoadmap.items);
+        if (result.fallbackRequired || !Array.isArray(rawItems) || !rawItems.length) {
+          throw new Error(result.message || "El Flow no devolvió etapas para el roadmap.");
+        }
+        const items = normalizeRoadmapItems(rawItems, recommendedKey);
+        state.aiRoadmap = {
+          planKey: recommendedKey,
+          items,
+          summary: result.summary || "",
+          generatedAt: new Date().toISOString(),
+          source: result.source || "Power Automate AI"
+        };
+        if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
+        showToast("Roadmap personalizado con IA.");
+        renderPlan(mode);
+      } catch (error) {
+        console.warn(error);
+        state.aiRoadmap = {
+          planKey: recommendedKey,
+          items: fallbackPersonalizedRoadmap(recommendedKey),
+          summary: `No se pudo conectar con IA (${error.message}). Se generó una versión personalizada local para no frenar la propuesta.`,
+          generatedAt: new Date().toISOString(),
+          source: "Fallback local"
+        };
+        if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
+        showToast("No se pudo conectar con IA. Generé una versión personalizada local.");
+        renderPlan(mode);
+      } finally {
+        hideThinking();
+        if ($("aiRoadmapBtn")) $("aiRoadmapBtn").disabled = false;
+      }
+    }
     async function copyHandoffPayload(payload) {
       try {
         await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
@@ -5214,7 +5409,7 @@ ${location.href}`
     function buildPrintableProposal(recommendedKey) {
       const plans = planCatalog();
       const plan = plans[recommendedKey];
-      const roadmapItems = proposalRoadmap(recommendedKey);
+      const roadmapItems = roadmapForPlan(recommendedKey);
       const focus = [selectedLabel("inbox"), selectedLabel("meeting"), selectedLabel("create"), selectedLabel("automate")].filter(Boolean);
       const generatedAt = new Date().toLocaleDateString("es-AR");
       const quote = quoteForPlan(recommendedKey);
@@ -5393,11 +5588,11 @@ ${location.href}`
           <div class="grid-2">${addons.map(([title, desc]) => `<div class="card ${title.includes("Cowork") ? "cowork-pdf" : ""}"><strong>${title}</strong><p>${desc}</p></div>`).join("")}</div>${footer}
         </section>` : ""}
         <section class="slide">
-          <p class="eyebrow">Hoja de ruta propuesta</p>
-          <h2>Actividades sugeridas para ${plan.name}</h2>
+          <p class="eyebrow">Hoja de ruta propuesta${state.aiRoadmap && state.aiRoadmap.planKey === recommendedKey ? " · personalizada con IA" : ""}</p>
+          <h2>Actividades sugeridas para ${escapeHtml(plan.name)}</h2>
           <div class="timeline">${roadmapItems.map(item => `<div class="stage">
-            <div><div class="stage-tag">${item.tag}</div><p>${item.date}</p></div>
-            <div><h3>${item.title}</h3><p>${item.desc}</p><ul>${item.tasks.map(task => `<li>${task}</li>`).join("")}</ul></div>
+            <div><div class="stage-tag">${escapeHtml(item.tag)}</div><p>${escapeHtml(item.date)}</p></div>
+            <div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.desc)}</p><ul>${item.tasks.map(task => `<li>${escapeHtml(task)}</li>`).join("")}${item.owner ? `<li><strong>Responsable sugerido:</strong> ${escapeHtml(item.owner)}</li>` : ""}${item.deliverable ? `<li><strong>Entregable:</strong> ${escapeHtml(item.deliverable)}</li>` : ""}${item.risk ? `<li><strong>Riesgo a cuidar:</strong> ${escapeHtml(item.risk)}</li>` : ""}</ul></div>
           </div>`).join("")}</div>${footer}
         </section>
         <section class="slide dark">
@@ -5674,7 +5869,7 @@ ${location.href}`
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, validationNotes: "", aiValidation: null, aiSummary: null, completed: {} });
+      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, completed: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
       location.hash = "/onboarding";
