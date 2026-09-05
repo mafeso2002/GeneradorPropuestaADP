@@ -3200,7 +3200,7 @@
           ${renderAddonSection("Add-ons sugeridos para este caso", "Se marcan por las respuestas del relevamiento y el árbol de decisión.", suggested, selected, planKey)}
           ${availableByCategory.map(([category, addons]) => renderAddonSection(category, "Disponibles para sumar si el comercial quiere ampliar alcance.", addons, selected, planKey)).join("")}
           ${renderAddonSection("Ya incluido en el plan probable", "No lo cotices como adicional salvo que el alcance sea mayor al previsto.", includedAddons, selected, planKey)}
-          ${renderAddonSection("No disponible por licenciamiento", "Requieren Microsoft 365 Copilot; quedan al final para no agrandar la selección principal.", unavailable, selected, planKey)}
+          ${renderAddonSection("No disponible por licenciamiento", "Requieren Microsoft 365 Copilot.", unavailable, selected, planKey)}
         </div>`;
       }
       $("stepBody").innerHTML = body;
