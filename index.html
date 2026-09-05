@@ -950,7 +950,7 @@
     }
     .proposal-meta {
       display: grid;
-      grid-template-columns: .55fr .55fr 1.55fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
       margin: 14px 0;
       align-items: start;
@@ -981,6 +981,67 @@
       font-size: 22px;
     }
     .quote-card p { margin-top: 5px; font-size: 13px; }
+    .proposal-commercial-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, .38fr);
+      gap: 18px;
+      margin-top: 22px;
+      align-items: start;
+    }
+    .proposal-functional-stack {
+      display: grid;
+      gap: 18px;
+      min-width: 0;
+    }
+    .proposal-commercial-grid .proposal-grid {
+      margin-top: 0;
+    }
+    .proposal-price-panel {
+      position: sticky;
+      top: 92px;
+      border: 1px solid var(--cp-cowork);
+      border-radius: 18px;
+      padding: 18px;
+      background:
+        linear-gradient(90deg, var(--cp-cowork) 0 7px, transparent 7px),
+        radial-gradient(circle at right top, var(--cp-cowork-soft), transparent 13rem),
+        var(--cp-surface);
+      box-shadow: 0 14px 34px rgba(46, 45, 49, 0.08);
+    }
+    .proposal-price-panel h3 { margin: 8px 0 6px; }
+    .proposal-price-panel .total {
+      display: block;
+      color: var(--cp-cowork);
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1.08;
+    }
+    .proposal-price-rows {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .proposal-price-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--cp-border);
+      border-radius: 12px;
+      background: rgba(255,255,255,.72);
+      color: var(--cp-text-muted);
+      font-size: 13px;
+    }
+    .proposal-price-row strong {
+      color: var(--cp-text);
+      text-align: right;
+    }
+    .proposal-addon-functional-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .proposal-addon-functional-grid .addon-item .addon-price { display: none; }
     .money-icon {
       display: grid;
       place-items: center;
@@ -2265,7 +2326,8 @@
     .hidden { display: none !important; }
     @media (max-width: 860px) {
       .hero, .layout, .form-row, .review-grid, .roadmap, .links { grid-template-columns: 1fr; }
-      .proposal-grid, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option { grid-template-columns: 1fr; }
+      .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option { grid-template-columns: 1fr; }
+      .proposal-price-panel { position: static; }
       .addon-pricing { border-left: 0; border-top: 1px solid var(--cp-border); padding-left: 0; padding-top: 10px; }
       .topbar, .top-actions { align-items: flex-start; flex-direction: column; }
       .auth-status { max-width: 100%; }
@@ -4394,6 +4456,25 @@
       }
       return `Plan principal: ${primary.main}. Alternativa: ${alternative.main}.`;
     }
+    function renderProposalPricePanel(recommendedKey) {
+      const quote = quoteForPlan(recommendedKey);
+      const totalEstimate = proposalTotalEstimate(recommendedKey);
+      const selectedAddons = selectedAddonItems();
+      const addonRows = selectedAddons.length
+        ? selectedAddons.map((addon) => `<div class="proposal-price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("")
+        : `<div class="proposal-price-row"><span>Add-ons seleccionados</span><strong>Sin add-ons</strong></div>`;
+      return `<aside class="proposal-price-panel">
+        <div class="money-icon">$</div>
+        <h3>Resumen económico</h3>
+        <span class="total">${escapeHtml(totalEstimate.label)}</span>
+        <p>${escapeHtml(totalEstimate.detail)}</p>
+        <div class="proposal-price-rows">
+          <div class="proposal-price-row"><span>Plan base</span><strong>${escapeHtml(quote.main)}</strong></div>
+          ${addonRows}
+        </div>
+        <p style="margin-top:12px;font-size:13px">Referencia comercial sujeta a validación de alcance, cantidad de participantes, modalidad y calendario final.</p>
+      </aside>`;
+    }
     function decisionAlternativesMarkup(decision, plans) {
       if (!decision.alternatives.length) return "";
       return `<div class="alternative-panel">
@@ -4540,55 +4621,55 @@
           <div class="proposal-meta">
             <div class="proposal-meta-card"><strong>${formatDate(state.startDate)}</strong><span>Inicio estimado</span></div>
             <div class="proposal-meta-card"><strong>${planEndDate(recommended)}</strong><span>Fin estimado</span></div>
-            <div class="proposal-meta-card quote-card"><div class="money-icon">$</div><div><strong>${quote.main}</strong><span>Cotización de referencia</span><p>${quote.detail}</p></div></div>
-            <div class="proposal-meta-card quote-card budget-total-card"><div class="money-icon">$</div><div><strong>${totalEstimate.label}</strong><span>Total estimado</span><p>${totalEstimate.detail}</p></div></div>
           </div>
-          <div class="proposal-grid">
-            <div class="proposal-panel">
-              <div class="recommendation-title">
-                <div class="stage-icon">${iconSvg(recommended.icon)}</div>
+          <div class="proposal-commercial-grid">
+            <div class="proposal-functional-stack">
+              <div class="proposal-grid">
+                <div class="proposal-panel">
+                  <div class="recommendation-title">
+                    <div class="stage-icon">${iconSvg(recommended.icon)}</div>
+                    <div>
+                      <span class="badge">${recommended.badge}</span>
+                      <h3>${recommended.name}</h3>
+                    </div>
+                  </div>
+                  <div class="plan-context-grid">
+                    <div class="plan-context-card">
+                      <strong>Caso de cliente</strong>
+                      <p>${recommended.customerCase}</p>
+                    </div>
+                    <div class="plan-context-card plan-ai-card">
+                      <strong>Nivel de IA</strong>
+                      <p>${recommended.aiLevel}<span>${recommended.aiLevelDetail}</span></p>
+                    </div>
+                  </div>
+                  <p><strong>Análisis comercial:</strong> ${recommendationReason(recommendedKey)}</p>
+                  ${decisionEvidenceMarkup(decision)}
+                  ${decisionAlternativesMarkup(decision, plans)}
+                  <p>${recommended.desc}</p>
+                  <div class="plan-metric-row">
+                    <div class="plan-metric"><strong>${recommended.duration}</strong><span>Duración</span></div>
+                    <div class="plan-metric"><strong>${recommended.effort}</strong><span>Modelo</span></div>
+                    <div class="plan-metric"><strong>${recommended.shortScope}</strong><span>${recommended.scope}</span></div>
+                  </div>
+                </div>
+                <div class="proposal-panel">
+                  <h3>Qué incluye este plan</h3>
+                  <div class="execution-grid" style="grid-template-columns:1fr">
+                    <div class="execution-card">
+                      <strong>Ejecución</strong>
+                      <ul>${recommended.execution.map((item) => `<li>${item}</li>`).join("")}</ul>
+                    </div>
+                    <div class="execution-card">
+                      <strong>Entregables</strong>
+                      <ul>${recommended.deliverables.map((item) => `<li>${item}</li>`).join("")}</ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ai-summary-panel ${aiSummaryText ? "" : "ai-summary-empty"}">
                 <div>
-                  <span class="badge">${recommended.badge}</span>
-                  <h3>${recommended.name}</h3>
-                </div>
-              </div>
-              <div class="plan-context-grid">
-                <div class="plan-context-card">
-                  <strong>Caso de cliente</strong>
-                  <p>${recommended.customerCase}</p>
-                </div>
-                <div class="plan-context-card plan-ai-card">
-                  <strong>Nivel de IA</strong>
-                  <p>${recommended.aiLevel}<span>${recommended.aiLevelDetail}</span></p>
-                </div>
-              </div>
-              <p><strong>Análisis comercial:</strong> ${recommendationReason(recommendedKey)}</p>
-              ${decisionEvidenceMarkup(decision)}
-              ${decisionAlternativesMarkup(decision, plans)}
-              <p>${recommended.desc}</p>
-              <div class="plan-metric-row">
-                <div class="plan-metric"><strong>${recommended.duration}</strong><span>Duración</span></div>
-                <div class="plan-metric"><strong>${recommended.effort}</strong><span>Modelo</span></div>
-                <div class="plan-metric"><strong>${recommended.shortScope}</strong><span>${recommended.scope}</span></div>
-              </div>
-            </div>
-            <div class="proposal-panel">
-              <h3>Qué incluye este plan</h3>
-              <div class="execution-grid" style="grid-template-columns:1fr">
-                <div class="execution-card">
-                  <strong>Ejecución</strong>
-                  <ul>${recommended.execution.map((item) => `<li>${item}</li>`).join("")}</ul>
-                </div>
-                <div class="execution-card">
-                  <strong>Entregables</strong>
-                  <ul>${recommended.deliverables.map((item) => `<li>${item}</li>`).join("")}</ul>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="ai-summary-panel ${aiSummaryText ? "" : "ai-summary-empty"}">
-            <div>
-              ${aiSummaryText ? `<div class="ai-summary-head">
+                  ${aiSummaryText ? `<div class="ai-summary-head">
                 <div>
                   <span class="ai-badge">Generado con IA</span>
                   <h3>Resumen ejecutivo comercial</h3>
@@ -4608,10 +4689,10 @@
                   <button class="switch ${state.includeBudgetEstimate ? "on" : ""}" id="budgetEstimateSwitch" aria-label="Incluir estimación de presupuesto"></button>
                 </div>
               </div>`}
-            </div>
-            ${aiSummaryText ? "" : `<button class="btn action-ai" id="aiSummaryBtn"><span class="btn-icon">${iconSvg("spark")}</span>Mejorar con IA</button>`}
-          </div>
-          ${state.cowork ? `<div class="cowork-selected-panel">
+                </div>
+                ${aiSummaryText ? "" : `<button class="btn action-ai" id="aiSummaryBtn"><span class="btn-icon">${iconSvg("spark")}</span>Mejorar con IA</button>`}
+              </div>
+              ${state.cowork ? `<div class="cowork-selected-panel">
             <div class="recommendation-title">
               <div class="cowork-brand-icon"><img src="copilot-cowork-icon.webp" alt="Copilot Cowork"></div>
               <div>
@@ -4621,15 +4702,18 @@
             </div>
             <p>Se incluye como add-on recomendado porque el relevamiento detectó procesos complejos, tareas de varios pasos o necesidad de automatización asistida.</p>
           </div>` : ""}
-          ${validationProposalText ? `<div class="validation-panel">
+              ${validationProposalText ? `<div class="validation-panel">
             <h3>Diagnóstico revisado con IA</h3>
             ${formatAiSummaryText(validationProposalText)}
           </div>` : ""}
-          ${addons.length ? `<div class="addons-panel">
+              ${addons.length ? `<div class="addons-panel">
             <h3>Add-ons y módulos sugeridos</h3>
-            <p>Estos módulos permiten ampliar el alcance de la propuesta y se cotizan por separado.</p>
-            <div class="addons-grid">${addons.map(([title, desc, icon, price]) => `<div class="addon-item"><div class="stage-icon">${iconSvg(icon)}</div><div><strong>${title}</strong><p>${desc}</p><span class="addon-price"><span class="money-icon" style="width:22px;height:22px;font-size:13px;margin-right:6px">$</span> ${price}</span></div></div>`).join("")}</div>
+            <p>Estos módulos amplían el alcance funcional; los importes quedan consolidados en el resumen económico.</p>
+            <div class="proposal-addon-functional-grid">${addons.map(([title, desc, icon]) => `<div class="addon-item"><div class="stage-icon">${iconSvg(icon)}</div><div><strong>${title}</strong><p>${desc}</p></div></div>`).join("")}</div>
           </div>` : ""}
+            </div>
+            ${renderProposalPricePanel(recommendedKey)}
+          </div>
           <div class="proposal-actions">
             <button class="btn" id="editPlanBtn">Editar datos</button>
             <div class="proposal-action-buttons">
@@ -5125,6 +5209,10 @@ ${location.href}`
       const quote = quoteForPlan(recommendedKey);
       const totalEstimate = proposalTotalEstimate(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
+      const selectedAddons = selectedAddonItems();
+      const printableAddonRows = selectedAddons.length
+        ? selectedAddons.map((addon) => `<div class="price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("")
+        : `<div class="price-row"><span>Add-ons seleccionados</span><strong>Sin add-ons</strong></div>`;
       const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
       const validationSummaryText = state.aiValidation && state.aiValidation.summary ? filterValidationSummaryForProposal(state.aiValidation.summary) : "";
       const decision = planDecision();
@@ -5166,6 +5254,13 @@ ${location.href}`
           .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; margin-top: 8mm; }
           .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6mm; margin-top: 8mm; }
           .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5mm; margin-top: 8mm; }
+          .pdf-recommendation-grid { display: grid; grid-template-columns: minmax(0, 1fr) 76mm; gap: 7mm; margin-top: 7mm; align-items: start; }
+          .pdf-compact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin-top: 5mm; }
+          .price-card { border-color: #00a351; background: #effbf4; }
+          .price-card .total { display: block; margin: 2mm 0 3mm; color: #007a3d; font-size: 23pt; font-weight: 900; line-height: 1.05; }
+          .price-list { display: grid; gap: 2.2mm; margin-top: 4mm; }
+          .price-row { display: flex; justify-content: space-between; gap: 4mm; border: 1px solid #d8eadf; border-radius: 3mm; padding: 2.5mm 3mm; background: #ffffff; font-size: 10pt; color: #5f6168; }
+          .price-row strong { color: #2e2d31; text-align: right; font-size: 10pt; }
           .card { border: 1px solid #dedede; border-radius: 5mm; padding: 6mm; background: #ffffff; box-shadow: 0 4mm 14mm rgba(46,45,49,.08); }
           .card.yellow { background: #fff7bf; border-color: #fcd702; }
           .card strong { display: block; margin-bottom: 2mm; font-size: 16pt; color: #2e2d31; }
@@ -5232,18 +5327,28 @@ ${location.href}`
           <div class="confidence">${confidenceLabel(decision.level)} · ${decision.confidence}%</div>
           <p>${recommendationReason(recommendedKey)}</p>
           ${decision.reasons.length ? `<ul class="evidence">${decision.reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>` : ""}
-          <div class="grid-4">
-            <div class="card metric yellow"><strong>$</strong><p>Cotización de referencia</p></div>
-            <div class="card metric quote"><strong>${quote.main}</strong><p>${quote.detail}</p></div>
-            <div class="card metric quote"><strong>${totalEstimate.label}</strong><p>Total estimado con add-ons seleccionados</p></div>
-            <div class="card metric"><strong>${plan.duration}</strong><p>Duración · ${formatDate(state.startDate)} a ${planEndDate(plan)}</p></div>
-            <div class="card metric"><strong>${plan.shortScope}</strong><p>${plan.scope}</p></div>
-          </div>
-          <div class="grid-2">
-            <div class="card"><strong>Contexto relevado</strong><p>${selectedLabel("industry")} · ${selectedLabel("users")}</p><p>${focus.join(" · ")}</p></div>
-            <div class="card"><strong>Alcance de referencia</strong><p>${plan.scope}</p><p>${plan.bestFor}</p></div>
-            <div class="card"><strong>Diagnóstico operativo M365</strong><p>${operationalSummary.join(" · ")}</p></div>
-            <div class="card"><strong>Logística y medición</strong><p>${logisticsSummary.join(" · ")}</p></div>
+          <div class="pdf-recommendation-grid">
+            <div>
+              <div class="pdf-compact-grid">
+                <div class="card"><strong>Contexto relevado</strong><p>${selectedLabel("industry")} · ${selectedLabel("users")}</p><p>${focus.join(" · ")}</p></div>
+                <div class="card"><strong>Alcance de referencia</strong><p>${plan.scope}</p><p>${plan.bestFor}</p></div>
+                <div class="card"><strong>Diagnóstico operativo M365</strong><p>${operationalSummary.join(" · ")}</p></div>
+                <div class="card"><strong>Logística y medición</strong><p>${logisticsSummary.join(" · ")}</p></div>
+              </div>
+              <div class="pdf-compact-grid">
+                <div class="card metric"><strong>${plan.duration}</strong><p>Duración · ${formatDate(state.startDate)} a ${planEndDate(plan)}</p></div>
+                <div class="card metric"><strong>${plan.shortScope}</strong><p>${plan.scope}</p></div>
+              </div>
+            </div>
+            <div class="card price-card">
+              <strong>Resumen económico</strong>
+              <span class="total">${totalEstimate.label}</span>
+              <p>${totalEstimate.detail}</p>
+              <div class="price-list">
+                <div class="price-row"><span>Plan base</span><strong>${quote.main}</strong></div>
+                ${printableAddonRows}
+              </div>
+            </div>
           </div>${footer}
         </section>
         ${decision.alternatives.length ? `<section class="slide">
@@ -5273,8 +5378,8 @@ ${location.href}`
         ${addons.length ? `<section class="slide">
           <p class="eyebrow">Add-ons y módulos focalizados</p>
           <h2>Módulos sugeridos para complementar ${plan.name}</h2>
-          <p>Según la presentación, los add-ons se suman a cualquier plan y se cotizan por separado.</p>
-          <div class="grid-2">${addons.map(([title, desc, icon, price]) => `<div class="card ${title.includes("Cowork") ? "cowork-pdf" : ""}"><strong>${title}</strong><p>${desc}</p><p><strong>${price}</strong></p></div>`).join("")}</div>${footer}
+          <p>Estos módulos amplían el alcance funcional de la propuesta. Sus importes ya están consolidados en el resumen económico.</p>
+          <div class="grid-2">${addons.map(([title, desc]) => `<div class="card ${title.includes("Cowork") ? "cowork-pdf" : ""}"><strong>${title}</strong><p>${desc}</p></div>`).join("")}</div>${footer}
         </section>` : ""}
         <section class="slide">
           <p class="eyebrow">Hoja de ruta propuesta</p>
