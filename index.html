@@ -1362,6 +1362,10 @@
       text-transform: uppercase;
       letter-spacing: .04em;
     }
+    .roadmap-ai-badge.local {
+      border-color: var(--cp-border);
+      background: var(--cp-surface-soft);
+    }
     .roadmap-toolbar .btn { white-space: nowrap; }
     .timeline-item {
       overflow: hidden;
@@ -4643,6 +4647,21 @@
       }
       return proposalRoadmap(planKey);
     }
+    function roadmapStatus(planKey = recommendedPlanKey()) {
+      const roadmap = state.aiRoadmap;
+      if (!roadmap || roadmap.planKey !== planKey || !Array.isArray(roadmap.items) || !roadmap.items.length) {
+        return { active: false, isAi: false, label: "", title: "Hoja de ruta base del plan", note: "Podés personalizarla con IA para adaptar etapas, actividades y entregables al cliente.", button: "Personalizar roadmap con IA" };
+      }
+      const isAi = roadmap.source !== "Fallback local";
+      return {
+        active: true,
+        isAi,
+        label: isAi ? "Roadmap personalizado con IA" : "Roadmap personalizado local",
+        title: isAi ? "Hoja de ruta adaptada con IA" : "Hoja de ruta adaptada localmente",
+        note: isAi ? "La IA ajustó etapas, foco, actividades y riesgos según el diagnóstico." : "El Flow IA todavía no devolvió etapas válidas; la app dejó una versión personalizada local para no frenar la propuesta.",
+        button: isAi ? "Regenerar roadmap con IA" : "Reintentar con IA"
+      };
+    }
     function fallbackPersonalizedRoadmap(planKey = recommendedPlanKey()) {
       const base = proposalRoadmap(planKey);
       const industry = selectedLabel("industry");
@@ -4724,6 +4743,7 @@
       const recommendedKey = decision.recommendedKey;
       const recommended = plans[recommendedKey];
       const roadmapItems = roadmapForPlan(recommendedKey);
+      const roadmapState = roadmapStatus(recommendedKey);
       const quote = quoteForPlan(recommendedKey);
       const totalEstimate = proposalTotalEstimate(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
@@ -4919,12 +4939,12 @@
           <div class="proposal-accordion-body">
             <div class="roadmap-toolbar">
               <div>
-                ${state.aiRoadmap && state.aiRoadmap.planKey === recommendedKey ? `<span class="roadmap-ai-badge">${iconSvg("spark")} Roadmap personalizado con IA</span>` : ""}
-                <strong>${state.aiRoadmap && state.aiRoadmap.planKey === recommendedKey ? "Hoja de ruta adaptada al cliente" : "Hoja de ruta base del plan"}</strong>
-                <p>${state.aiRoadmap && state.aiRoadmap.planKey === recommendedKey ? "La IA ajustó etapas, foco, actividades y riesgos según el diagnóstico." : "Podés personalizarla con IA para adaptar etapas, actividades y entregables al cliente."}</p>
+                ${roadmapState.active ? `<span class="roadmap-ai-badge ${roadmapState.isAi ? "" : "local"}">${iconSvg(roadmapState.isAi ? "spark" : "roadmap")} ${roadmapState.label}</span>` : ""}
+                <strong>${roadmapState.title}</strong>
+                <p>${roadmapState.note}</p>
                 <div class="handoff-status" id="aiRoadmapStatus"></div>
               </div>
-              <button class="btn action-ai" id="aiRoadmapBtn"><span class="btn-icon">${iconSvg("roadmap")}</span>${state.aiRoadmap && state.aiRoadmap.planKey === recommendedKey ? "Regenerar roadmap con IA" : "Personalizar roadmap con IA"}</button>
+              <button class="btn action-ai" id="aiRoadmapBtn"><span class="btn-icon">${iconSvg("roadmap")}</span>${roadmapState.button}</button>
             </div>
             <div class="timeline">${roadmapItems.map((week, wi) => `<details class="timeline-item">
               <summary>
@@ -5305,6 +5325,18 @@ ${location.href}`
       const button = $("aiRoadmapBtn");
       const status = $("aiRoadmapStatus");
       const payload = buildAiRoadmapPayload(recommendedKey);
+      const applyLocalRoadmap = (message) => {
+        state.aiRoadmap = {
+          planKey: recommendedKey,
+          items: fallbackPersonalizedRoadmap(recommendedKey),
+          summary: message,
+          generatedAt: new Date().toISOString(),
+          source: "Fallback local"
+        };
+        if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
+        showToast("Roadmap personalizado localmente. Falta conectar el Flow IA para generarlo con IA real.");
+        renderPlan(mode);
+      };
       if (button) button.disabled = true;
       if (status) {
         status.className = "handoff-status";
@@ -5321,7 +5353,8 @@ ${location.href}`
         if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
         const rawItems = result.items || result.roadmap || (result.aiRoadmap && result.aiRoadmap.items);
         if (result.fallbackRequired || !Array.isArray(rawItems) || !rawItems.length) {
-          throw new Error(result.message || "El Flow no devolvió etapas para el roadmap.");
+          applyLocalRoadmap(result.message || "El Flow IA todavía no devolvió etapas válidas para el roadmap.");
+          return;
         }
         const items = normalizeRoadmapItems(rawItems, recommendedKey);
         state.aiRoadmap = {
@@ -5335,17 +5368,8 @@ ${location.href}`
         showToast("Roadmap personalizado con IA.");
         renderPlan(mode);
       } catch (error) {
-        console.warn(error);
-        state.aiRoadmap = {
-          planKey: recommendedKey,
-          items: fallbackPersonalizedRoadmap(recommendedKey),
-          summary: `No se pudo conectar con IA (${error.message}). Se generó una versión personalizada local para no frenar la propuesta.`,
-          generatedAt: new Date().toISOString(),
-          source: "Fallback local"
-        };
-        if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
-        showToast("No se pudo conectar con IA. Generé una versión personalizada local.");
-        renderPlan(mode);
+        console.info(error);
+        applyLocalRoadmap(`No se pudo conectar con IA (${error.message}). Se generó una versión personalizada local para no frenar la propuesta.`);
       } finally {
         hideThinking();
         if ($("aiRoadmapBtn")) $("aiRoadmapBtn").disabled = false;
@@ -5415,6 +5439,7 @@ ${location.href}`
       const quote = quoteForPlan(recommendedKey);
       const totalEstimate = proposalTotalEstimate(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
+      const roadmapState = roadmapStatus(recommendedKey);
       const selectedAddons = selectedAddonItems();
       const printableAddonRows = selectedAddons.length
         ? selectedAddons.map((addon) => `<div class="price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("")
@@ -5588,7 +5613,7 @@ ${location.href}`
           <div class="grid-2">${addons.map(([title, desc]) => `<div class="card ${title.includes("Cowork") ? "cowork-pdf" : ""}"><strong>${title}</strong><p>${desc}</p></div>`).join("")}</div>${footer}
         </section>` : ""}
         <section class="slide">
-          <p class="eyebrow">Hoja de ruta propuesta${state.aiRoadmap && state.aiRoadmap.planKey === recommendedKey ? " · personalizada con IA" : ""}</p>
+          <p class="eyebrow">Hoja de ruta propuesta${roadmapState.active ? ` · ${roadmapState.isAi ? "personalizada con IA" : "personalizada localmente"}` : ""}</p>
           <h2>Actividades sugeridas para ${escapeHtml(plan.name)}</h2>
           <div class="timeline">${roadmapItems.map(item => `<div class="stage">
             <div><div class="stage-tag">${escapeHtml(item.tag)}</div><p>${escapeHtml(item.date)}</p></div>

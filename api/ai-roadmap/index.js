@@ -104,6 +104,7 @@ module.exports = async function (context, req) {
 
   const text = findText(responseBody);
   const parsed = findRoadmap(responseBody) || findRoadmap(extractJsonObject(text)) || findRoadmap(extractJsonObject(responseText));
+  const hasItems = parsed && Array.isArray(parsed.items) && parsed.items.length;
 
   context.res = {
     status: flowResponse.ok ? 200 : 502,
@@ -111,7 +112,9 @@ module.exports = async function (context, req) {
     body: flowResponse.ok
       ? {
           summary: parsed && parsed.summary ? parsed.summary : text,
-          items: parsed && Array.isArray(parsed.items) ? parsed.items : [],
+          items: hasItems ? parsed.items : [],
+          fallbackRequired: !hasItems,
+          message: hasItems ? "" : "El Flow respondió, pero no devolvió etapas de roadmap en JSON.",
           source: process.env.POWER_AUTOMATE_AI_ROADMAP_URL ? "Power Automate AI Roadmap" : "Power Automate AI",
           raw: responseBody
         }
