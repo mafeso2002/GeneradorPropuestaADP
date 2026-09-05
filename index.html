@@ -283,6 +283,24 @@
       stroke-linecap: round;
       stroke-linejoin: round;
     }
+    .btn.icon-only {
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      display: inline-grid;
+      place-items: center;
+      border-radius: 16px;
+    }
+    .btn.icon-only .btn-icon {
+      width: 24px;
+      height: 24px;
+      margin: 0;
+      vertical-align: 0;
+    }
+    .btn.icon-only .btn-icon svg {
+      width: 24px;
+      height: 24px;
+    }
     .btn.ghost { border-color: var(--cp-border); }
     .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
     .side {
@@ -2014,7 +2032,7 @@
     <div class="top-actions">
       <span class="auth-status hidden" id="authStatus">Login Microsoft deshabilitado para pruebas</span>
       <button class="btn ghost hidden" id="loginBtn">Iniciar sesión</button>
-      <button class="btn ghost" id="decisionHelpBtn">Ayuda · lógica de decisión</button>
+      <button class="btn ghost icon-only" id="decisionHelpBtn" title="Ayuda · lógica de decisión" aria-label="Ayuda · lógica de decisión"><span class="btn-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.8 9a2.4 2.4 0 0 1 4.4 1.3c0 1.7-1.5 2.2-2.2 3"></path><path d="M12 17h.01"></path></svg></span></button>
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
