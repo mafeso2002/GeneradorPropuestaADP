@@ -2832,6 +2832,7 @@
       commercialName: "",
       commercialEmail: "",
       includeBudgetEstimate: true,
+      addonPrices: {},
       validationNotes: "",
       aiValidation: null,
       aiSummary: null,
@@ -2966,6 +2967,59 @@
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, " ")
         .trim();
+    }
+    function normalizeAddonPriceRow(row) {
+      if (!row || typeof row !== "object") return null;
+      const id = row.addon_id || row.addonId || row.id || row.key || row.crf_addon_id || row.pos_addon_id;
+      if (!id) return null;
+      const activeValue = row.active ?? row.activo ?? row.enabled ?? row.pos_activo ?? true;
+      const active = !(activeValue === false || activeValue === "false" || activeValue === 0 || activeValue === "0");
+      return {
+        id: String(id).trim(),
+        title: row.nombre || row.name || row.title || row.pos_nombre || "",
+        category: row.categoria || row.category || row.pos_categoria || "",
+        price: row.precio_texto || row.priceText || row.price || row.pos_precio_texto || "A cotizar",
+        priceMinUsd: Number(row.precio_min_usd ?? row.priceMinUsd ?? row.minUsd ?? row.pos_precio_min_usd ?? 0) || null,
+        priceMaxUsd: Number(row.precio_max_usd ?? row.priceMaxUsd ?? row.maxUsd ?? row.pos_precio_max_usd ?? 0) || null,
+        notes: row.notas || row.notes || row.pos_notas || "",
+        requiresCopilot: Boolean(row.requiere_copilot ?? row.requiresCopilot ?? row.pos_requiere_copilot ?? false),
+        active
+      };
+    }
+    function addonPriceData(id) {
+      return state.addonPrices && state.addonPrices[id] ? state.addonPrices[id] : null;
+    }
+    function applyAddonPrice(addon) {
+      const pricing = addonPriceData(addon.id);
+      if (!pricing || !pricing.active) return addon;
+      return {
+        ...addon,
+        title: pricing.title || addon.title,
+        category: pricing.category || addon.category,
+        price: pricing.price || addon.price,
+        priceMinUsd: pricing.priceMinUsd,
+        priceMaxUsd: pricing.priceMaxUsd,
+        pricingNotes: pricing.notes,
+        requiresCopilot: addon.requiresCopilot || pricing.requiresCopilot
+      };
+    }
+    async function loadAddonPrices() {
+      try {
+        const response = await fetch("/api/addon-prices", { method: "GET" });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+        const rows = Array.isArray(result.prices) ? result.prices : [];
+        state.addonPrices = rows.reduce((acc, row) => {
+          const normalized = normalizeAddonPriceRow(row);
+          if (normalized) acc[normalized.id] = normalized;
+          return acc;
+        }, {});
+        return state.addonPrices;
+      } catch (error) {
+        console.warn("No se pudieron cargar precios de add-ons.", error);
+        state.addonPrices = {};
+        return state.addonPrices;
+      }
     }
 
     function showToast(message) {
@@ -3212,7 +3266,7 @@
       return optionsByIndustry[state.industry] || data.create;
     }
     function addOnCatalog() {
-      return [
+      const baseAddons = [
         { id: "excel-intermediate", title: "Excel intermedio", category: "Formación focalizada", desc: "Fórmulas, tablas, reportes y adopción práctica de Excel para usuarios de negocio.", icon: "measurement", price: "A cotizar", requirement: "Disponible para todos" },
         { id: "excel-advanced", title: "Excel avanzado", category: "Formación focalizada", desc: "Modelado, Power Query, tableros y análisis más avanzado sobre información operativa.", icon: "measurement", price: "A cotizar", requirement: "Disponible para todos" },
         { id: "tool-module", title: "Módulo a medida de herramienta puntual", category: "Formación focalizada", desc: "Adopción específica de una herramienta Microsoft 365 puntual fuera del alcance base.", icon: "training", price: "A cotizar", requirement: "Disponible para todos" },
@@ -3233,6 +3287,7 @@
         { id: "readiness", title: "Readiness técnico", category: "Gobierno y orden digital", desc: "Revisión de SharePoint, oversharing, Purview, permisos y preparación para IA.", icon: "shield", price: "A cotizar", requirement: "Disponible para todos" },
         { id: "dashboard", title: "Copilot Dashboard / reporte de adopción", category: "Gobierno y orden digital", desc: "Medición, seguimiento y lectura ejecutiva de adopción con datos de Copilot.", icon: "diagnostic", price: "A cotizar", requiresCopilot: true }
       ];
+      return baseAddons.map(applyAddonPrice).filter((addon) => addonPriceData(addon.id)?.active !== false);
     }
     function includedAddonIdsForPlan(planKey = recommendedPlanKey()) {
       const included = new Set();
@@ -3346,6 +3401,7 @@
           ${compact ? "" : `<span class="addon-price"><span class="money-icon" style="width:22px;height:22px;font-size:13px;margin-right:6px">$</span> ${addon.price}</span>`}
           <span class="addon-requirement">${addonRequirement(addon, stateName)}</span>
           <span class="addon-status ${stateName}">${addonStateLabel(stateName)}</span>
+          ${addon.pricingNotes ? `<span class="addon-requirement">${escapeHtml(addon.pricingNotes)}</span>` : ""}
         </div>
         <div class="option-check">${isSelected ? "✓" : ""}</div>
       </button>`;
@@ -4535,7 +4591,7 @@ ${location.href}`
         baseRange: quote.main,
         baseDetail: quote.detail,
         commercialMode: budgetCommercialMode(recommendedKey, addons, decision),
-        selectedAddons: addons.map((item) => ({ title: item.title, price: item.price, category: item.category || "Add-on" })),
+        selectedAddons: addons.map((item) => ({ title: item.title, price: item.price, priceMinUsd: item.priceMinUsd || null, priceMaxUsd: item.priceMaxUsd || null, notes: item.pricingNotes || "", category: item.category || "Add-on" })),
         includedInPlan: included.map((item) => item.title),
         factors: [
           `Confianza del algoritmo: ${confidenceLabel(decision.level)} ${decision.confidence}%`,
@@ -4645,6 +4701,9 @@ ${location.href}`
             title: item.title,
             description: item.desc,
             price: item.price,
+            priceMinUsd: item.priceMinUsd || null,
+            priceMaxUsd: item.priceMaxUsd || null,
+            pricingNotes: item.pricingNotes || "",
             requiresCopilot: Boolean(item.requiresCopilot)
           })),
           focus,
@@ -5244,7 +5303,7 @@ ${location.href}`
       show("onboarding");
     }
     restoreMicrosoftSession();
-    route();
+    loadAddonPrices().finally(route);
   </script>
 </body>
 </html>

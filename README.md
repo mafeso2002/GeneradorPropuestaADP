@@ -12,6 +12,26 @@ La app publica una API `POST /api/handoff` para reenviar el payload de la propue
 
 Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_AUTOMATE_HANDOFF_URL` con la URL del trigger HTTP del Flow.
 
+## Precios de add-ons desde Dataverse
+
+La app publica una API `GET /api/addon-prices` que consulta Power Automate y reemplaza los precios fallback de los add-ons por valores administrados en Dataverse. Si el Flow o la variable no están configurados, la app conserva `A cotizar`.
+
+Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_AUTOMATE_ADDON_PRICES_URL` con la URL del trigger HTTP del Flow creado en el entorno **Possumus - Desarrollo** (`474ab5eb-a1ed-4530-b1c4-d47edde7c659`).
+
+Tabla sugerida en Dataverse: `AddonPrice`.
+
+| Campo | Uso |
+| --- | --- |
+| `addon_id` | ID técnico usado por la app, por ejemplo `excel-intermediate` |
+| `nombre` | Nombre visible del add-on |
+| `categoria` | Categoría comercial |
+| `precio_texto` | Texto comercial, por ejemplo `USD 850 + IVA` |
+| `precio_min_usd` | Valor mínimo numérico opcional |
+| `precio_max_usd` | Valor máximo numérico opcional |
+| `requiere_copilot` | Si requiere Microsoft 365 Copilot |
+| `activo` | Permite ocultar/desactivar un add-on |
+| `notas` | Condición comercial, por ejemplo `por grupo` |
+
 ## Modelo de decisión
 
 La recomendación se calcula con un scoring ponderado. La app mantiene un plan principal para que el comercial tenga una salida clara, pero agrega una etiqueta de confianza. Si la confianza no es alta, muestra alternativas posibles para validar con preventa/adopción antes de cerrar el alcance.
