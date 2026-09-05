@@ -2013,7 +2013,7 @@
     <div class="thinking-card">
       <div class="thinking-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"></path><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8L18 15z"></path></svg></div>
       <h3>Generando resumen con IA</h3>
-      <p>Estoy buscando contexto público de la empresa y pensando la mejor síntesis comercial con las respuestas del relevamiento.</p>
+      <p>Estoy buscando contexto público de la empresa, armando el resumen comercial y estimando el presupuesto sugerido.</p>
     </div>
   </div>
   <div id="confirmProposalModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirmProposalTitle">
@@ -3852,7 +3852,7 @@
               ${formatAiSummaryText(aiSummaryText)}
               ${companyResearchMarkup}` : `<span class="ai-badge">Resumen con IA</span>
               <h3>Resumen ejecutivo comercial</h3>
-              <p>Generá una síntesis comercial con madurez, foco recomendado, plan sugerido y argumentos para el cliente. La IA intentará sumar contexto público real de la empresa antes de redactar.</p>`}
+              <p>Generá una síntesis comercial con contexto público, plan sugerido, argumentos y estimación asistida de presupuesto según confianza, alcance y add-ons.</p>`}
             </div>
             ${aiSummaryText ? "" : `<button class="btn action-ai" id="aiSummaryBtn"><span class="btn-icon">${iconSvg("spark")}</span>Mejorar con IA</button>`}
           </div>
@@ -3988,6 +3988,41 @@ URL de la propuesta:
 ${location.href}`
       };
     }
+    function budgetCommercialMode(recommendedKey, addons, decision) {
+      if (decision.level === "low") return "Validar con preventa/adopción antes de cerrar rango";
+      if (addons.some((item) => item.id === "excel-intermediate" || item.id === "excel-advanced" || item.id === "tool-module")) return "Módulo focalizado o plan base + add-on";
+      if (recommendedKey === "plan1" && state.userRange === "small") return "Ola Express";
+      if (recommendedKey === "plan1" && state.userRange === "medium") return "Ola Estándar o Completa";
+      if (recommendedKey === "plan2") return "Plan base Copilot in 30 + add-ons si aplica";
+      if (recommendedKey === "plan3") return "Programa integral a cotizar por alcance";
+      return "Plan base + validación de alcance";
+    }
+    function budgetEstimateInput(recommendedKey, quote, decision) {
+      const addons = selectedAddonItems();
+      const included = addOnCatalog().filter((item) => includedAddonIdsForPlan(recommendedKey).has(item.id));
+      return {
+        shouldEstimate: decision.level !== "low",
+        instruction: decision.level === "low"
+          ? "No cerrar rango de presupuesto. Indicar que requiere validación con preventa/adopción por baja confianza."
+          : "Generar una estimación asistida usando el rango base y explicar si conviene rango bajo, medio o alto. No inventar precios cerrados para add-ons a cotizar.",
+        baseRange: quote.main,
+        baseDetail: quote.detail,
+        commercialMode: budgetCommercialMode(recommendedKey, addons, decision),
+        selectedAddons: addons.map((item) => ({ title: item.title, price: item.price, category: item.category || "Add-on" })),
+        includedInPlan: included.map((item) => item.title),
+        factors: [
+          `Confianza del algoritmo: ${confidenceLabel(decision.level)} ${decision.confidence}%`,
+          `Alcance: ${qualificationValue("userRange")}`,
+          `Áreas: ${selectedDepartments().join(", ") || "No definido"}`,
+          `Madurez M365: ${qualificationValue("m365Maturity")}`,
+          `Licenciamiento: ${qualificationValue("copilotLicenses")}`,
+          `Acompañamiento: ${qualificationValue("accompaniment")}`,
+          `Modalidad: ${discoveryValue(logisticsFields, "deliveryMode")}`,
+          `Frecuencia: ${discoveryValue(logisticsFields, "sessionFrequency")}`,
+          addons.length ? `Add-ons adicionales: ${addons.map((item) => item.title).join(", ")}` : "Sin add-ons adicionales seleccionados"
+        ].filter(Boolean)
+      };
+    }
     function openHandoffModal(recommendedKey = recommendedPlanKey()) {
       const email = buildDefaultHandoffEmail(recommendedKey);
       $("handoffModal").dataset.recommendedKey = recommendedKey;
@@ -4031,6 +4066,8 @@ ${location.href}`
             "Madurez, dolores principales, confianza del algoritmo y oportunidad detectada.",
             "## Recomendacion Possumus",
             "Plan recomendado, por que aplica, alternativas si la confianza es media/baja y como se relaciona con la realidad del cliente.",
+            "## Estimacion asistida de presupuesto",
+            "Rango recomendado, modalidad comercial sugerida, supuestos y alertas. Si la confianza es baja, no cerrar rango y pedir validacion con preventa/adopcion.",
             "## Argumentos para la reunion",
             "- 3 bullets comerciales concretos para presentar al cliente."
           ]
@@ -4050,6 +4087,7 @@ ${location.href}`
           recommendedPlanScope: recommended.scope,
           quote: quote.main,
           quoteDetail: quote.detail,
+          budgetEstimateInput: budgetEstimateInput(recommendedKey, quote, decision),
           decision: {
             confidence: decision.confidence,
             confidenceLevel: decision.level,
@@ -4139,7 +4177,7 @@ ${location.href}`
       const payload = buildHandoffPayload(recommendedKey);
       button.disabled = true;
       status.className = "handoff-status";
-      status.textContent = "Generando resumen ejecutivo con IA...";
+      status.textContent = "Generando resumen ejecutivo y estimación de presupuesto con IA...";
       overlay.classList.remove("hidden");
       try {
         const response = await fetch("/api/ai-summary", {
