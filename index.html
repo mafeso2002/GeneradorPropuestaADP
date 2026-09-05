@@ -1351,22 +1351,41 @@
       align-items: center;
       gap: 7px;
       width: fit-content;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       border: 1px solid var(--cp-brand-yellow);
       border-radius: 999px;
-      padding: 6px 10px;
+      padding: 4px 8px;
       background: var(--cp-brand-yellow-soft);
       color: var(--cp-brand-dark);
-      font-size: 12px;
+      font-size: 10px;
       font-weight: 900;
       text-transform: uppercase;
       letter-spacing: .04em;
+    }
+    .roadmap-ai-badge svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
     .roadmap-ai-badge.local {
       border-color: var(--cp-border);
       background: var(--cp-surface-soft);
     }
     .roadmap-toolbar .btn { white-space: nowrap; }
+    .roadmap-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .roadmap-actions .btn {
+      padding: 10px 14px;
+      font-size: 13px;
+    }
     .roadmap-visual {
       margin: 18px 0 20px;
       border: 1px solid var(--cp-border);
@@ -2064,7 +2083,7 @@
       box-shadow: 0 14px 34px rgba(46, 45, 49, 0.08);
       overflow: hidden;
     }
-    .proposal-accordion summary {
+    .proposal-accordion > summary {
       display: grid;
       grid-template-columns: 44px 1fr auto;
       gap: 14px;
@@ -2073,17 +2092,17 @@
       cursor: pointer;
       list-style: none;
     }
-    .proposal-accordion summary::-webkit-details-marker { display: none; }
-    .proposal-accordion summary h2 {
+    .proposal-accordion > summary::-webkit-details-marker { display: none; }
+    .proposal-accordion > summary h2 {
       margin: 0;
       font-size: 22px;
     }
-    .proposal-accordion summary p {
+    .proposal-accordion > summary p {
       margin: 4px 0 0;
       color: var(--cp-text-muted);
       font-size: 14px;
     }
-    .proposal-accordion summary::after {
+    .proposal-accordion > summary::after {
       content: "+";
       display: grid;
       place-items: center;
@@ -2094,7 +2113,7 @@
       color: var(--cp-text);
       font-weight: 900;
     }
-    .proposal-accordion[open] summary::after {
+    .proposal-accordion[open] > summary::after {
       content: "–";
       background: var(--cp-brand-yellow);
     }
@@ -3151,6 +3170,7 @@
       aiValidation: null,
       aiSummary: null,
       aiRoadmap: null,
+      useAiRoadmap: true,
       completed: {}
     };
     const steps = [
@@ -3761,7 +3781,9 @@
       return true;
     }
     function selectedDepartments() {
-      if (Array.isArray(state.departments) && state.departments.length) return state.departments;
+      if (Array.isArray(state.departments) && state.departments.length) {
+        return state.departments.map((item) => String(item || "").trim()).filter(Boolean);
+      }
       return state.department ? [state.department] : [];
     }
     function hasDefaultAnswer(field) {
@@ -4745,7 +4767,7 @@
     }
     function roadmapForPlan(planKey = recommendedPlanKey()) {
       const aiRoadmap = state.aiRoadmap;
-      if (aiRoadmap && aiRoadmap.planKey === planKey && Array.isArray(aiRoadmap.items) && aiRoadmap.items.length) {
+      if (state.useAiRoadmap !== false && aiRoadmap && aiRoadmap.planKey === planKey && Array.isArray(aiRoadmap.items) && aiRoadmap.items.length) {
         return normalizeRoadmapItems(aiRoadmap.items, planKey);
       }
       return proposalRoadmap(planKey);
@@ -4805,12 +4827,28 @@
     }
     function roadmapStatus(planKey = recommendedPlanKey()) {
       const roadmap = state.aiRoadmap;
-      if (!roadmap || roadmap.planKey !== planKey || !Array.isArray(roadmap.items) || !roadmap.items.length) {
-        return { active: false, isAi: false, label: "", title: "Hoja de ruta base del plan", note: "Podés personalizarla con IA para adaptar etapas, actividades y entregables al cliente.", button: "Personalizar roadmap con IA" };
+      const hasCustom = Boolean(roadmap && roadmap.planKey === planKey && Array.isArray(roadmap.items) && roadmap.items.length);
+      if (!hasCustom) {
+        return { active: false, hasCustom: false, useCustom: false, isAi: false, label: "", title: "Hoja de ruta base del plan", note: "Podés personalizarla con IA para adaptar etapas, actividades y entregables al cliente.", button: "Personalizar roadmap con IA" };
       }
       const isAi = roadmap.source !== "Fallback local";
+      const useCustom = state.useAiRoadmap !== false;
+      if (!useCustom) {
+        return {
+          active: false,
+          hasCustom: true,
+          useCustom: false,
+          isAi,
+          label: "Roadmap original",
+          title: "Hoja de ruta original del plan",
+          note: "Estás usando el roadmap base. Podés volver al roadmap personalizado sin regenerarlo.",
+          button: isAi ? "Regenerar roadmap con IA" : "Reintentar con IA"
+        };
+      }
       return {
         active: true,
+        hasCustom: true,
+        useCustom,
         isAi,
         label: isAi ? "Roadmap personalizado con IA" : "Roadmap personalizado local",
         title: isAi ? "Hoja de ruta adaptada con IA" : "Hoja de ruta adaptada localmente",
@@ -5100,7 +5138,11 @@
                 <p>${roadmapState.note}</p>
                 <div class="handoff-status" id="aiRoadmapStatus"></div>
               </div>
-              <button class="btn action-ai" id="aiRoadmapBtn"><span class="btn-icon">${iconSvg("roadmap")}</span>${roadmapState.button}</button>
+              <div class="roadmap-actions">
+                ${roadmapState.hasCustom ? `<button class="btn ${roadmapState.useCustom ? "ghost" : "action-mail"}" id="useOriginalRoadmapBtn" type="button">Usar original</button>
+                <button class="btn ${roadmapState.useCustom ? "action-mail" : "ghost"}" id="useAiRoadmapBtn" type="button">${roadmapState.isAi ? "Usar IA" : "Usar personalizado"}</button>` : ""}
+                <button class="btn action-ai" id="aiRoadmapBtn" type="button"><span class="btn-icon">${iconSvg("roadmap")}</span>${roadmapState.button}</button>
+              </div>
             </div>
             ${renderRoadmapVisual(roadmapItems)}
             <div class="timeline">${roadmapItems.map((week, wi) => `<details class="timeline-item">
@@ -5131,6 +5173,16 @@
       $("confidenceBadge").addEventListener("click", () => openConfidenceModal(decision, plans));
       $("aiSummaryBtn").addEventListener("click", () => generateAiSummary(recommendedKey));
       $("aiRoadmapBtn").addEventListener("click", () => generateAiRoadmap(recommendedKey, mode));
+      if ($("useOriginalRoadmapBtn")) $("useOriginalRoadmapBtn").addEventListener("click", () => {
+        state.useAiRoadmap = false;
+        if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
+        renderPlan(mode);
+      });
+      if ($("useAiRoadmapBtn")) $("useAiRoadmapBtn").addEventListener("click", () => {
+        state.useAiRoadmap = true;
+        if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
+        renderPlan(mode);
+      });
       const budgetSwitch = $("budgetEstimateSwitch");
       if (budgetSwitch) budgetSwitch.addEventListener("click", () => {
         state.includeBudgetEstimate = !state.includeBudgetEstimate;
@@ -5491,6 +5543,7 @@ ${location.href}`
           generatedAt: new Date().toISOString(),
           source: "Fallback local"
         };
+        state.useAiRoadmap = true;
         if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
         showToast("Roadmap personalizado localmente. Falta conectar el Flow IA para generarlo con IA real.");
         renderPlan(mode);
@@ -5522,6 +5575,7 @@ ${location.href}`
           generatedAt: new Date().toISOString(),
           source: result.source || "Power Automate AI"
         };
+        state.useAiRoadmap = true;
         if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
         showToast("Roadmap personalizado con IA.");
         renderPlan(mode);
@@ -6067,7 +6121,7 @@ ${location.href}`
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, completed: {} });
+      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, completed: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
       location.hash = "/onboarding";
