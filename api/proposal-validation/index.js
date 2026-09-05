@@ -81,6 +81,21 @@ function validationToMarkdown(validation) {
   return lines.join("\n");
 }
 
+function isValidationObject(value) {
+  if (!value || typeof value !== "object") return false;
+  return Boolean(
+    value.status ||
+    value.statusLabel ||
+    value.planDecision ||
+    value.planComment ||
+    value.markdownSummary ||
+    value.addonReview ||
+    value.commercialRecommendation ||
+    (Array.isArray(value.missingQuestions) && value.missingQuestions.length) ||
+    (Array.isArray(value.risks) && value.risks.length)
+  );
+}
+
 module.exports = async function (context, req) {
   const flowUrl = process.env.POWER_AUTOMATE_AI_SUMMARY_URL;
 
@@ -129,8 +144,9 @@ module.exports = async function (context, req) {
   }
 
   const text = findText(responseBody);
-  const parsed = extractJsonObject(text) || extractJsonObject(responseText) || (responseBody && typeof responseBody === "object" ? responseBody.validation : null);
-  const summary = parsed && typeof parsed === "object"
+  const parsedCandidate = extractJsonObject(text) || extractJsonObject(responseText) || (responseBody && typeof responseBody === "object" ? responseBody.validation : null);
+  const parsed = isValidationObject(parsedCandidate) ? parsedCandidate : null;
+  const summary = parsed
     ? (parsed.markdownSummary || validationToMarkdown(parsed))
     : text;
 
