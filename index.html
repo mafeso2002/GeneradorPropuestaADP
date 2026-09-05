@@ -1373,6 +1373,47 @@
     }
     .handoff-status.success { color: var(--cp-success); }
     .handoff-status.error { color: var(--cp-danger); }
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: var(--cp-overlay);
+      backdrop-filter: blur(8px);
+    }
+    .modal-card {
+      width: min(760px, 100%);
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      background: var(--cp-panel-strong);
+      box-shadow: var(--cp-shadow);
+      padding: 24px;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: start;
+      margin-bottom: 18px;
+    }
+    .modal-header p { margin: 6px 0 0; }
+    .modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .modal-grid .full { grid-column: 1 / -1; }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .modal-card textarea { min-height: 190px; }
     .ai-summary-panel {
       margin-top: 18px;
       padding: 22px;
@@ -1612,6 +1653,44 @@
   </div>
 
   <div id="toast" class="toast"></div>
+  <div id="handoffModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="handoffModalTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <span class="ai-badge">Handoff por mail</span>
+          <h3 id="handoffModalTitle">Revisar envío</h3>
+          <p>Podés ajustar los campos antes de disparar Power Automate.</p>
+        </div>
+        <button class="btn ghost" id="closeHandoffModalBtn">Cerrar</button>
+      </div>
+      <div class="modal-grid">
+        <div>
+          <label for="handoffFrom">De</label>
+          <input id="handoffFrom" type="email">
+        </div>
+        <div>
+          <label for="handoffTo">Para</label>
+          <input id="handoffTo" type="email">
+        </div>
+        <div class="full">
+          <label for="handoffCc">CC</label>
+          <input id="handoffCc" placeholder="Separar múltiples mails con ;">
+        </div>
+        <div class="full">
+          <label for="handoffSubject">Asunto</label>
+          <input id="handoffSubject">
+        </div>
+        <div class="full">
+          <label for="handoffBody">Cuerpo</label>
+          <textarea id="handoffBody"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" id="cancelHandoffBtn">Cancelar</button>
+        <button class="btn primary" id="confirmHandoffBtn">Enviar handoff</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Login Microsoft deshabilitado temporalmente hasta tener aprobación admin.
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
@@ -2010,6 +2089,11 @@
     }
     function formatGeneratedText(value) {
       return escapeHtml(value).replace(/\n{2,}/g, "<br><br>").replace(/\n/g, "<br>");
+    }
+    function stripHtml(value) {
+      const temp = document.createElement("div");
+      temp.innerHTML = value || "";
+      return temp.textContent || temp.innerText || "";
     }
 
     function showToast(message) {
@@ -3079,9 +3163,65 @@
       $("editPlanBtn").addEventListener("click", () => { currentStep = 0; renderStep(); show("wizard"); });
       $("aiSummaryBtn").addEventListener("click", () => generateAiSummary(recommendedKey));
       $("printBtn").addEventListener("click", () => generateProposalPdf(recommendedKey));
-      $("handoffBtn").addEventListener("click", () => sendHandoff(recommendedKey));
+      $("handoffBtn").addEventListener("click", () => openHandoffModal(recommendedKey));
     }
-    function buildHandoffPayload(recommendedKey = recommendedPlanKey()) {
+    function buildDefaultHandoffEmail(recommendedKey = recommendedPlanKey()) {
+      const recommended = planCatalog()[recommendedKey];
+      const quote = quoteForPlan(recommendedKey);
+      const aiSummary = state.aiSummary ? {
+        text: state.aiSummary.text || "",
+        generatedAt: state.aiSummary.generatedAt || "",
+        source: state.aiSummary.source || "Power Automate AI"
+      } : null;
+      const to = state.commercialEmail || "martin.sosa@possumus.tech";
+      const aiSection = aiSummary && aiSummary.text
+        ? `\n\nResumen ejecutivo generado con IA:\n${aiSummary.text}`
+        : "";
+      return {
+        from: "adopcion@possumus.tech",
+        to,
+        cc: "",
+        subject: `Handoff adopción - ${state.company} - ${recommended.name}`,
+        body: `Nuevo handoff de propuesta de adopción
+
+Cliente: ${state.company}
+Plan recomendado: ${recommended.name}
+Duración: ${recommended.duration}
+Alcance: ${recommended.scope}
+Cotización: ${quote.main}
+Detalle: ${quote.detail}${aiSection}
+
+Motivo de recomendación:
+${recommendationReason(recommendedKey)}
+
+URL de la propuesta:
+${location.href}`
+      };
+    }
+    function openHandoffModal(recommendedKey = recommendedPlanKey()) {
+      const email = buildDefaultHandoffEmail(recommendedKey);
+      $("handoffModal").dataset.recommendedKey = recommendedKey;
+      $("handoffFrom").value = email.from;
+      $("handoffTo").value = email.to;
+      $("handoffCc").value = email.cc;
+      $("handoffSubject").value = email.subject;
+      $("handoffBody").value = email.body;
+      $("handoffModal").classList.remove("hidden");
+      $("handoffTo").focus();
+    }
+    function closeHandoffModal() {
+      $("handoffModal").classList.add("hidden");
+    }
+    function handoffEmailFromModal() {
+      return {
+        from: $("handoffFrom").value.trim(),
+        to: $("handoffTo").value.trim(),
+        cc: $("handoffCc").value.trim(),
+        subject: $("handoffSubject").value.trim(),
+        body: $("handoffBody").value.trim()
+      };
+    }
+    function buildHandoffPayload(recommendedKey = recommendedPlanKey(), emailOverride = null) {
       const plans = planCatalog();
       const recommended = plans[recommendedKey];
       const quote = quoteForPlan(recommendedKey);
@@ -3090,6 +3230,7 @@
       return {
         source: "GeneradorPropuestaADP",
         createdAt: new Date().toISOString(),
+        email: emailOverride || buildDefaultHandoffEmail(recommendedKey),
         proposal: {
           planId: state.planId || "",
           company: state.company,
@@ -3211,11 +3352,16 @@
         console.error(error);
       }
     }
-    async function sendHandoff(recommendedKey = recommendedPlanKey()) {
+    async function sendHandoff(recommendedKey = recommendedPlanKey(), emailOverride = null) {
       const button = $("handoffBtn");
       const status = $("handoffStatus");
-      const payload = buildHandoffPayload(recommendedKey);
+      const payload = buildHandoffPayload(recommendedKey, emailOverride);
+      if (!payload.email.from || !payload.email.to || !payload.email.subject || !payload.email.body) {
+        showToast("Completa De, Para, Asunto y Cuerpo antes de enviar.");
+        return;
+      }
       button.disabled = true;
+      $("confirmHandoffBtn").disabled = true;
       status.className = "handoff-status";
       status.textContent = "Enviando handoff a Power Automate...";
       try {
@@ -3228,6 +3374,7 @@
         if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
         status.className = "handoff-status success";
         status.textContent = "Handoff enviado correctamente.";
+        closeHandoffModal();
         showToast("Handoff enviado.");
       } catch (error) {
         console.error(error);
@@ -3236,6 +3383,7 @@
         copyHandoffPayload(payload);
       } finally {
         button.disabled = false;
+        $("confirmHandoffBtn").disabled = false;
       }
     }
     function generateProposalPdf(recommendedKey = recommendedPlanKey()) {
@@ -3463,6 +3611,15 @@
     $("reviewBackBtn").addEventListener("click", () => { currentStep = steps.length - 1; renderStep(); show("wizard"); });
     $("buildBtn").addEventListener("click", generatePlan);
     $("viewPlanBtn").addEventListener("click", () => { location.hash = `/admin/${state.planId}`; renderPlan("admin"); });
+    $("closeHandoffModalBtn").addEventListener("click", closeHandoffModal);
+    $("cancelHandoffBtn").addEventListener("click", closeHandoffModal);
+    $("handoffModal").addEventListener("click", (event) => {
+      if (event.target === $("handoffModal")) closeHandoffModal();
+    });
+    $("confirmHandoffBtn").addEventListener("click", () => {
+      const recommendedKey = $("handoffModal").dataset.recommendedKey || recommendedPlanKey();
+      sendHandoff(recommendedKey, handoffEmailFromModal());
+    });
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
