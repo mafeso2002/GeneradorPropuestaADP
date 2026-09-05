@@ -360,7 +360,11 @@
       background:
         linear-gradient(180deg, var(--cp-surface), var(--cp-bg));
     }
-    .step-header { display: flex; justify-content: space-between; gap: 16px; align-items: start; margin-bottom: 24px; }
+    .step-header { display: flex; justify-content: space-between; gap: 16px; align-items: start; margin-bottom: 28px; }
+    .step-header .badge { margin-bottom: 14px; }
+    .step-header .eyebrow { margin-top: 6px; }
+    .step-header h2 { margin-top: 4px; }
+    .step-header p:last-child { margin-top: 12px; }
     .pill, .badge {
       display: inline-flex;
       align-items: center;
@@ -1330,17 +1334,31 @@
     .addon-option {
       position: relative;
       display: grid;
-      grid-template-columns: 46px 1fr;
-      gap: 12px;
+      grid-template-columns: 38px 1fr;
+      gap: 10px;
       align-items: start;
-      min-height: 128px;
-      padding: 16px 48px 16px 16px;
+      min-height: 104px;
+      padding: 14px 40px 14px 14px;
       border: 1px solid var(--cp-border);
       border-radius: 16px;
       background: var(--cp-surface);
       color: var(--cp-text);
       text-align: left;
       cursor: pointer;
+    }
+    .addon-option .stage-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+    }
+    .addon-option .stage-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+    .addon-option p {
+      margin-top: 4px;
+      font-size: 13px;
+      line-height: 1.35;
     }
     .addon-option.disabled {
       opacity: .56;
@@ -1391,21 +1409,21 @@
     .addon-price {
       display: inline-flex;
       width: fit-content;
-      margin-top: 8px;
+      margin-top: 7px;
       border-radius: 999px;
-      padding: 4px 9px;
+      padding: 3px 8px;
       background: var(--cp-surface-soft);
       color: var(--cp-text);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
     }
     .addon-requirement {
       display: inline-flex;
       width: fit-content;
-      margin-top: 8px;
+      margin-top: 7px;
       margin-left: 6px;
       border-radius: 999px;
-      padding: 4px 9px;
+      padding: 3px 8px;
       border: 1px solid var(--cp-border);
       background: var(--cp-surface);
       color: var(--cp-text-muted);
@@ -1414,7 +1432,7 @@
     }
     .addon-plan-context {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-columns: 1fr;
       gap: 14px;
       align-items: center;
       margin-bottom: 18px;
@@ -1427,6 +1445,12 @@
     }
     .addon-plan-context h3 { margin-bottom: 4px; }
     .addon-plan-context p { margin: 0; }
+    .addon-plan-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 10px 0;
+    }
     .addon-section {
       margin-top: 18px;
       border: 1px solid var(--cp-border);
@@ -1473,9 +1497,10 @@
     .addon-status {
       display: inline-flex;
       width: fit-content;
-      margin-top: 8px;
+      margin-top: 7px;
+      margin-left: 6px;
       border-radius: 999px;
-      padding: 4px 9px;
+      padding: 3px 8px;
       background: var(--cp-brand-mint);
       color: #116b2f;
       font-size: 12px;
@@ -1720,6 +1745,51 @@
     }
     .work-links .links {
       margin: 0;
+      padding: 0 18px 18px;
+    }
+    .proposal-accordion {
+      margin-top: 22px;
+      border: 1px solid var(--cp-border);
+      border-radius: 18px;
+      background: var(--cp-surface);
+      box-shadow: 0 14px 34px rgba(46, 45, 49, 0.08);
+      overflow: hidden;
+    }
+    .proposal-accordion summary {
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      padding: 18px;
+      cursor: pointer;
+      list-style: none;
+    }
+    .proposal-accordion summary::-webkit-details-marker { display: none; }
+    .proposal-accordion summary h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+    .proposal-accordion summary p {
+      margin: 4px 0 0;
+      color: var(--cp-text-muted);
+      font-size: 14px;
+    }
+    .proposal-accordion summary::after {
+      content: "+";
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: var(--cp-surface-soft);
+      color: var(--cp-text);
+      font-weight: 900;
+    }
+    .proposal-accordion[open] summary::after {
+      content: "–";
+      background: var(--cp-brand-yellow);
+    }
+    .proposal-accordion-body {
       padding: 0 18px 18px;
     }
     .pdf-note {
@@ -2365,13 +2435,13 @@
       {
         key: "m365Tools",
         icon: "maturity",
-        label: "Herramientas Microsoft 365 usadas hoy",
-        help: "Qué tan instalado está el uso real de Outlook, Teams, OneDrive, SharePoint, Planner, To Do y Forms.",
+        label: "Nivel de uso actual de Microsoft 365",
+        help: "Qué tan extendido está el uso real de las herramientas base. Esta respuesta pesa en la recomendación: uso básico/parcial empuja Productividad Digital; uso colaborativo/avanzado habilita avanzar mejor hacia IA.",
         options: [
-          ["basic", "Outlook/Word/Excel principalmente"],
-          ["partial", "Teams/OneDrive parcial"],
-          ["collaboration", "Teams + OneDrive + SharePoint en uso"],
-          ["advanced", "Planner/To Do/Forms y colaboración avanzada"]
+          ["basic", "Office básico: Outlook, Word y Excel"],
+          ["partial", "Colaboración parcial: Teams y OneDrive en algunos equipos"],
+          ["collaboration", "Colaboración instalada: Teams + OneDrive + SharePoint"],
+          ["advanced", "Ecosistema avanzado: SharePoint, Planner/To Do, Forms y gobierno"]
         ]
       },
       {
@@ -2401,13 +2471,13 @@
       {
         key: "taskManagement",
         icon: "projects",
-        label: "Gestión de tareas y seguimiento",
-        help: "Identifica si el seguimiento está en conversaciones o en herramientas trazables.",
+        label: "Cómo gestionan tareas y seguimiento",
+        help: "Identifica si los pendientes viven en conversaciones o en herramientas trazables. Manual/parcial suma señal de desorden operativo para Productividad Digital y add-ons.",
         options: [
-          ["manual", "Manual por WhatsApp/correo/consultas"],
-          ["partial", "Planner/To Do parcial"],
-          ["external", "Sistema externo de gestión"],
-          ["formal", "Herramienta formal adoptada"]
+          ["manual", "Manual: WhatsApp, correo, chats o memoria del equipo"],
+          ["partial", "Planner/To Do o listas usadas de forma parcial"],
+          ["external", "Sistema externo de gestión ya definido"],
+          ["formal", "Modelo formal adoptado con responsables y trazabilidad"]
         ]
       },
       {
@@ -2711,11 +2781,11 @@
       company: "",
       startDate: "",
       industry: "",
-      usersMode: "",
-      department: "",
-      departments: [],
+      usersMode: "department",
+      department: "RR. HH.",
+      departments: ["RR. HH."],
       userRange: "",
-      m365Maturity: "",
+      m365Maturity: "low",
       copilotLicenses: "",
       copilotUsage: "not-applicable",
       concreteUseCases: "none",
@@ -3264,6 +3334,12 @@
       if (Array.isArray(state.departments) && state.departments.length) return state.departments;
       return state.department ? [state.department] : [];
     }
+    function hasDefaultAnswer(field) {
+      return ["copilotUsage", "concreteUseCases", "agentNeed", "m365Maturity", "iaGovernanceNeed"].includes(field.key);
+    }
+    function orderQualificationFields(fields) {
+      return fields.slice().sort((a, b) => Number(hasDefaultAnswer(b)) - Number(hasDefaultAnswer(a)));
+    }
     function qualificationValue(key) {
       const field = qualificationFields.find((item) => item.key === key);
       const option = field && field.options.find((item) => item[0] === state[key]);
@@ -3346,6 +3422,23 @@
       if (key === "addons") return Boolean(state.addonsReviewed);
       return Boolean(state[key]);
     }
+    function stepTitle(step) {
+      const company = state.company ? state.company : "el cliente";
+      const titles = {
+        industry: `¿Qué tipo de cliente es ${company}?`,
+        users: `¿A qué grupo de usuarios de ${company} conviene orientar la propuesta?`,
+        qualification: `¿Qué datos de ${company} necesitamos para recomendar el plan correcto?`,
+        operational: `¿Cómo trabaja hoy ${company} con Microsoft 365?`,
+        inbox: `¿Qué problema de comunicación aparece más seguido en ${company}?`,
+        meeting: `¿Qué tipo de reuniones le consumen más tiempo a ${company}?`,
+        create: `¿Qué tarda más en crear o analizar el equipo de ${company}?`,
+        automate: `¿Qué trabajo repetitivo consume más tiempo en ${company}?`,
+        cowork: `¿Conviene incluir Copilot Cowork para ${company}?`,
+        addons: `¿Qué add-ons querés sumar a la propuesta de ${company}?`,
+        logistics: `¿Cómo conviene entregar y medir la adopción en ${company}?`
+      };
+      return titles[step.key] || step.title;
+    }
     function renderStep() {
       const step = steps[currentStep];
       const numberedSteps = visibleSteps().filter((item) => item.key !== "cowork" && item.key !== "addons");
@@ -3353,7 +3446,7 @@
       $("stepCount").textContent = step.key === "cowork" ? "Mejora opcional" : step.key === "addons" ? "Módulos opcionales" : `Paso ${visibleNumber} de ${numberedSteps.length}`;
       $("stepKicker").textContent = step.key === "cowork" || step.key === "addons" ? "" : step.kicker;
       $("stepKicker").classList.toggle("hidden", step.key === "cowork" || step.key === "addons");
-      $("stepTitle").textContent = step.title;
+      $("stepTitle").textContent = stepTitle(step);
       $("stepSubtitle").textContent = step.subtitle;
       renderNav();
       let body = "";
@@ -3384,10 +3477,10 @@
       }
       if (step.key === "qualification") {
         const groups = [
-          ["Intención comercial", qualificationFields.filter((field) => field.group === "Intención comercial")],
-          ["Readiness tecnológico", qualificationFields.filter((field) => field.group === "Readiness tecnológico")],
-          ["Alcance y escala", qualificationFields.filter((field) => field.group === "Alcance y escala")],
-          ["Cambio y acompañamiento", qualificationFields.filter((field) => field.group === "Cambio y acompañamiento")]
+          ["Intención comercial", orderQualificationFields(qualificationFields.filter((field) => field.group === "Intención comercial"))],
+          ["Readiness tecnológico", orderQualificationFields(qualificationFields.filter((field) => field.group === "Readiness tecnológico"))],
+          ["Alcance y escala", orderQualificationFields(qualificationFields.filter((field) => field.group === "Alcance y escala"))],
+          ["Cambio y acompañamiento", orderQualificationFields(qualificationFields.filter((field) => field.group === "Cambio y acompañamiento"))]
         ];
         let questionIndex = 0;
         body = groups.map(([groupName, fields]) => `<section class="qualification-section">
@@ -3534,10 +3627,13 @@
             <div>
               <span class="confidence-badge ${decision.level}">Plan probable · ${confidenceLabel(decision.level)} ${decision.confidence}%</span>
               <h3>${plan.name}</h3>
-              <div class="chips"><span class="pill license-pill ${hasCopilotLicense() ? "has-copilot" : ""}">${hasCopilotLicense() ? "Tiene M365 Copilot" : "Sin M365 Copilot"}</span></div>
+              <div class="addon-plan-meta">
+                <span class="pill license-pill ${hasCopilotLicense() ? "has-copilot" : ""}">${hasCopilotLicense() ? "Tiene M365 Copilot" : "Sin M365 Copilot"}</span>
+                <span class="pill">${plan.duration}</span>
+                <span class="pill">${plan.effort}</span>
+              </div>
               <p>Los módulos de abajo se separan entre lo que ya cubre el plan, lo recomendado como adicional y lo disponible para cotizar aparte.</p>
             </div>
-            <div class="score">${plan.duration}</div>
           </div>
           ${renderAddonSection("Add-ons sugeridos para este caso", "Se marcan por las respuestas del relevamiento y el árbol de decisión.", suggested, selected, planKey)}
           ${availableByCategory.map(([category, addons]) => renderAddonSection(category, "Disponibles para sumar si el comercial quiere ampliar alcance.", addons, selected, planKey)).join("")}
@@ -3728,7 +3824,7 @@
         <div class="validation-actions">
           ${consistent ? `<button class="btn action-mail" id="validationGenerateBtn"><span class="btn-icon">${iconSvg("proposal-doc")}</span>Generar propuesta</button>` : `<button class="btn action-ai" id="validateDiagnosisBtn"><span class="btn-icon">${iconSvg("spark")}</span>${summary ? "Revalidar diagnóstico" : "Validar diagnóstico con IA"}</button>
           ${summary ? `<button class="btn" id="editFromValidationBtn">Editar respuestas</button>
-          ${changes.add.length || changes.remove.length ? `<button class="btn action-mail" id="applyValidationAddonsBtn">Aplicar add-ons sugeridos</button>` : ""}` : ""}`}
+          ${changes.add.length || changes.remove.length ? `<button class="btn action-mail" id="applyValidationAddonsBtn">Aplicar cambios de add-ons</button>` : ""}` : ""}`}
         </div>
         <div class="handoff-status" id="validationStatus"></div>
       </div>`;
@@ -4213,7 +4309,6 @@
             <p>Se incluye como add-on recomendado porque el relevamiento detectó procesos complejos, tareas de varios pasos o necesidad de automatización asistida.</p>
           </div>` : ""}
           ${state.aiValidation && state.aiValidation.summary ? `<div class="validation-panel">
-            <span class="validation-status ${validationStatusClass(validationStatusLabel(state.aiValidation.validation))}">${escapeHtml(validationStatusLabel(state.aiValidation.validation))}</span>
             <h3>Validación IA del diagnóstico</h3>
             ${formatAiSummaryText(state.aiValidation.summary)}
           </div>` : ""}
@@ -4235,65 +4330,77 @@
             <div class="handoff-status" id="handoffStatus"></div>
           </div>
         </div>
-        <h2 style="margin-top:28px">Criterios que definieron el plan</h2>
-        <p>La recomendación se calcula con scoring ponderado: objetivo, licenciamiento, uso real de Copilot, madurez M365, casos de uso, agentes, escala, gobierno/COE, sponsor y acompañamiento. Si la confianza baja, se muestran alternativas posibles.</p>
-        <div class="plan-option-grid">
-          <article class="plan-option-card recommended">
-            <div class="stage-icon">${iconSvg(recommended.icon)}</div>
-            <h4>${recommended.name}</h4>
-            <span class="badge">${recommended.duration} · ${recommended.effort}</span>
-            <p>${recommended.bestFor}</p>
-          </article>
-          <article class="plan-option-card">
-            <div class="stage-icon">${iconSvg("diagnostic")}</div>
-            <h4>Readiness comercial</h4>
-            <p>${qualificationValue("primaryObjective")} · ${qualificationValue("copilotLicenses")} · ${qualificationValue("copilotUsage")} · ${qualificationValue("m365Maturity")}</p>
-            <p>Casos: ${qualificationValue("concreteUseCases")} · Agentes: ${qualificationValue("agentNeed")} · IA/COE: ${qualificationValue("iaGovernanceNeed")}</p>
-          </article>
-          <article class="plan-option-card">
-            <div class="stage-icon">${iconSvg("users-mix")}</div>
-            <h4>Alcance relevado y alcance del plan</h4>
-            <p>Inicial relevado: ${qualificationValue("userRange")} · Sponsor: ${qualificationValue("sponsor")} · ${qualificationValue("accompaniment")}</p>
-            <p>Plan recomendado: ${recommended.scope}</p>
-          </article>
-          <article class="plan-option-card">
-            <div class="stage-icon">${iconSvg("teams")}</div>
-            <h4>Diagnóstico operativo Microsoft 365</h4>
-            <p>${operationalSummary.join(" · ")}</p>
-          </article>
-          <article class="plan-option-card">
-            <div class="stage-icon">${iconSvg("calendar")}</div>
-            <h4>Logística y medición</h4>
-            <p>${logisticsSummary.join(" · ")}</p>
-          </article>
-        </div>
-        <h2 style="margin-top:28px">Metodología de adopción</h2>
-        <div class="method-grid">${methodologyPillars().map(([title, desc, icon]) => `<article class="pillar-card">
-          <div class="stage-icon">${iconSvg(icon)}</div>
-          <h4>${title}</h4>
-          <p>${desc}</p>
-        </article>`).join("")}</div>
-        <h2 style="margin-top:28px">Hoja de ruta recomendada</h2>
-        <p>Las etapas se pueden expandir o contraer para usar la propuesta durante una reunión comercial.</p>
-        <div class="timeline">${roadmapItems.map((week, wi) => `<details class="timeline-item">
-          <summary>
-            <div class="stage-icon">${iconSvg(week.icon)}</div>
-            <div>
-              <span class="badge">${week.tag} · ${week.date}</span>
-              <h3 style="margin-top:8px">${week.title}</h3>
-              <p>${week.desc}</p>
+        <details class="proposal-accordion">
+          <summary><div class="stage-icon">${iconSvg("diagnostic")}</div><div><h2>Criterios que definieron el plan</h2><p>Variables usadas por el scoring y señales principales.</p></div></summary>
+          <div class="proposal-accordion-body">
+            <p>La recomendación se calcula con scoring ponderado: objetivo, licenciamiento, uso real de Copilot, madurez M365, casos de uso, agentes, escala, gobierno/COE, sponsor y acompañamiento. Si la confianza baja, se muestran alternativas posibles.</p>
+            <div class="plan-option-grid">
+              <article class="plan-option-card recommended">
+                <div class="stage-icon">${iconSvg(recommended.icon)}</div>
+                <h4>${recommended.name}</h4>
+                <span class="badge">${recommended.duration} · ${recommended.effort}</span>
+                <p>${recommended.bestFor}</p>
+              </article>
+              <article class="plan-option-card">
+                <div class="stage-icon">${iconSvg("diagnostic")}</div>
+                <h4>Readiness comercial</h4>
+                <p>${qualificationValue("primaryObjective")} · ${qualificationValue("copilotLicenses")} · ${qualificationValue("copilotUsage")} · ${qualificationValue("m365Maturity")}</p>
+                <p>Casos: ${qualificationValue("concreteUseCases")} · Agentes: ${qualificationValue("agentNeed")} · IA/COE: ${qualificationValue("iaGovernanceNeed")}</p>
+              </article>
+              <article class="plan-option-card">
+                <div class="stage-icon">${iconSvg("users-mix")}</div>
+                <h4>Alcance relevado y alcance del plan</h4>
+                <p>Inicial relevado: ${qualificationValue("userRange")} · Sponsor: ${qualificationValue("sponsor")} · ${qualificationValue("accompaniment")}</p>
+                <p>Plan recomendado: ${recommended.scope}</p>
+              </article>
+              <article class="plan-option-card">
+                <div class="stage-icon">${iconSvg("teams")}</div>
+                <h4>Diagnóstico operativo Microsoft 365</h4>
+                <p>${operationalSummary.join(" · ")}</p>
+              </article>
+              <article class="plan-option-card">
+                <div class="stage-icon">${iconSvg("calendar")}</div>
+                <h4>Logística y medición</h4>
+                <p>${logisticsSummary.join(" · ")}</p>
+              </article>
             </div>
-          </summary>
-          <div class="timeline-body">
-            <div style="grid-column:1 / -1">
-              <strong>Actividades sugeridas</strong>
-              ${week.tasks.map((task, ti) => {
+          </div>
+        </details>
+        <details class="proposal-accordion">
+          <summary><div class="stage-icon">${iconSvg("training")}</div><div><h2>Metodología de adopción</h2><p>Cómo Possumus acompaña diagnóstico, formación, comunicación y medición.</p></div></summary>
+          <div class="proposal-accordion-body">
+            <div class="method-grid">${methodologyPillars().map(([title, desc, icon]) => `<article class="pillar-card">
+              <div class="stage-icon">${iconSvg(icon)}</div>
+              <h4>${title}</h4>
+              <p>${desc}</p>
+            </article>`).join("")}</div>
+          </div>
+        </details>
+        <details class="proposal-accordion">
+          <summary><div class="stage-icon">${iconSvg("roadmap")}</div><div><h2>Hoja de ruta recomendada</h2><p>Etapas sugeridas para presentar y ejecutar la propuesta.</p></div></summary>
+          <div class="proposal-accordion-body">
+            <p>Las etapas se pueden expandir o contraer para usar la propuesta durante una reunión comercial.</p>
+            <div class="timeline">${roadmapItems.map((week, wi) => `<details class="timeline-item">
+              <summary>
+                <div class="stage-icon">${iconSvg(week.icon)}</div>
+                <div>
+                  <span class="badge">${week.tag} · ${week.date}</span>
+                  <h3 style="margin-top:8px">${week.title}</h3>
+                  <p>${week.desc}</p>
+                </div>
+              </summary>
+              <div class="timeline-body">
+                <div style="grid-column:1 / -1">
+                  <strong>Actividades sugeridas</strong>
+                  ${week.tasks.map((task, ti) => {
             const id = `${wi}-${ti}`;
             return `<div class="task"><span class="task-marker">${ti + 1}</span><span><strong>${task}</strong><p>${taskPrompt(week.tag, task)}</p></span></div>`;
           }).join("")}
-            </div>
+                </div>
+              </div>
+            </details>`).join("")}</div>
           </div>
-        </details>`).join("")}</div>
+        </details>
         <div class="proposal-panel" style="margin-top:18px">
           <h3>Por qué Possumus</h3>
           <p>Adopción no es solo capacitación: combinamos liderazgo, cambio humano, preparación técnica y medición para convertir Microsoft 365 Copilot en uso sostenido y resultados visibles.</p>
@@ -4931,6 +5038,8 @@ ${location.href}`
             <div class="decision-plan-card"><strong>Confianza media</strong><span>Se muestra plan principal + “También podría aplicar” para validar alcance.</span></div>
             <div class="decision-plan-card"><strong>Confianza baja</strong><span>No conviene cerrar rango ni propuesta sin revisión de preventa/adopción.</span></div>
             <div class="decision-plan-card"><strong>Estimación IA</strong><span>Si está activada, usa plan, confianza, usuarios, modalidad, madurez, licencias y add-ons. Si la confianza es baja, pide validación.</span></div>
+            <div class="decision-plan-card"><strong>Cómo se calcula el porcentaje</strong><span>Cada respuesta suma puntos a uno o más planes. El porcentaje sube cuando el plan ganador tiene muchas señales propias y se distancia del segundo. Baja cuando dos caminos quedan cerca o faltan señales críticas.</span></div>
+            <div class="decision-plan-card"><strong>Qué señales pesan más</strong><span>Objetivo principal, licencias y uso de Copilot, madurez M365, casos de uso, agentes, gobierno/COE, escala, sponsor y acompañamiento.</span></div>
           </div>
         </section>
         <section class="decision-help-section">
@@ -5006,7 +5115,7 @@ ${location.href}`
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "", department: "", departments: [], userRange: "", m365Maturity: "", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, validationNotes: "", aiValidation: null, aiSummary: null, completed: {} });
+      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, validationNotes: "", aiValidation: null, aiSummary: null, completed: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
       location.hash = "/onboarding";
