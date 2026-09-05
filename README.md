@@ -20,6 +20,8 @@ Variables decisoras principales: objetivo comercial, licenciamiento Copilot, uso
 
 La pantalla de add-ons muestra el plan probable y separa los módulos entre sugeridos para el caso, disponibles para ampliar alcance, ya incluidos en el plan y no disponibles por licenciamiento. Esto evita cotizar como adicional una actividad que ya forma parte del plan base.
 
+El botón global "Ayuda · lógica de decisión" abre una explicación transparente del árbol/scoring, los planes, la confianza, las alternativas y el tratamiento de add-ons.
+
 ## Resumen ejecutivo con IA
 
 La app publica una API `POST /api/ai-summary` para pedir a Power Automate un resumen ejecutivo comercial generado con IA. Antes de invocar el Flow, la API intenta detectar el sitio oficial probable de la empresa, leer paginas publicas relevantes y enriquecer el payload con actividad, productos/servicios y canales publicos. Si no encuentra datos confiables, informa esa situacion en el payload para que la IA no invente informacion externa.

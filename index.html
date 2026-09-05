@@ -1648,6 +1648,83 @@
       box-shadow: var(--cp-shadow);
       padding: 24px;
     }
+    .decision-help-card {
+      width: min(1040px, 100%);
+    }
+    .decision-help-content {
+      display: grid;
+      gap: 18px;
+    }
+    .decision-help-section {
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      padding: 18px;
+      background: var(--cp-surface);
+    }
+    .decision-help-section h4 {
+      margin: 0 0 8px;
+      font-size: 18px;
+    }
+    .decision-help-section p {
+      margin: 0 0 10px;
+      color: var(--cp-text-muted);
+    }
+    .decision-help-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .decision-plan-card {
+      border: 1px solid var(--cp-border);
+      border-radius: 14px;
+      padding: 14px;
+      background: var(--cp-surface-soft);
+    }
+    .decision-plan-card strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--cp-text);
+    }
+    .decision-plan-card span {
+      display: block;
+      color: var(--cp-text-muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .decision-flow {
+      display: grid;
+      gap: 10px;
+      margin: 12px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    .decision-flow li {
+      display: grid;
+      grid-template-columns: 30px 1fr;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border: 1px solid var(--cp-border);
+      border-radius: 14px;
+      background: var(--cp-surface-soft);
+    }
+    .decision-flow b {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      background: var(--cp-brand-yellow);
+      color: var(--cp-brand-dark);
+    }
+    .decision-flow strong { display: block; margin-bottom: 4px; }
+    .decision-help-list {
+      columns: 2;
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: var(--cp-text-muted);
+    }
+    .decision-help-list li { margin: 4px 0; break-inside: avoid; }
     .modal-header {
       display: flex;
       justify-content: space-between;
@@ -1894,7 +1971,7 @@
     .hidden { display: none !important; }
     @media (max-width: 860px) {
       .hero, .layout, .form-row, .review-grid, .roadmap, .links { grid-template-columns: 1fr; }
-      .proposal-grid, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid { grid-template-columns: 1fr; }
+      .proposal-grid, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid, .decision-help-grid { grid-template-columns: 1fr; }
       .topbar, .top-actions { align-items: flex-start; flex-direction: column; }
       .auth-status { max-width: 100%; }
       .cowork-hero-header { grid-template-columns: 96px 1fr; }
@@ -1918,6 +1995,7 @@
       .dept-grid { grid-template-columns: 1fr; }
       .meeting-app-grid { grid-template-columns: 1fr; }
       .result-top { flex-direction: column; }
+      .decision-help-list { columns: 1; }
     }
     @media print {
       .topbar, .side-nav, .toolbar, .btn, .toast { display: none !important; }
@@ -1936,6 +2014,7 @@
     <div class="top-actions">
       <span class="auth-status hidden" id="authStatus">Login Microsoft deshabilitado para pruebas</span>
       <button class="btn ghost hidden" id="loginBtn">Iniciar sesión</button>
+      <button class="btn ghost" id="decisionHelpBtn">Ayuda · lógica de decisión</button>
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
@@ -2040,6 +2119,19 @@
         <button class="btn" id="cancelProposalBtn">No, seguir editando</button>
         <button class="btn primary" id="confirmProposalBtn">Sí, generar propuesta</button>
       </div>
+    </div>
+  </div>
+  <div id="decisionHelpModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="decisionHelpTitle">
+    <div class="modal-card decision-help-card">
+      <div class="modal-header">
+        <div>
+          <span class="ai-badge">Transparencia comercial</span>
+          <h3 id="decisionHelpTitle">Cómo se elige el plan recomendado</h3>
+          <p>La app usa un scoring ponderado inspirado en un árbol de decisión. Siempre muestra un plan principal y, si hay señales mezcladas, alternativas para validar.</p>
+        </div>
+        <button class="btn ghost" id="closeDecisionHelpBtn">Cerrar</button>
+      </div>
+      <div id="decisionHelpContent" class="decision-help-content"></div>
     </div>
   </div>
   <div id="handoffModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="handoffModalTitle">
@@ -4485,8 +4577,75 @@ ${location.href}`
       if (tag === "Día 30") return "Prompt sugerido: resume resultados, adopción, historias de éxito y recomendación de próximos pasos.";
       return "Acción de sponsor/admin para preparar el lanzamiento.";
     }
+    function renderDecisionHelp() {
+      const plans = planCatalog();
+      const planCards = Object.entries(plans).map(([key, plan]) => {
+        const included = addOnCatalog().filter((addon) => includedAddonIdsForPlan(key).has(addon.id)).map((addon) => addon.title);
+        return `<div class="decision-plan-card">
+          <strong>${escapeHtml(plan.name)}</strong>
+          <span><b>Caso:</b> ${escapeHtml(plan.customerCase)}</span>
+          <span><b>Nivel de IA:</b> ${escapeHtml(plan.aiLevel)} (${escapeHtml(plan.aiLevelDetail)})</span>
+          <span><b>Incluye:</b> ${escapeHtml(plan.execution.slice(0, 3).join(" · "))}</span>
+          ${included.length ? `<span><b>Ya cubre:</b> ${included.map(escapeHtml).join(" · ")}</span>` : ""}
+        </div>`;
+      }).join("");
+      const addonCategories = Object.entries(addOnCatalog().reduce((groups, addon) => {
+        groups[addon.category] = groups[addon.category] || [];
+        groups[addon.category].push(addon.title);
+        return groups;
+      }, {})).map(([category, items]) => `<li><strong>${escapeHtml(category)}:</strong> ${items.map(escapeHtml).join(", ")}</li>`).join("");
+      $("decisionHelpContent").innerHTML = `
+        <section class="decision-help-section">
+          <h4>1. Planes disponibles</h4>
+          <p>Estos nombres respetan la presentación comercial vigente. La app no inventa planes nuevos; usa add-ons para ampliar alcance.</p>
+          <div class="decision-help-grid">${planCards}</div>
+        </section>
+        <section class="decision-help-section">
+          <h4>2. Árbol de decisión simplificado</h4>
+          <p>El scoring suma señales. Si varias señales apuntan al mismo plan, la confianza sube; si se mezclan caminos, aparecen alternativas.</p>
+          <ol class="decision-flow">
+            <li><b>1</b><div><strong>Objetivo principal</strong><span>Productividad M365 empuja Plan 1; explorar IA empuja Plan 0; ROI de Copilot empuja Plan 2; estrategia, COE o escalamiento empuja Plan 3.</span></div></li>
+            <li><b>2</b><div><strong>Licenciamiento y uso real</strong><span>Sin M365 Copilot se prioriza Plan 0 o Plan 1. Con licencias y bajo uso semanal, se prioriza Plan 2. Con uso alto, escala, agentes o COE, puede subir a Plan 3.</span></div></li>
+            <li><b>3</b><div><strong>Madurez Microsoft 365</strong><span>Madurez baja/media, información dispersa o Teams/SharePoint desordenado refuerzan Plan 1 y add-ons de orden digital.</span></div></li>
+            <li><b>4</b><div><strong>Casos de uso, agentes y gobierno</strong><span>Casos concretos, agentes activos, gobierno de IA, seguridad, datos o COE suman peso a Plan 3 o a add-ons específicos.</span></div></li>
+            <li><b>5</b><div><strong>Escala y cambio</strong><span>Más usuarios, varias áreas, sponsor, despliegue escalado o gestión del cambio integral aumentan la necesidad de programa completo.</span></div></li>
+          </ol>
+        </section>
+        <section class="decision-help-section">
+          <h4>3. Confianza y alternativas</h4>
+          <p>La propuesta siempre mantiene un plan principal para que el comercial tenga una salida clara.</p>
+          <div class="decision-help-grid">
+            <div class="decision-plan-card"><strong>Confianza alta</strong><span>Se muestra un único plan porque la mayoría de señales coinciden.</span></div>
+            <div class="decision-plan-card"><strong>Confianza media</strong><span>Se muestra plan principal + “También podría aplicar” para validar alcance.</span></div>
+            <div class="decision-plan-card"><strong>Confianza baja</strong><span>No conviene cerrar rango ni propuesta sin revisión de preventa/adopción.</span></div>
+            <div class="decision-plan-card"><strong>Estimación IA</strong><span>Si está activada, usa plan, confianza, usuarios, modalidad, madurez, licencias y add-ons. Si la confianza es baja, pide validación.</span></div>
+          </div>
+        </section>
+        <section class="decision-help-section">
+          <h4>4. Add-ons</h4>
+          <p>Los add-ons se clasifican según el plan probable para evitar cotizar como adicional algo ya incluido.</p>
+          <ul class="decision-help-list">${addonCategories}</ul>
+          <ol class="decision-flow">
+            <li><b>A</b><div><strong>Sugeridos</strong><span>Se activan por respuestas concretas: Excel/análisis, Teams/SharePoint, orden documental, agentes, modalidad presencial/mixta, gobierno o cambio.</span></div></li>
+            <li><b>B</b><div><strong>Ya incluidos</strong><span>Se muestran separados para no duplicar alcance en la cotización.</span></div></li>
+            <li><b>C</b><div><strong>No disponibles</strong><span>Quedan deshabilitados cuando requieren Microsoft 365 Copilot y el cliente no tiene licencia/trial.</span></div></li>
+          </ol>
+        </section>`;
+    }
+    function openDecisionHelpModal() {
+      renderDecisionHelp();
+      $("decisionHelpModal").classList.remove("hidden");
+    }
+    function closeDecisionHelpModal() {
+      $("decisionHelpModal").classList.add("hidden");
+    }
 
     $("loginBtn").addEventListener("click", signInWithMicrosoft);
+    $("decisionHelpBtn").addEventListener("click", openDecisionHelpModal);
+    $("closeDecisionHelpBtn").addEventListener("click", closeDecisionHelpModal);
+    $("decisionHelpModal").addEventListener("click", (event) => {
+      if (event.target === $("decisionHelpModal")) closeDecisionHelpModal();
+    });
     $("startBtn").addEventListener("click", async () => {
       if (AUTH_ENABLED && !state.commercialEmail) {
         const signedIn = await signInWithMicrosoft();
