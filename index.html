@@ -941,6 +941,69 @@
       font-size: 18px;
       color: var(--cp-text);
     }
+    .decision-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin: 14px 0 0;
+    }
+    .confidence-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 999px;
+      padding: 7px 12px;
+      font-size: 13px;
+      font-weight: 900;
+    }
+    .confidence-badge.high {
+      border: 1px solid var(--cp-success);
+      background: var(--cp-brand-mint);
+      color: #116b2f;
+    }
+    .confidence-badge.medium {
+      border: 1px solid var(--cp-brand-yellow);
+      background: var(--cp-brand-yellow-soft);
+      color: var(--cp-brand-dark);
+    }
+    .confidence-badge.low {
+      border: 1px solid var(--cp-danger);
+      background: #fff1f2;
+      color: var(--cp-danger);
+    }
+    .decision-note {
+      color: var(--cp-text-muted);
+      font-size: 13px;
+    }
+    .decision-evidence {
+      margin: 12px 0 0;
+      padding-left: 18px;
+      color: var(--cp-text-muted);
+      font-size: 14px;
+    }
+    .decision-evidence li { margin: 4px 0; }
+    .alternative-panel {
+      margin-top: 16px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      padding: 16px;
+      background: var(--cp-surface);
+    }
+    .alternative-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .alternative-card {
+      border: 1px solid var(--cp-border);
+      border-radius: 14px;
+      padding: 14px;
+      background: var(--cp-surface-soft);
+    }
+    .alternative-card h4 { margin: 0 0 6px; }
+    .alternative-card p { margin: 0; font-size: 13px; }
     .plan-option-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1694,7 +1757,7 @@
     .hidden { display: none !important; }
     @media (max-width: 860px) {
       .hero, .layout, .form-row, .review-grid, .roadmap, .links { grid-template-columns: 1fr; }
-      .proposal-grid, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid { grid-template-columns: 1fr; }
+      .proposal-grid, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid { grid-template-columns: 1fr; }
       .topbar, .top-actions { align-items: flex-start; flex-direction: column; }
       .auth-status { max-width: 100%; }
       .cowork-hero-header { grid-template-columns: 96px 1fr; }
@@ -2069,12 +2132,16 @@
           "explore-ai": "Elegilo si el cliente quiere entender oportunidades, casos de uso y ROI antes de invertir en licencias o despliegues.",
           "digital-productivity": "Elegilo si el dolor principal es mejorar hábitos de Microsoft 365: colaboración, documentos, reuniones, correo y productividad diaria.",
           "copilot-roi": "Elegilo si ya hay interés concreto en Copilot y la conversación apunta a demostrar valor, adopción y retorno rápido.",
+          "agent-automation": "Elegilo si la conversación ya menciona agentes, Copilot Studio, automatización o procesos concretos a resolver.",
+          "ia-strategy": "Elegilo si el cliente necesita gobierno, COE, seguridad, datos, roadmap o escalamiento organizacional de IA.",
           "integral-transformation": "Elegilo si la conversación combina productividad digital, IA, cambio organizacional, varias áreas y necesidad de acompañamiento sostenido."
         },
         options: [
           ["explore-ai", "Explorar IA y construir business case"],
           ["digital-productivity", "Mejorar productividad digital Microsoft 365"],
           ["copilot-roi", "Acelerar uso/ROI de Microsoft 365 Copilot"],
+          ["agent-automation", "Crear agentes o automatizaciones"],
+          ["ia-strategy", "Definir estrategia, gobierno y escalamiento de IA"],
           ["integral-transformation", "Programa integral Microsoft 365 + IA"]
         ]
       },
@@ -2096,6 +2163,62 @@
           ["chat", "Usa Copilot Chat sin licencia M365 Copilot"],
           ["trial", "Tiene trial o compra reciente"],
           ["licensed", "Ya tiene Microsoft 365 Copilot"]
+        ]
+      },
+      {
+        key: "copilotUsage",
+        icon: "measurement",
+        group: "Readiness tecnológico",
+        groupHelp: "Qué tan preparada está la organización para capturar valor.",
+        label: "Uso semanal real de Copilot",
+        help: "Si ya tienen Copilot, permite detectar si compraron licencias pero todavía no capturan valor.",
+        optionHelp: {
+          "not-applicable": "No tienen Microsoft 365 Copilot o todavía no aplica medir uso. La decisión debe apoyarse en productividad digital o exploración IA.",
+          "under-20": "Muy bajo uso: suele requerir adopción Microsoft 365 Copilot con comunicación, capacitación, champions y métricas.",
+          "20-60": "Uso intermedio: conviene validar casos de uso concretos antes de escalar a agentes o transformación.",
+          "over-60": "Uso alto: hay base para evolucionar hacia casos avanzados, automatización o escalamiento organizacional."
+        },
+        options: [
+          ["not-applicable", "No aplica / todavía no usan M365 Copilot"],
+          ["under-20", "Menos del 20%"],
+          ["20-60", "Entre 20% y 60%"],
+          ["over-60", "Más del 60%"]
+        ]
+      },
+      {
+        key: "concreteUseCases",
+        icon: "target",
+        group: "Intención comercial",
+        groupHelp: "Qué busca resolver o comprar el cliente en esta conversación.",
+        label: "Casos de uso concretos identificados",
+        help: "Define si la propuesta debe descubrir valor, activar Copilot o avanzar a automatización/agentes.",
+        optionHelp: {
+          none: "Todavía no hay casos claros. Conviene discovery, quick wins y priorización antes de una iniciativa avanzada.",
+          some: "Hay algunos casos de uso. Permite armar adopción aplicada y validar valor con áreas concretas.",
+          many: "Hay varios casos priorizables. Puede justificar un enfoque más avanzado, con agentes o escalamiento."
+        },
+        options: [
+          ["none", "No"],
+          ["some", "Algunos"],
+          ["many", "Muchos"]
+        ]
+      },
+      {
+        key: "agentNeed",
+        icon: "automation",
+        group: "Intención comercial",
+        groupHelp: "Qué busca resolver o comprar el cliente en esta conversación.",
+        label: "Interés en agentes o automatizaciones",
+        help: "Distingue una adopción de Copilot de una oportunidad que necesita Copilot Studio, agentes o procesos automatizados.",
+        optionHelp: {
+          no: "No aparece como necesidad central. Se puede cubrir con adopción, prompts y buenas prácticas.",
+          explore: "Quieren explorar agentes. Conviene piloto o add-on de Copilot Studio si hay licencias y casos claros.",
+          active: "Quieren construir agentes activamente. Es una señal fuerte para programa avanzado o add-on específico."
+        },
+        options: [
+          ["no", "No"],
+          ["explore", "Simplemente explorar"],
+          ["active", "Sí, activamente"]
         ]
       },
       {
@@ -2191,6 +2314,26 @@
         ]
       },
       {
+        key: "iaGovernanceNeed",
+        icon: "shield",
+        group: "Readiness tecnológico",
+        groupHelp: "Qué tan preparada está la organización para capturar valor.",
+        label: "Necesidad estratégica de IA",
+        help: "Marca si la conversación excede adopción y requiere gobierno, COE, seguridad, datos o escalamiento organizacional.",
+        optionHelp: {
+          none: "No aparece una necesidad estratégica explícita. El plan puede concentrarse en adopción y add-ons puntuales.",
+          governance: "Hay necesidad de gobierno, seguridad o datos. Conviene sumar readiness y puede elevar el plan si hay escala.",
+          coe: "Necesitan centro de excelencia o modelo operativo de IA. Señal fuerte de transformación.",
+          corporate: "Buscan IA corporativa o escalamiento organizacional. Señal fuerte para transformación integral."
+        },
+        options: [
+          ["none", "No aparece por ahora"],
+          ["governance", "Gobierno, seguridad o datos"],
+          ["coe", "Centro de excelencia / modelo operativo"],
+          ["corporate", "Escalamiento organizacional de IA"]
+        ]
+      },
+      {
         key: "accompaniment",
         icon: "support",
         group: "Cambio y acompañamiento",
@@ -2219,9 +2362,13 @@
       userRange: "",
       m365Maturity: "",
       copilotLicenses: "",
+      copilotUsage: "",
+      concreteUseCases: "",
+      agentNeed: "",
       projectStage: "",
       sponsor: "",
       governance: "",
+      iaGovernanceNeed: "",
       accompaniment: "",
       primaryObjective: "",
       m365Tools: "",
@@ -2605,16 +2752,17 @@
     function suggestedAddonIds() {
       const ids = new Set();
       if (state.cowork) ids.add("cowork");
-      if (["data-analysis", "sales-analysis", "student-analysis", "operations-analysis"].includes(state.create) || state.primaryObjective === "integral-transformation") ids.add("excel");
+      if (["data-analysis", "sales-analysis", "student-analysis", "operations-analysis"].includes(state.create) || state.primaryObjective === "integral-transformation") ids.add("copilot-excel");
       if (state.primaryObjective === "copilot-roi" || state.primaryObjective === "integral-transformation") ids.add("role-cases");
       if (state.primaryObjective === "copilot-roi") ids.add("prompt-library");
+      if (state.agentNeed === "explore" || state.agentNeed === "active" || state.primaryObjective === "agent-automation") ids.add("copilot-studio");
       if (state.sponsor === "yes") ids.add("webinar");
       if (state.accompaniment !== "training") ids.add("champions");
       if (state.teamsSharepointStructure && state.teamsSharepointStructure !== "governed") ids.add("teams-sharepoint");
       if (state.informationLocation === "scattered" || state.informationLocation === "mixed" || state.successMetric === "document-centralization") ids.add("document-governance");
       if (state.deliveryMode === "onsite" || state.deliveryMode === "hybrid") ids.add("office-hours");
-      if (state.governance !== "high") ids.add("readiness");
-      if (state.accompaniment === "change-management") ids.add("change");
+      if (state.governance !== "high" || state.iaGovernanceNeed === "governance" || state.iaGovernanceNeed === "coe" || state.iaGovernanceNeed === "corporate") ids.add("readiness");
+      if (state.accompaniment === "change-management" || state.iaGovernanceNeed === "coe" || state.iaGovernanceNeed === "corporate") ids.add("change");
       if (state.copilotLicenses === "licensed" || state.copilotLicenses === "trial") ids.add("dashboard");
       return Array.from(ids).filter((id) => isAddonEnabled(addOnCatalog().find((item) => item.id === id)));
     }
@@ -2643,8 +2791,9 @@
     function qualificationSummary() {
       const objective = qualificationValue("primaryObjective");
       const licenses = qualificationValue("copilotLicenses");
+      const cases = qualificationValue("concreteUseCases");
       if (!objective && !licenses) return "";
-      return [objective, licenses].filter(Boolean).join(" · ");
+      return [objective, licenses, cases].filter(Boolean).join(" · ");
     }
     function discoveryValue(fields, key) {
       const field = fields.find((item) => item.key === key);
@@ -2959,11 +3108,13 @@
       $("stepBody").querySelectorAll("[data-qualification]").forEach((select) => select.addEventListener("change", () => {
         state[select.dataset.qualification] = select.value;
         if (select.dataset.qualification === "copilotLicenses" && !hasCopilotLicense()) {
+          state.copilotUsage = "not-applicable";
           state.cowork = false;
           state.selectedAddons = state.selectedAddons.filter((id) => id !== "cowork" && id !== "dashboard" && id !== "copilot-studio" && id !== "copilot-excel");
         }
+        if (select.dataset.qualification === "copilotLicenses" && hasCopilotLicense() && state.copilotUsage === "not-applicable") state.copilotUsage = "";
         select.closest(".qualification-field").classList.toggle("answered", Boolean(select.value));
-        renderNav();
+        renderStep();
       }));
       $("stepBody").querySelectorAll("[data-discovery]").forEach((select) => select.addEventListener("change", () => {
         state[select.dataset.discovery] = select.value;
@@ -2996,7 +3147,7 @@
       const items = [
         { label: "Contexto del cliente", title: selectedLabel("industry"), desc: find(industries, state.industry)[2], edit: stepIndexByKey("industry"), icon: "client-context" },
         { label: "Alcance de usuarios", title: selectedLabel("users"), desc: state.usersMode === "mix" ? "Adopción transversal con referentes de varias áreas" : "Foco inicial en un equipo o función con mayor oportunidad de impacto", edit: stepIndexByKey("users"), icon: state.usersMode === "mix" ? "users-mix" : "users-dept" },
-        { label: "Calificación comercial", title: qualificationSummary(), desc: `Inicio: ${formatDate(state.startDate)} · ${qualificationValue("m365Maturity")} · ${qualificationValue("userRange")} · Sponsor: ${qualificationValue("sponsor")}`, edit: stepIndexByKey("qualification"), icon: "diagnostic" },
+        { label: "Calificación comercial", title: qualificationSummary(), desc: `Inicio: ${formatDate(state.startDate)} · ${qualificationValue("m365Maturity")} · Uso Copilot: ${qualificationValue("copilotUsage")} · Agentes: ${qualificationValue("agentNeed")} · IA/COE: ${qualificationValue("iaGovernanceNeed")}`, edit: stepIndexByKey("qualification"), icon: "diagnostic" },
         {
           label: "Diagnóstico operativo M365",
           title: discoverySummary(operationalFields),
@@ -3090,8 +3241,8 @@
     function planCatalog() {
       return {
         plan0: {
-          name: "Plan 0 · Envisioning IA",
-          badge: "Exploración y business case",
+          name: "Plan 0 · Copilot Chat / Envisioning IA",
+          badge: "Entrada liviana a IA",
           duration: "4 semanas",
           durationDays: 28,
           effort: "Piloto controlado",
@@ -3120,7 +3271,7 @@
           deliverables: ["Diagnóstico de madurez digital", "Segmentación de audiencias", "KPIs de adopción", "Campañas y materiales", "Reportes ejecutivos por ola"]
         },
         plan2: {
-          name: "Plan 2 · IA aplicada al trabajo",
+          name: "Plan 2 · Adopción Microsoft 365 Copilot",
           badge: "Microsoft 365 Copilot",
           duration: "30 días",
           durationDays: 30,
@@ -3135,8 +3286,8 @@
           deliverables: ["Casos de uso por rol", "Biblioteca de prompts", "Encuesta de resultados", "Plan de escalado", "Recomendación de conversión o expansión de licencias"]
         },
         plan3: {
-          name: "Plan 3 · Productividad Digital + IA",
-          badge: "Programa integral",
+          name: "Plan 3 · Transformación IA + Agentes",
+          badge: "Programa integral avanzado",
           duration: "6 meses",
           durationMonths: 6,
           effort: "2 olas de 3 meses",
@@ -3144,10 +3295,10 @@
           scope: "Hasta 300 colaboradores · hasta 20 grupos de 15 personas",
           price: "A cotizar según alcance",
           icon: "calendar-cycle",
-          desc: "Integra adopción de Microsoft 365 y Microsoft 365 Copilot en un único programa con gestión del cambio y medición.",
-          bestFor: "Cuando el cliente necesita transformación integral, varias áreas, escala organizacional y acompañamiento sostenido.",
-          execution: ["2 olas de 3 meses", "Hasta 20 grupos de 15 personas", "Recorrido Microsoft 365 + recorrido Copilot", "Champions, webinars, comunicación y medición"],
-          deliverables: ["Diagnóstico inicial", "Formación integral Microsoft 365", "Formación integral Copilot", "Reportes de avance por ola", "Plan de mejora continua"]
+          desc: "Integra adopción, gobierno, casos de uso avanzados, agentes y medición en una iniciativa de transformación con gestión del cambio.",
+          bestFor: "Cuando el cliente necesita transformación integral, agentes, COE, gobierno, varias áreas, escala organizacional y acompañamiento sostenido.",
+          execution: ["2 olas de 3 meses", "Hasta 20 grupos de 15 personas", "Recorrido Microsoft 365 + recorrido Copilot", "Agentes/Copilot Studio como add-on o piloto avanzado", "Champions, webinars, comunicación y medición"],
+          deliverables: ["Diagnóstico inicial", "Formación integral Microsoft 365", "Formación integral Copilot", "Mapa de agentes y automatizaciones", "Reportes de avance por ola", "Plan de mejora continua"]
         }
       };
     }
@@ -3176,24 +3327,144 @@
     function addOnsForPlan(key) {
       return selectedAddonItems().map((item) => [item.title, item.desc, item.icon, item.price]);
     }
-    function recommendedPlanKey() {
+    function planDecision() {
       const deptCount = selectedDepartments().length;
       const hasCopilot = state.copilotLicenses === "trial" || state.copilotLicenses === "licensed";
       const noCopilot = state.copilotLicenses === "none" || state.copilotLicenses === "chat";
       const scale = state.userRange === "large" || (state.userRange === "medium" && deptCount >= 4) || (state.userRange !== "small" && state.projectStage === "scale");
-      const integral = state.primaryObjective === "integral-transformation" || state.accompaniment === "change-management";
       const m365NeedsWork = state.m365Maturity === "low" || state.m365Maturity === "medium";
       const operationalDisorder = ["scattered", "mixed"].includes(state.informationLocation) || ["none", "informal"].includes(state.teamsSharepointStructure) || ["manual", "partial"].includes(state.taskManagement);
-      const copilotPriority = state.primaryObjective === "copilot-roi" || state.primaryObjective === "integral-transformation";
-      if (scale || (hasCopilot && m365NeedsWork && copilotPriority) || (integral && hasCopilot)) return "plan3";
-      if (hasCopilot && state.m365Maturity === "high") return "plan2";
-      if (noCopilot && state.primaryObjective === "explore-ai") return "plan0";
-      if ((m365NeedsWork || operationalDisorder) && state.primaryObjective === "digital-productivity") return "plan1";
-      if (noCopilot && copilotPriority) return "plan0";
-      if (hasCopilot) return "plan2";
-      return "plan1";
+      const strategicNeed = state.primaryObjective === "ia-strategy" || state.primaryObjective === "integral-transformation" || state.iaGovernanceNeed === "coe" || state.iaGovernanceNeed === "corporate";
+      const governanceNeed = state.iaGovernanceNeed === "governance" || state.governance === "low" || state.governance === "medium";
+      const agentSignal = state.primaryObjective === "agent-automation" || state.agentNeed === "explore" || state.agentNeed === "active";
+      const hasConcreteCases = state.concreteUseCases === "some" || state.concreteUseCases === "many";
+      const scores = {
+        plan0: { key: "plan0", score: 0, reasons: [] },
+        plan1: { key: "plan1", score: 0, reasons: [] },
+        plan2: { key: "plan2", score: 0, reasons: [] },
+        plan3: { key: "plan3", score: 0, reasons: [] }
+      };
+      const add = (key, points, reason) => {
+        scores[key].score += points;
+        if (reason) scores[key].reasons.push(reason);
+      };
+
+      if (state.primaryObjective === "digital-productivity") add("plan1", 34, "el objetivo principal es mejorar productividad digital Microsoft 365");
+      if (state.primaryObjective === "explore-ai") add("plan0", 32, "el objetivo es comenzar con IA y construir evidencia antes de invertir fuerte");
+      if (state.primaryObjective === "copilot-roi") add("plan2", 34, "el objetivo es aumentar uso y ROI de Microsoft 365 Copilot");
+      if (state.primaryObjective === "agent-automation") {
+        add(hasCopilot ? "plan2" : "plan0", 20, "la conversación menciona agentes o automatizaciones como oportunidad");
+        add("plan3", hasCopilot ? 24 : 12, "los agentes pueden requerir una iniciativa más avanzada con gobierno y procesos");
+      }
+      if (state.primaryObjective === "ia-strategy" || state.primaryObjective === "integral-transformation") add("plan3", 36, "la conversación apunta a estrategia, gobierno o escalamiento organizacional de IA");
+
+      if (state.m365Tools === "basic" || state.m365Tools === "partial") add("plan1", 18, "el uso actual de Microsoft 365 todavía necesita consolidarse");
+      if (state.m365Tools === "collaboration" || state.m365Tools === "advanced") add(hasCopilot ? "plan2" : "plan0", 12, "ya existe una base de colaboración para avanzar con IA aplicada");
+      if (state.m365Maturity === "low") add("plan1", 28, "la madurez Microsoft 365 es baja");
+      if (state.m365Maturity === "medium") {
+        add("plan1", 18, "la madurez Microsoft 365 es media y requiere adopción guiada");
+        add(hasCopilot ? "plan2" : "plan0", 8, "hay base parcial para empezar a capturar valor con IA");
+      }
+      if (state.m365Maturity === "high") add(hasCopilot ? "plan2" : "plan0", 22, "Microsoft 365 está consolidado y permite avanzar a IA/Copilot");
+
+      if (state.copilotLicenses === "none") {
+        add("plan1", m365NeedsWork || operationalDisorder ? 26 : 14, "no tienen Microsoft 365 Copilot; conviene ordenar la base o validar valor antes");
+        add("plan0", state.primaryObjective === "explore-ai" ? 26 : 12, "sin licencias Copilot, Copilot Chat/Envisioning puede ser una entrada liviana");
+      }
+      if (state.copilotLicenses === "chat") add("plan0", 30, "usan Copilot Chat pero no Microsoft 365 Copilot completo");
+      if (state.copilotLicenses === "trial") add("plan2", 28, "tienen trial o compra reciente y necesitan activar uso con casos reales");
+      if (state.copilotLicenses === "licensed") add("plan2", 26, "ya tienen Microsoft 365 Copilot y el foco es adopción/ROI");
+
+      if (hasCopilot && state.copilotUsage === "under-20") add("plan2", 28, "el uso semanal de Copilot es menor al 20%, señal típica de adopción pendiente");
+      if (hasCopilot && state.copilotUsage === "20-60") {
+        add("plan2", 18, "el uso de Copilot es intermedio y todavía conviene fortalecer casos de uso");
+        if (hasConcreteCases || agentSignal) add("plan3", 12, "hay señales para evolucionar a casos avanzados o agentes");
+      }
+      if (hasCopilot && state.copilotUsage === "over-60") {
+        add("plan2", 12, "el uso de Copilot ya es alto");
+        add("plan3", agentSignal || strategicNeed ? 20 : 10, "hay base para escalar a procesos, gobierno o transformación");
+      }
+
+      if (state.concreteUseCases === "none") add(hasCopilot ? "plan2" : "plan0", 14, "todavía no hay casos de uso concretos; conviene discovery y quick wins");
+      if (state.concreteUseCases === "some") add(hasCopilot ? "plan2" : "plan0", 16, "hay algunos casos de uso para convertir en adopción aplicada");
+      if (state.concreteUseCases === "many") add(hasCopilot ? "plan3" : "plan0", hasCopilot ? 18 : 14, "hay muchos casos de uso y se necesita priorización/escalamiento");
+
+      if (state.agentNeed === "explore") add(hasCopilot ? "plan2" : "plan0", 16, "quieren explorar agentes sin convertirlo todavía en transformación completa");
+      if (state.agentNeed === "active") {
+        add("plan3", hasCopilot ? 24 : 12, "quieren construir agentes activamente");
+        add(hasCopilot ? "plan2" : "plan0", 10, "los agentes pueden entrar como piloto o add-on específico");
+      }
+
+      if (scale) add("plan3", 24, "hay escala por cantidad de usuarios, áreas o etapa de despliegue");
+      if (state.userRange === "small") add(hasCopilot ? "plan2" : "plan1", 8, "el alcance inicial es acotado");
+      if (state.projectStage === "evaluation") add(noCopilot ? "plan0" : "plan2", 12, "la oportunidad está en evaluación inicial");
+      if (state.projectStage === "recent-buy") add(hasCopilot ? "plan2" : "plan1", 14, "hay compra reciente o preparación de despliegue");
+      if (state.projectStage === "pilot") add(hasCopilot ? "plan2" : "plan0", 12, "hay piloto o prueba en marcha");
+
+      if (operationalDisorder) add("plan1", 18, "hay dispersión operativa en información, Teams/SharePoint o tareas");
+      if (governanceNeed) {
+        add("plan3", state.iaGovernanceNeed === "governance" ? 16 : 8, "aparece necesidad de gobierno, datos o seguridad");
+        if (!hasCopilot) add("plan1", 8, "el readiness técnico puede entrar como add-on sobre productividad digital");
+      }
+      if (strategicNeed) add("plan3", 28, "hay necesidad de COE, IA corporativa o escalamiento organizacional");
+      if (state.accompaniment === "training") add(hasCopilot ? "plan2" : "plan0", 8, "el acompañamiento esperado es puntual");
+      if (state.accompaniment === "adoption-program") add(hasCopilot ? "plan2" : "plan1", 12, "requiere programa de adopción");
+      if (state.accompaniment === "change-management") add("plan3", 24, "requiere gestión del cambio integral");
+      if (state.sponsor === "no") add(noCopilot ? "plan0" : "plan2", 6, "sin sponsor claro conviene validar valor antes de escalar");
+      if (state.sponsor === "yes" && scale) add("plan3", 8, "hay sponsor y escala para sostener un programa mayor");
+
+      const ranked = Object.values(scores).sort((a, b) => b.score - a.score);
+      const top = ranked[0];
+      const second = ranked[1] || { score: 0 };
+      const margin = Math.max(0, top.score - second.score);
+      const confidence = Math.min(96, Math.max(45, Math.round(36 + Math.min(18, top.score * 0.08) + Math.min(42, margin * 0.8))));
+      const level = confidence >= 70 ? "high" : confidence >= 50 ? "medium" : "low";
+      const alternatives = confidence >= 70
+        ? []
+        : ranked.slice(1, 3).filter((item) => item.score > 0 && top.score - item.score <= 28);
+
+      return {
+        recommendedKey: top.key,
+        confidence,
+        level,
+        ranked,
+        alternatives,
+        reasons: top.reasons.slice(0, 4),
+        closeCall: alternatives.length > 0
+      };
+    }
+    function recommendedPlanKey() {
+      return planDecision().recommendedKey;
+    }
+    function confidenceLabel(level) {
+      if (level === "high") return "Confianza alta";
+      if (level === "medium") return "Confianza media";
+      return "Confianza baja";
+    }
+    function confidenceNote(decision) {
+      if (decision.level === "high") return "La mayoría de las señales apuntan al mismo camino.";
+      if (decision.level === "medium") return "Hay una recomendación principal, pero conviene revisar la alternativa antes de cerrar alcance.";
+      return "Las respuestas mezclan señales; conviene validar con preventa/adopción antes de cerrar.";
+    }
+    function decisionEvidenceMarkup(decision) {
+      if (!decision.reasons.length) return "";
+      return `<ul class="decision-evidence">${decision.reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>`;
+    }
+    function decisionAlternativesMarkup(decision, plans) {
+      if (!decision.alternatives.length) return "";
+      return `<div class="alternative-panel">
+        <strong>También podría aplicar</strong>
+        <p class="decision-note">Estas opciones aparecen porque algunas respuestas apuntan a otro camino posible.</p>
+        <div class="alternative-grid">${decision.alternatives.map((item) => `<div class="alternative-card">
+          <h4>${plans[item.key].name}</h4>
+          <p>${item.reasons.slice(0, 2).map(escapeHtml).join(". ") || plans[item.key].bestFor}</p>
+        </div>`).join("")}</div>
+      </div>`;
     }
     function recommendationReason(key) {
+      const decision = planDecision();
+      const matched = decision.ranked.find((item) => item.key === key);
+      if (matched && matched.reasons.length) return `Recomendamos ${planCatalog()[key].name} porque ${matched.reasons.slice(0, 3).join(", ")}.`;
       const areaText = state.usersMode === "mix"
         ? `hay varias áreas involucradas (${selectedDepartments().join(", ")})`
         : `hay un área prioritaria (${selectedDepartments()[0] || state.department})`;
@@ -3255,7 +3526,8 @@
       const score = readinessScore();
       const focus = [selectedLabel("inbox"), selectedLabel("meeting"), selectedLabel("create"), selectedLabel("automate")].filter(Boolean);
       const plans = planCatalog();
-      const recommendedKey = recommendedPlanKey();
+      const decision = planDecision();
+      const recommendedKey = decision.recommendedKey;
       const recommended = plans[recommendedKey];
       const roadmapItems = proposalRoadmap(recommendedKey);
       const quote = quoteForPlan(recommendedKey);
@@ -3284,6 +3556,10 @@
               <div class="client-highlight">${state.company}</div>
               <p class="lead">${selectedLabel("industry")} · ${selectedLabel("users")}</p>
               <div class="chips">${focus.map((item) => `<span class="pill">${item}</span>`).join("")}<span class="pill">Cowork: ${state.cowork ? "Incluido" : "No incluido"}</span></div>
+              <div class="decision-row">
+                <span class="confidence-badge ${decision.level}">${confidenceLabel(decision.level)} · ${decision.confidence}%</span>
+                <span class="decision-note">${confidenceNote(decision)}</span>
+              </div>
             </div>
             <div class="score">${recommended.duration}</div>
           </div>
@@ -3302,6 +3578,8 @@
                 </div>
               </div>
               <p><strong>Análisis comercial:</strong> ${recommendationReason(recommendedKey)}</p>
+              ${decisionEvidenceMarkup(decision)}
+              ${decisionAlternativesMarkup(decision, plans)}
               <p>${recommended.desc}</p>
               <div class="plan-metric-row">
                 <div class="plan-metric"><strong>${recommended.duration}</strong><span>Duración</span></div>
@@ -3368,7 +3646,7 @@
           </div>
         </div>
         <h2 style="margin-top:28px">Criterios que definieron el plan</h2>
-        <p>La recomendación se calcula con las preguntas del relevamiento: objetivo, licenciamiento, madurez, alcance, etapa, sponsor, gobierno y nivel de acompañamiento.</p>
+        <p>La recomendación se calcula con scoring ponderado: objetivo, licenciamiento, uso real de Copilot, madurez M365, casos de uso, agentes, escala, gobierno/COE, sponsor y acompañamiento. Si la confianza baja, se muestran alternativas posibles.</p>
         <div class="plan-option-grid">
           <article class="plan-option-card recommended">
             <div class="stage-icon">${iconSvg(recommended.icon)}</div>
@@ -3379,7 +3657,8 @@
           <article class="plan-option-card">
             <div class="stage-icon">${iconSvg("diagnostic")}</div>
             <h4>Readiness comercial</h4>
-            <p>${qualificationValue("primaryObjective")} · ${qualificationValue("copilotLicenses")} · ${qualificationValue("m365Maturity")}</p>
+            <p>${qualificationValue("primaryObjective")} · ${qualificationValue("copilotLicenses")} · ${qualificationValue("copilotUsage")} · ${qualificationValue("m365Maturity")}</p>
+            <p>Casos: ${qualificationValue("concreteUseCases")} · Agentes: ${qualificationValue("agentNeed")} · IA/COE: ${qualificationValue("iaGovernanceNeed")}</p>
           </article>
           <article class="plan-option-card">
             <div class="stage-icon">${iconSvg("users-mix")}</div>
@@ -3438,6 +3717,7 @@
     function buildDefaultHandoffEmail(recommendedKey = recommendedPlanKey()) {
       const recommended = planCatalog()[recommendedKey];
       const quote = quoteForPlan(recommendedKey);
+      const decision = planDecision();
       const aiSummary = state.aiSummary ? {
         text: state.aiSummary.text || "",
         generatedAt: state.aiSummary.generatedAt || "",
@@ -3456,6 +3736,7 @@
 
 Cliente: ${state.company}
 Plan recomendado: ${recommended.name}
+Confianza: ${confidenceLabel(decision.level)} · ${decision.confidence}%
 Duración: ${recommended.duration}
 Alcance: ${recommended.scope}
 Cotización: ${quote.main}
@@ -3497,6 +3778,7 @@ ${location.href}`
       const quote = quoteForPlan(recommendedKey);
       const roadmapItems = proposalRoadmap(recommendedKey);
       const focus = [selectedLabel("inbox"), selectedLabel("meeting"), selectedLabel("create"), selectedLabel("automate")].filter(Boolean);
+      const decision = planDecision();
       return {
         source: "GeneradorPropuestaADP",
         createdAt: new Date().toISOString(),
@@ -3504,12 +3786,12 @@ ${location.href}`
           usePublicCompanyResearch: true,
           researchGuidance: `Antes de redactar, si el backend devuelve companyResearch con fuentes publicas, usalo para contextualizar a ${state.company}. No inventes datos: si no hay fuentes confiables, aclaralo de forma breve y basa la recomendacion en el relevamiento.`,
           outputFormat: [
-            "## Perfil del cliente",
+            "## Contexto de la empresa",
             "Definicion breve de la empresa/sector usando datos publicos disponibles y el contexto relevado.",
             "## Lectura comercial",
-            "Madurez, dolores principales y oportunidad detectada.",
+            "Madurez, dolores principales, confianza del algoritmo y oportunidad detectada.",
             "## Recomendacion Possumus",
-            "Plan recomendado, por que aplica y como se relaciona con la realidad del cliente.",
+            "Plan recomendado, por que aplica, alternativas si la confianza es media/baja y como se relaciona con la realidad del cliente.",
             "## Argumentos para la reunion",
             "- 3 bullets comerciales concretos para presentar al cliente."
           ]
@@ -3529,6 +3811,18 @@ ${location.href}`
           recommendedPlanScope: recommended.scope,
           quote: quote.main,
           quoteDetail: quote.detail,
+          decision: {
+            confidence: decision.confidence,
+            confidenceLevel: decision.level,
+            confidenceLabel: confidenceLabel(decision.level),
+            reasons: decision.reasons,
+            alternatives: decision.alternatives.map((item) => ({
+              planKey: item.key,
+              planName: plans[item.key].name,
+              score: item.score,
+              reasons: item.reasons.slice(0, 3)
+            }))
+          },
           aiSummary: state.aiSummary ? {
             text: state.aiSummary.text || "",
             generatedAt: state.aiSummary.generatedAt || "",
@@ -3565,11 +3859,15 @@ ${location.href}`
           qualification: {
             primaryObjective: qualificationValue("primaryObjective"),
             copilotLicenses: qualificationValue("copilotLicenses"),
+            copilotUsage: qualificationValue("copilotUsage"),
+            concreteUseCases: qualificationValue("concreteUseCases"),
+            agentNeed: qualificationValue("agentNeed"),
             m365Maturity: qualificationValue("m365Maturity"),
             userRange: qualificationValue("userRange"),
             projectStage: qualificationValue("projectStage"),
             sponsor: qualificationValue("sponsor"),
             governance: qualificationValue("governance"),
+            iaGovernanceNeed: qualificationValue("iaGovernanceNeed"),
             accompaniment: qualificationValue("accompaniment")
           },
           operational: {
@@ -3696,6 +3994,7 @@ ${location.href}`
       const quote = quoteForPlan(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
       const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
+      const decision = planDecision();
       const operationalSummary = [
         discoveryValue(operationalFields, "m365Tools"),
         discoveryValue(operationalFields, "informationLocation"),
@@ -3743,6 +4042,9 @@ ${location.href}`
           .cowork-pdf { border-color: #00a351; background: #e8f8ef; }
           .ai-card { border-color: #fcd702; background: #fff7bf; }
           .ai-badge { display: inline-block; margin-bottom: 4mm; border: 1px solid #fcd702; border-radius: 99px; padding: 2mm 4mm; color: #2e2d31; font-size: 9pt; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; }
+          .confidence { display: inline-block; margin: 3mm 0 5mm; border: 1px solid #fcd702; border-radius: 99px; padding: 2mm 4mm; background: #fff7bf; font-weight: 900; }
+          .evidence { margin: 2mm 0 5mm; padding-left: 5mm; color: #5f6168; font-size: 11.5pt; }
+          .alternative { border-color: #dedede; background: #f8f8fb; }
           .ai-summary-content { display: grid; gap: 4mm; }
           .ai-summary-section { border: 1px solid #f4d500; border-radius: 4mm; padding: 4mm; background: #ffffff; }
           .ai-summary-section h4 { margin: 0 0 2mm; font-size: 14pt; }
@@ -3794,7 +4096,9 @@ ${location.href}`
         <section class="slide">
           <p class="eyebrow">Recomendación generada</p>
           <h2>Plan recomendado: <span class="accent">${plan.name}</span></h2>
+          <div class="confidence">${confidenceLabel(decision.level)} · ${decision.confidence}%</div>
           <p>${recommendationReason(recommendedKey)}</p>
+          ${decision.reasons.length ? `<ul class="evidence">${decision.reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>` : ""}
           <div class="grid-4">
             <div class="card metric yellow"><strong>$</strong><p>Cotización de referencia</p></div>
             <div class="card metric quote"><strong>${quote.main}</strong><p>${quote.detail}</p></div>
@@ -3808,6 +4112,11 @@ ${location.href}`
             <div class="card"><strong>Logística y medición</strong><p>${logisticsSummary.join(" · ")}</p></div>
           </div>${footer}
         </section>
+        ${decision.alternatives.length ? `<section class="slide">
+          <p class="eyebrow">Alternativas posibles</p>
+          <h2>Planes a validar si cambia el alcance.</h2>
+          <div class="grid-2">${decision.alternatives.map((item) => `<div class="card alternative"><strong>${plans[item.key].name}</strong><p>${item.reasons.slice(0, 3).map(escapeHtml).join(". ") || plans[item.key].bestFor}</p></div>`).join("")}</div>${footer}
+        </section>` : ""}
         ${aiSummaryText ? `<section class="slide">
           <p class="eyebrow">Resumen ejecutivo comercial</p>
           <h2>Lectura ejecutiva generada con IA.</h2>
@@ -3918,7 +4227,7 @@ ${location.href}`
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "", department: "", departments: [], userRange: "", m365Maturity: "", copilotLicenses: "", projectStage: "", sponsor: "", governance: "", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "", sessionFrequency: "", groupModel: "", successMetric: "", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, aiSummary: null, completed: {} });
+      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "", department: "", departments: [], userRange: "", m365Maturity: "", copilotLicenses: "", copilotUsage: "", concreteUseCases: "", agentNeed: "", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "", sessionFrequency: "", groupModel: "", successMetric: "", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, aiSummary: null, completed: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
       location.hash = "/onboarding";
