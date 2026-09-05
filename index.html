@@ -1365,6 +1365,14 @@
       color: var(--cp-text-muted);
       font-size: 13px;
     }
+    .handoff-status {
+      width: 100%;
+      margin-top: 10px;
+      color: var(--cp-text-muted);
+      font-size: 13px;
+    }
+    .handoff-status.success { color: var(--cp-success); }
+    .handoff-status.error { color: var(--cp-danger); }
     .pdf-only { display: none; }
     .links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 18px; }
     .link-card {
@@ -2954,6 +2962,8 @@
             <button class="btn" id="editPlanBtn">Editar datos</button>
             <span class="pdf-note">Incluye portada, presentación de Possumus, metodología y plan generado.</span>
             <button class="btn primary" id="printBtn">Generar PDF</button>
+            <button class="btn primary" id="handoffBtn">Enviar handoff</button>
+            <div class="handoff-status" id="handoffStatus"></div>
           </div>
         </div>
         <h2 style="margin-top:28px">Criterios que definieron el plan</h2>
@@ -3021,6 +3031,126 @@
       show("plan");
       $("editPlanBtn").addEventListener("click", () => { currentStep = 0; renderStep(); show("wizard"); });
       $("printBtn").addEventListener("click", () => generateProposalPdf(recommendedKey));
+      $("handoffBtn").addEventListener("click", () => sendHandoff(recommendedKey));
+    }
+    function buildHandoffPayload(recommendedKey = recommendedPlanKey()) {
+      const plans = planCatalog();
+      const recommended = plans[recommendedKey];
+      const quote = quoteForPlan(recommendedKey);
+      const roadmapItems = proposalRoadmap(recommendedKey);
+      const focus = [selectedLabel("inbox"), selectedLabel("meeting"), selectedLabel("create"), selectedLabel("automate")].filter(Boolean);
+      return {
+        source: "GeneradorPropuestaADP",
+        createdAt: new Date().toISOString(),
+        proposal: {
+          planId: state.planId || "",
+          company: state.company,
+          startDate: state.startDate,
+          startDateFormatted: formatDate(state.startDate),
+          endDateFormatted: planEndDate(recommended),
+          pageUrl: location.href,
+          recommendedPlanKey,
+          recommendedPlanName: recommended.name,
+          recommendedPlanBadge: recommended.badge,
+          recommendedPlanDuration: recommended.duration,
+          recommendedPlanScope: recommended.scope,
+          quote: quote.main,
+          quoteDetail: quote.detail,
+          coworkIncluded: state.cowork,
+          addons: selectedAddonItems().map((item) => ({
+            id: item.id,
+            title: item.title,
+            description: item.desc,
+            price: item.price,
+            requiresCopilot: Boolean(item.requiresCopilot)
+          })),
+          focus,
+          recommendationReason: recommendationReason(recommendedKey),
+          roadmap: roadmapItems.map((item) => ({
+            tag: item.tag,
+            title: item.title,
+            date: item.date,
+            description: item.desc,
+            tasks: item.tasks
+          }))
+        },
+        commercial: {
+          name: state.commercialName || "",
+          email: state.commercialEmail || ""
+        },
+        answers: {
+          customerContext: {
+            industry: selectedLabel("industry"),
+            users: selectedLabel("users"),
+            departments: selectedDepartments()
+          },
+          qualification: {
+            primaryObjective: qualificationValue("primaryObjective"),
+            copilotLicenses: qualificationValue("copilotLicenses"),
+            m365Maturity: qualificationValue("m365Maturity"),
+            userRange: qualificationValue("userRange"),
+            projectStage: qualificationValue("projectStage"),
+            sponsor: qualificationValue("sponsor"),
+            governance: qualificationValue("governance"),
+            accompaniment: qualificationValue("accompaniment")
+          },
+          operational: {
+            m365Tools: discoveryValue(operationalFields, "m365Tools"),
+            informationLocation: discoveryValue(operationalFields, "informationLocation"),
+            teamsSharepointStructure: discoveryValue(operationalFields, "teamsSharepointStructure"),
+            taskManagement: discoveryValue(operationalFields, "taskManagement"),
+            firstChange: discoveryValue(operationalFields, "firstChange")
+          },
+          productivity: {
+            communication: selectedLabel("inbox"),
+            meetings: selectedLabel("meeting"),
+            meetingApp: state.meetingApp,
+            createAnalyze: selectedLabel("create"),
+            automate: selectedLabel("automate")
+          },
+          logistics: {
+            deliveryMode: discoveryValue(logisticsFields, "deliveryMode"),
+            sessionFrequency: discoveryValue(logisticsFields, "sessionFrequency"),
+            groupModel: discoveryValue(logisticsFields, "groupModel"),
+            successMetric: discoveryValue(logisticsFields, "successMetric")
+          }
+        }
+      };
+    }
+    async function copyHandoffPayload(payload) {
+      try {
+        await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
+        showToast("No se pudo enviar. Copié el payload para revisar o pegar en el Flow.");
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    async function sendHandoff(recommendedKey = recommendedPlanKey()) {
+      const button = $("handoffBtn");
+      const status = $("handoffStatus");
+      const payload = buildHandoffPayload(recommendedKey);
+      button.disabled = true;
+      status.className = "handoff-status";
+      status.textContent = "Enviando handoff a Power Automate...";
+      try {
+        const response = await fetch("/api/handoff", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+        status.className = "handoff-status success";
+        status.textContent = "Handoff enviado correctamente.";
+        showToast("Handoff enviado.");
+      } catch (error) {
+        console.error(error);
+        status.className = "handoff-status error";
+        status.textContent = `No se pudo enviar el handoff: ${error.message}`;
+        copyHandoffPayload(payload);
+      } finally {
+        button.disabled = false;
+      }
     }
     function generateProposalPdf(recommendedKey = recommendedPlanKey()) {
       const html = buildPrintableProposal(recommendedKey);
