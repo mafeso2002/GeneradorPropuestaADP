@@ -2317,6 +2317,30 @@
         </div>`;
       }).join("")}</div>`;
     }
+    function safeHostname(value) {
+      try {
+        return new URL(value).hostname.replace(/^www\./, "");
+      } catch (error) {
+        return "";
+      }
+    }
+    function formatCompanyResearch(research) {
+      if (!research || research.status !== "found") return "";
+      const sources = Array.isArray(research.sources) ? research.sources.filter((source) => source && source.url) : [];
+      const officialSite = research.officialSite || (sources[0] && sources[0].url) || "";
+      const products = Array.isArray(research.products) ? research.products.filter(Boolean) : [];
+      const contacts = research.contacts || {};
+      const phones = Array.isArray(contacts.phones) ? contacts.phones.filter(Boolean) : [];
+      const emails = Array.isArray(contacts.emails) ? contacts.emails.filter(Boolean) : [];
+      const details = [
+        research.overview ? `<p><strong>Actividad detectada:</strong> ${escapeHtml(research.overview)}</p>` : "",
+        products.length ? `<p><strong>Productos/servicios:</strong> ${products.map(escapeHtml).join(", ")}</p>` : "",
+        phones.length || emails.length ? `<p><strong>Canales públicos:</strong> ${[...phones, ...emails].map(escapeHtml).join(" · ")}</p>` : "",
+        officialSite ? `<p><strong>Sitio oficial probable:</strong> <a href="${escapeHtml(officialSite)}" target="_blank" rel="noopener">${escapeHtml(safeHostname(officialSite) || officialSite)}</a></p>` : ""
+      ].filter(Boolean).join("");
+      if (!details && !sources.length) return "";
+      return `<div class="ai-source-list"><strong>Contexto comercial detectado</strong>${details}${sources.length ? `<p><strong>Paginas consultadas:</strong> ${sources.slice(0, 3).map((source) => `<a href="${escapeHtml(source.url)}" target="_blank" rel="noopener">${escapeHtml(safeHostname(source.url) || source.title || "Fuente")}</a>`).join(" · ")}</p>` : ""}</div>`;
+    }
     function stripHtml(value) {
       const temp = document.createElement("div");
       temp.innerHTML = value || "";
@@ -3237,9 +3261,7 @@
       const quote = quoteForPlan(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
       const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
-      const aiSources = state.aiSummary && state.aiSummary.companyResearch && Array.isArray(state.aiSummary.companyResearch.sources)
-        ? state.aiSummary.companyResearch.sources
-        : [];
+      const companyResearchMarkup = formatCompanyResearch(state.aiSummary && state.aiSummary.companyResearch);
       const operationalSummary = [
         discoveryValue(operationalFields, "m365Tools"),
         discoveryValue(operationalFields, "informationLocation"),
@@ -3311,7 +3333,7 @@
                 <button class="btn action-ai" id="aiSummaryBtn"><span class="btn-icon">${iconSvg("spark")}</span>Regenerar IA</button>
               </div>
               ${formatAiSummaryText(aiSummaryText)}
-              ${aiSources.length ? `<div class="ai-source-list"><strong>Contexto público consultado:</strong> ${aiSources.map((source) => source.url ? `<a href="${escapeHtml(source.url)}" target="_blank" rel="noopener">${escapeHtml(source.title || "Fuente")}</a>` : escapeHtml(source.title || "Fuente")).join(" · ")}</div>` : ""}` : `<span class="ai-badge">Resumen con IA</span>
+              ${companyResearchMarkup}` : `<span class="ai-badge">Resumen con IA</span>
               <h3>Resumen ejecutivo comercial</h3>
               <p>Generá una síntesis comercial con madurez, foco recomendado, plan sugerido y argumentos para el cliente. La IA intentará sumar contexto público real de la empresa antes de redactar.</p>`}
             </div>
