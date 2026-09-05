@@ -1462,8 +1462,8 @@
   <header class="topbar">
     <div class="brand"><div class="mark"><img alt="Possumus" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADA0lEQVRYhdWXTUhUURTHr1kkBVZQUUFtalErF1O4KGsg591z7AsXRm2KVkFSGELQQtBNBEEQfawCi1ZCUQt3RdIqE1FI5p3zKhIqxCIT0pl77jjyWmiOOjPvvdFx4YG7mnvO73//98y99ym12mK4J16VISeWJjifZriWJt0qBJfFhQaTrN+zIlC/J75WGE4LwQvLOC7cMF1wEE4JIxuCW/IZ95YFLq4+IYRDRaHFxYgwPJ5MxncsbdWjzkZD0CmM2ZLh84Zh/JlK6jMlwScG6rZZwt7lgBe5kRHWLZHgY7211Yahr2zwuYFT4sKVYNuVqjAudJUfnusL4zpHiwqwHpxb7p5HEPHJ749tyF/9cLxKuOFrRDtFCN8J60dCcE8YXgnjyLzfAxdhXX0jT4Ah52IEcNYSdBY6cHy/qTLlHT9kPWgUT7eG1Pnhf8b1CwoIw5sQ66bE082BTZSrdS18K5yTcwl/+us3CYEJToKHUeBKKWWH6g9YxkywAHiQsz+p60ImT0x8cbZHFaCUUoagJ6imYfgwf3LI/uPLUuBKKSWEV0Nq/spNDtkzS9BesgDXSQTWZJz0+2PrZifr5kC7XN1WugOgQwRM+L6qVEopZVmfDXYAn5buAFwP7gH8Pjc54+mawMmEoyOFTq8i4fuqwhC+D2ns17mE/tg6w/A7pA9uRhVgXH0h7DQ0pDsWJcGzkK41KXJOhcIJ4sL4N6RWNkVObFFi4ljoRUQohnTHWG9tdZ7tw/Eq8XSrZZwMhjdMG4I+31cVeeqF4W1Y8mxPjBkXugxBu2XdZj14MnMZRblJMWuLvZAmPV0jjOkoIpY8CLp9VWD1ORd0y4q9CTz85rt6Z2AT+UpVCOn75RZhCMZSQ4mDgfA5Ee1qjWV9WxinygJn/J5Z3PVRwjI0GcLRpcMxKwTdKU7sKhn+P/568a2W4U7gF1FBMA5YN9FY8O+2lBgfjG82rC8J4XPD+GPmrb8AmBLGQSG4m2Y8XDZwsfA/HtkiSb3Pes7+9JCzO++Nt1riH1ln/un62kkzAAAAAElFTkSuQmCC"></div><span>Possumus · Diseñador de Propuestas de Adopción</span></div>
     <div class="top-actions">
-      <span class="auth-status" id="authStatus">Sin sesión Microsoft</span>
-      <button class="btn ghost" id="loginBtn">Iniciar sesión</button>
+      <span class="auth-status hidden" id="authStatus">Login Microsoft deshabilitado para pruebas</span>
+      <button class="btn ghost hidden" id="loginBtn">Iniciar sesión</button>
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
@@ -1578,8 +1578,11 @@
 
   <div id="toast" class="toast"></div>
 
+  <!-- Login Microsoft deshabilitado temporalmente hasta tener aprobación admin.
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
+  -->
   <script>
+    const AUTH_ENABLED = false;
     const msalConfig = {
       auth: {
         clientId: "1b7446c2-78b7-4478-a159-dc0588cde896",
@@ -1592,7 +1595,7 @@
       }
     };
     const loginRequest = { scopes: ["User.Read"] };
-    const msalClient = window.msal ? new msal.PublicClientApplication(msalConfig) : null;
+    const msalClient = AUTH_ENABLED && window.msal ? new msal.PublicClientApplication(msalConfig) : null;
 
     const industries = [
       ["healthcare", "Salud y clínicas", "El cliente atiende pacientes y necesita reducir carga administrativa, agenda, documentación y seguimiento.", "health"],
@@ -1968,7 +1971,9 @@
       setTimeout(() => $("toast").classList.remove("show"), 1800);
     }
     function updateAuthUi() {
-      const label = state.commercialEmail
+      const label = !AUTH_ENABLED
+        ? "Login Microsoft deshabilitado para pruebas"
+        : state.commercialEmail
         ? `${state.commercialName || "Comercial"} · ${state.commercialEmail}`
         : "Sin sesión Microsoft";
       $("authStatus").textContent = label;
@@ -2009,7 +2014,7 @@
       }
     }
     function restoreMicrosoftSession() {
-      if (!msalClient) {
+      if (!AUTH_ENABLED || !msalClient) {
         updateAuthUi();
         return;
       }
@@ -3203,7 +3208,7 @@
 
     $("loginBtn").addEventListener("click", signInWithMicrosoft);
     $("startBtn").addEventListener("click", async () => {
-      if (!state.commercialEmail) {
+      if (AUTH_ENABLED && !state.commercialEmail) {
         const signedIn = await signInWithMicrosoft();
         if (!signedIn) return;
       }
