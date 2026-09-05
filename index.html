@@ -218,7 +218,7 @@
     h4 { font-size: 19px; }
     p { color: var(--cp-text-muted); line-height: 1.5; }
     .lead { font-size: 19px; max-width: 760px; }
-    .form-row { display: grid; grid-template-columns: 1fr 220px; gap: 12px; margin-top: 28px; }
+    .form-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(260px, .55fr); gap: 18px; margin-top: 28px; align-items: end; }
     label { display: block; font-weight: 650; margin-bottom: 7px; }
     input, select, textarea {
       width: 100%;
@@ -1171,6 +1171,16 @@
     }
     .alternative-card h4 { margin: 0 0 6px; }
     .alternative-card p { margin: 0; font-size: 13px; }
+    .alternative-quote {
+      display: grid;
+      gap: 4px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--cp-border);
+      color: var(--cp-text-muted);
+      font-size: 13px;
+    }
+    .alternative-quote strong { color: var(--cp-text); }
     .plan-option-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2325,7 +2335,10 @@
           <h3 id="decisionHelpTitle">Cómo se elige el plan recomendado</h3>
           <p>La app usa un scoring ponderado inspirado en un árbol de decisión. Siempre muestra un plan principal y, si hay señales mezcladas, alternativas para validar.</p>
         </div>
-        <button class="btn ghost" id="closeDecisionHelpBtn">Cerrar</button>
+        <div class="modal-actions" style="margin-top:0">
+          <button class="btn action-pdf" id="exportDecisionHelpBtn">Exportar PDF</button>
+          <button class="btn ghost" id="closeDecisionHelpBtn">Cerrar</button>
+        </div>
       </div>
       <div id="decisionHelpContent" class="decision-help-content"></div>
     </div>
@@ -2450,10 +2463,10 @@
         label: "Dónde vive hoy la información",
         help: "Permite detectar dispersión documental y esfuerzo de ordenamiento.",
         options: [
-          ["scattered", "WhatsApp, carpetas locales y correo"],
-          ["mixed", "Mixto: local, OneDrive, Teams y correo"],
-          ["mostly-cloud", "Mayormente OneDrive/Teams/SharePoint"],
-          ["structured", "SharePoint/Teams con estructura definida"]
+          ["scattered", "Bajo orden: WhatsApp, carpetas locales y correo"],
+          ["mixed", "Orden medio/bajo: local, OneDrive, Teams y correo"],
+          ["mostly-cloud", "Orden medio/alto: mayormente OneDrive/Teams/SharePoint"],
+          ["structured", "Orden alto: SharePoint/Teams con estructura definida"]
         ]
       },
       {
@@ -2474,10 +2487,10 @@
         label: "Cómo gestionan tareas y seguimiento",
         help: "Identifica si los pendientes viven en conversaciones o en herramientas trazables. Manual/parcial suma señal de desorden operativo para Productividad Digital y add-ons.",
         options: [
-          ["manual", "Manual: WhatsApp, correo, chats o memoria del equipo"],
-          ["partial", "Planner/To Do o listas usadas de forma parcial"],
-          ["external", "Sistema externo de gestión ya definido"],
-          ["formal", "Modelo formal adoptado con responsables y trazabilidad"]
+          ["manual", "Bajo: WhatsApp, correo, chats o memoria del equipo"],
+          ["partial", "Medio/bajo: Planner, To Do o listas usadas parcialmente"],
+          ["external", "Medio/alto: sistema externo de gestión ya definido"],
+          ["formal", "Alto: modelo formal con responsables y trazabilidad"]
         ]
       },
       {
@@ -2891,6 +2904,31 @@
           ${bullets.length ? `<ul>${bullets.map((line) => `<li>${inlineMarkdown(line)}</li>`).join("")}</ul>` : ""}
         </div>`;
       }).join("")}</div>`;
+    }
+    function filterValidationSummaryForProposal(value) {
+      const allowed = new Set([
+        "plan recomendado",
+        "riesgos comerciales",
+        "recomendacion final para el comercial",
+        "recomendación final para el comercial",
+        "comentario ia"
+      ]);
+      const lines = String(value || "").split(/\r?\n/);
+      const kept = [];
+      let keep = false;
+      let sawHeading = false;
+      lines.forEach((line) => {
+        const heading = line.match(/^#{1,4}\s+(.+)$/);
+        if (heading) {
+          sawHeading = true;
+          const normalized = normalizeText(heading[1]);
+          keep = allowed.has(normalized);
+          if (keep) kept.push(line.replace(/^#{1,4}\s+/, "## "));
+          return;
+        }
+        if (keep) kept.push(line);
+      });
+      return sawHeading ? kept.join("\n").trim() : String(value || "").trim();
     }
     function safeHostname(value) {
       try {
@@ -4112,6 +4150,23 @@
       if (!decision.reasons.length) return "";
       return `<ul class="decision-evidence">${decision.reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>`;
     }
+    function quoteDifference(primaryKey, alternativeKey) {
+      const primary = quoteForPlan(primaryKey);
+      const alternative = quoteForPlan(alternativeKey);
+      if (primary.main === alternative.main) return "Mismo rango base; cambia alcance/metodología.";
+      const numeric = (value) => {
+        const match = String(value || "").replace(/\./g, "").match(/USD\s*([0-9]+)/i);
+        return match ? Number(match[1]) : null;
+      };
+      const primaryValue = numeric(primary.main);
+      const alternativeValue = numeric(alternative.main);
+      if (primaryValue && alternativeValue) {
+        const diff = alternativeValue - primaryValue;
+        if (diff === 0) return "Mismo valor base.";
+        return diff > 0 ? `Aprox. USD ${diff.toLocaleString("es-AR")} por encima del plan principal.` : `Aprox. USD ${Math.abs(diff).toLocaleString("es-AR")} por debajo del plan principal.`;
+      }
+      return `Plan principal: ${primary.main}. Alternativa: ${alternative.main}.`;
+    }
     function decisionAlternativesMarkup(decision, plans) {
       if (!decision.alternatives.length) return "";
       return `<div class="alternative-panel">
@@ -4120,6 +4175,10 @@
         <div class="alternative-grid">${decision.alternatives.map((item) => `<div class="alternative-card">
           <h4>${plans[item.key].name}</h4>
           <p>${item.reasons.slice(0, 2).map(escapeHtml).join(". ") || plans[item.key].bestFor}</p>
+          <div class="alternative-quote">
+            <span><strong>Cotización:</strong> ${escapeHtml(quoteForPlan(item.key).main)}</span>
+            <span><strong>Diferencia:</strong> ${escapeHtml(quoteDifference(decision.recommendedKey, item.key))}</span>
+          </div>
         </div>`).join("")}</div>
       </div>`;
     }
@@ -4195,6 +4254,7 @@
       const quote = quoteForPlan(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
       const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
+      const validationProposalText = state.aiValidation && state.aiValidation.summary ? filterValidationSummaryForProposal(state.aiValidation.summary) : "";
       const companyResearchMarkup = formatCompanyResearch(state.aiSummary && state.aiSummary.companyResearch);
       const operationalSummary = [
         discoveryValue(operationalFields, "m365Tools"),
@@ -4308,13 +4368,13 @@
             </div>
             <p>Se incluye como add-on recomendado porque el relevamiento detectó procesos complejos, tareas de varios pasos o necesidad de automatización asistida.</p>
           </div>` : ""}
-          ${state.aiValidation && state.aiValidation.summary ? `<div class="validation-panel">
-            <h3>Validación IA del diagnóstico</h3>
-            ${formatAiSummaryText(state.aiValidation.summary)}
+          ${validationProposalText ? `<div class="validation-panel">
+            <h3>Diagnóstico revisado con IA</h3>
+            ${formatAiSummaryText(validationProposalText)}
           </div>` : ""}
           ${addons.length ? `<div class="addons-panel">
             <h3>Add-ons y módulos sugeridos</h3>
-            <p>Según el PPT, los add-ons se suman a cualquier plan y se cotizan por separado.</p>
+            <p>Estos módulos permiten ampliar el alcance de la propuesta y se cotizan por separado.</p>
             <div class="addons-grid">${addons.map(([title, desc, icon, price]) => `<div class="addon-item"><div class="stage-icon">${iconSvg(icon)}</div><div><strong>${title}</strong><p>${desc}</p><span class="addon-price"><span class="money-icon" style="width:22px;height:22px;font-size:13px;margin-right:6px">$</span> ${price}</span></div></div>`).join("")}</div>
           </div>` : ""}
           <div class="proposal-actions">
@@ -4401,10 +4461,7 @@
             </details>`).join("")}</div>
           </div>
         </details>
-        <div class="proposal-panel" style="margin-top:18px">
-          <h3>Por qué Possumus</h3>
-          <p>Adopción no es solo capacitación: combinamos liderazgo, cambio humano, preparación técnica y medición para convertir Microsoft 365 Copilot en uso sostenido y resultados visibles.</p>
-        </div>`;
+        `;
       show("plan");
       $("editPlanBtn").addEventListener("click", () => { currentStep = 0; renderStep(); show("wizard"); });
       $("aiSummaryBtn").addEventListener("click", () => generateAiSummary(recommendedKey));
@@ -4430,7 +4487,7 @@
         ? `\n\nResumen ejecutivo generado con IA:\n${aiSummary.text}`
         : "";
       const validationSection = state.aiValidation && state.aiValidation.summary
-        ? `\n\nValidación IA del diagnóstico:\n${state.aiValidation.summary}`
+        ? `\n\nDiagnóstico revisado con IA:\n${filterValidationSummaryForProposal(state.aiValidation.summary)}`
         : "";
       return {
         from: "adopcion@possumus.tech",
@@ -4807,7 +4864,7 @@ ${location.href}`
       const quote = quoteForPlan(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
       const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
-      const validationSummaryText = state.aiValidation && state.aiValidation.summary ? state.aiValidation.summary : "";
+      const validationSummaryText = state.aiValidation && state.aiValidation.summary ? filterValidationSummaryForProposal(state.aiValidation.summary) : "";
       const decision = planDecision();
       const operationalSummary = [
         discoveryValue(operationalFields, "m365Tools"),
@@ -4929,7 +4986,7 @@ ${location.href}`
         ${decision.alternatives.length ? `<section class="slide">
           <p class="eyebrow">Alternativas posibles</p>
           <h2>Planes a validar si cambia el alcance.</h2>
-          <div class="grid-2">${decision.alternatives.map((item) => `<div class="card alternative"><strong>${plans[item.key].name}</strong><p>${item.reasons.slice(0, 3).map(escapeHtml).join(". ") || plans[item.key].bestFor}</p></div>`).join("")}</div>${footer}
+          <div class="grid-2">${decision.alternatives.map((item) => `<div class="card alternative"><strong>${plans[item.key].name}</strong><p>${item.reasons.slice(0, 3).map(escapeHtml).join(". ") || plans[item.key].bestFor}</p><p><strong>Cotización:</strong> ${quoteForPlan(item.key).main}</p><p><strong>Diferencia:</strong> ${quoteDifference(decision.recommendedKey, item.key)}</p></div>`).join("")}</div>${footer}
         </section>` : ""}
         ${aiSummaryText ? `<section class="slide">
           <p class="eyebrow">Resumen ejecutivo comercial</p>
@@ -4937,9 +4994,9 @@ ${location.href}`
           <div class="card ai-card"><span class="ai-badge">Generado con IA</span>${formatAiSummaryText(aiSummaryText)}</div>${footer}
         </section>` : ""}
         ${validationSummaryText ? `<section class="slide">
-          <p class="eyebrow">Validación IA del diagnóstico</p>
-          <h2>Segunda mirada sobre plan, add-ons y riesgos.</h2>
-          <div class="card"><span class="ai-badge">Validación interna</span>${formatAiSummaryText(validationSummaryText)}</div>${footer}
+          <p class="eyebrow">Diagnóstico revisado con IA</p>
+          <h2>Lectura final sobre plan y riesgos comerciales.</h2>
+          <div class="card"><span class="ai-badge">Revisado con IA</span>${formatAiSummaryText(validationSummaryText)}</div>${footer}
         </section>` : ""}
         <section class="slide">
           <p class="eyebrow">Ejecución del plan recomendado</p>
@@ -4998,6 +5055,28 @@ ${location.href}`
     }
     function renderDecisionHelp() {
       const plans = planCatalog();
+      const optionList = (items) => `<ul class="decision-help-list">${items.map((item) => `<li><strong>${escapeHtml(item[1])}:</strong> ${escapeHtml(item[2] || "")}</li>`).join("")}</ul>`;
+      const fieldCard = (field) => `<div class="decision-plan-card">
+        <strong>${escapeHtml(field.label)}</strong>
+        <span>${escapeHtml(field.help)}</span>
+        <span><b>Opciones:</b> ${field.options.map(([value, label]) => `${escapeHtml(label)}${field.optionHelp && field.optionHelp[value] ? ` (${escapeHtml(field.optionHelp[value])})` : ""}`).join(" · ")}</span>
+      </div>`;
+      const questionGuide = `
+        <section class="decision-help-section">
+          <h4>5. Guía de preguntas y valor de cada respuesta</h4>
+          <p>Esta guía explica para qué sirve cada pregunta del relevamiento y cómo ayuda a acercar el plan correcto.</p>
+          <div class="decision-help-grid">
+            <div class="decision-plan-card"><strong>Tipo de cliente</strong><span>Contextualiza ejemplos, dolores, lenguaje comercial y resumen IA. No decide solo el plan, pero ayuda a orientar la propuesta.</span>${optionList(industries)}</div>
+            <div class="decision-plan-card"><strong>Alcance de usuarios</strong><span>Define si la adopción se piensa para un área prioritaria o perfiles de varias áreas. Impacta escala, confianza y posible Plan 3.</span><span><b>Default:</b> área prioritaria · RR.HH.</span></div>
+            ${qualificationFields.map(fieldCard).join("")}
+            ${operationalFields.map(fieldCard).join("")}
+            <div class="decision-plan-card"><strong>Dolor en comunicaciones</strong><span>Alimenta argumentos, casos de uso, resumen IA y roadmap. No cambia solo el plan.</span><span><b>Opciones según industria:</b> consultas, seguimientos, aprobaciones, documentación, reporting u operación.</span></div>
+            <div class="decision-plan-card"><strong>Reuniones y seguimiento</strong><span>Define escenarios de adopción y ejemplos prácticos. La herramienta usada ayuda a contextualizar las actividades.</span>${optionList(data.meetings)}</div>
+            <div class="decision-plan-card"><strong>Creación/análisis</strong><span>Detecta si conviene sumar add-ons como Excel, Copilot en Excel, casos por rol o prompts.</span><span><b>Opciones según industria:</b> documentos, propuestas, reportes, análisis, materiales o investigación.</span></div>
+            <div class="decision-plan-card"><strong>Trabajo repetitivo</strong><span>Alimenta oportunidades de automatización, agentes y argumentos de valor.</span>${optionList(data.automate)}</div>
+            ${logisticsFields.map(fieldCard).join("")}
+          </div>
+        </section>`;
       const planCards = Object.entries(plans).map(([key, plan]) => {
         const included = addOnCatalog().filter((addon) => includedAddonIdsForPlan(key).has(addon.id)).map((addon) => addon.title);
         return `<div class="decision-plan-card">
@@ -5051,7 +5130,8 @@ ${location.href}`
             <li><b>B</b><div><strong>Ya incluidos</strong><span>Se muestran separados para no duplicar alcance en la cotización.</span></div></li>
             <li><b>C</b><div><strong>No disponibles</strong><span>Quedan deshabilitados cuando requieren Microsoft 365 Copilot y el cliente no tiene licencia/trial.</span></div></li>
           </ol>
-        </section>`;
+        </section>
+        ${questionGuide}`;
     }
     function openDecisionHelpModal() {
       renderDecisionHelp();
@@ -5060,9 +5140,42 @@ ${location.href}`
     function closeDecisionHelpModal() {
       $("decisionHelpModal").classList.add("hidden");
     }
+    function exportDecisionHelpPdf() {
+      renderDecisionHelp();
+      const printWindow = window.open("", "_blank");
+      if (!printWindow) {
+        showToast("El navegador bloqueó la ventana de PDF. Habilitá pop-ups para exportar la ayuda.");
+        return;
+      }
+      printWindow.document.open();
+      printWindow.document.write(`<!doctype html><html lang="es"><head><meta charset="UTF-8"><title>Ayuda - lógica de decisión</title>
+        <style>
+          body { margin: 28px; color: #2e2d31; font-family: "Segoe UI", Aptos, Arial, sans-serif; }
+          h1 { font-size: 30px; margin: 0 0 8px; }
+          h4 { font-size: 20px; margin: 0 0 8px; }
+          p, span, li { color: #5f6168; line-height: 1.45; }
+          .decision-help-content { display: grid; gap: 18px; }
+          .decision-help-section { break-inside: avoid; border: 1px solid #dedede; border-radius: 14px; padding: 16px; margin-bottom: 16px; }
+          .decision-help-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+          .decision-plan-card, .decision-flow li { border: 1px solid #dedede; border-radius: 12px; padding: 12px; background: #f8f8fb; break-inside: avoid; }
+          .decision-plan-card strong { display: block; margin-bottom: 6px; color: #2e2d31; }
+          .decision-plan-card span { display: block; margin: 4px 0; }
+          .decision-flow { display: grid; gap: 8px; padding-left: 0; list-style: none; }
+          .decision-help-list { columns: 1; padding-left: 18px; }
+          @media print { body { margin: 14mm; } }
+        </style></head><body>
+        <h1>Ayuda · lógica de decisión</h1>
+        <p>Detalle de planes, scoring, confianza, add-ons y valor de cada pregunta.</p>
+        ${$("decisionHelpContent").innerHTML}
+      </body></html>`);
+      printWindow.document.close();
+      printWindow.focus();
+      setTimeout(() => printWindow.print(), 450);
+    }
 
     $("loginBtn").addEventListener("click", signInWithMicrosoft);
     $("decisionHelpBtn").addEventListener("click", openDecisionHelpModal);
+    $("exportDecisionHelpBtn").addEventListener("click", exportDecisionHelpPdf);
     $("closeDecisionHelpBtn").addEventListener("click", closeDecisionHelpModal);
     $("decisionHelpModal").addEventListener("click", (event) => {
       if (event.target === $("decisionHelpModal")) closeDecisionHelpModal();
