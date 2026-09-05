@@ -578,12 +578,17 @@
     .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 18px; border: 1px solid var(--cp-border); border-radius: 16px; }
     .switch {
       width: 58px;
+      min-width: 58px;
+      flex: 0 0 58px;
       height: 32px;
+      padding: 0;
+      appearance: none;
       border-radius: 999px;
       background: var(--cp-border-strong);
       position: relative;
       border: 0;
       cursor: pointer;
+      overflow: hidden;
     }
     .switch::after {
       content: "";
@@ -597,7 +602,7 @@
       transition: left .16s ease;
     }
     .switch.on { background: var(--cp-cowork); }
-    .switch.on::after { left: 30px; }
+    .switch.on::after { left: calc(100% - 28px); }
     .ai-options {
       margin-top: 16px;
       padding-top: 14px;
@@ -1100,6 +1105,12 @@
       padding: 22px;
       background:
         linear-gradient(90deg, var(--cp-brand-yellow) 0 7px, transparent 7px),
+        var(--cp-surface);
+    }
+    .proposal-panel.includes-panel {
+      background:
+        linear-gradient(90deg, #2563eb 0 7px, transparent 7px),
+        radial-gradient(circle at right top, var(--cp-brand-sky), transparent 12rem),
         var(--cp-surface);
     }
     .recommendation-title {
@@ -2488,7 +2499,7 @@
           <p>La app usa un scoring ponderado inspirado en un árbol de decisión. Siempre muestra un plan principal y, si hay señales mezcladas, alternativas para validar.</p>
         </div>
         <div class="modal-actions" style="margin-top:0">
-          <button class="btn action-pdf" id="exportDecisionHelpBtn">Exportar PDF</button>
+          <button class="btn action-pdf" id="exportDecisionHelpBtn"><span class="btn-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"></path><path d="M14 3v5h5"></path><path d="M9 13h6"></path><path d="M9 17h3"></path><path d="M5 7v14"></path><path d="M10 11h5"></path></svg></span>Exportar PDF</button>
           <button class="btn ghost" id="closeDecisionHelpBtn">Cerrar</button>
         </div>
       </div>
@@ -4653,7 +4664,7 @@
                     <div class="plan-metric"><strong>${recommended.shortScope}</strong><span>${recommended.scope}</span></div>
                   </div>
                 </div>
-                <div class="proposal-panel">
+                <div class="proposal-panel includes-panel">
                   <h3>Qué incluye este plan</h3>
                   <div class="execution-grid" style="grid-template-columns:1fr">
                     <div class="execution-card">
@@ -5423,25 +5434,88 @@ ${location.href}`
     }
     function renderDecisionHelp() {
       const plans = planCatalog();
-      const optionList = (items) => `<ul class="decision-help-list">${items.map((item) => `<li><strong>${escapeHtml(item[1])}:</strong> ${escapeHtml(item[2] || "")}</li>`).join("")}</ul>`;
+      const impactList = (items) => `<ul class="decision-help-list">${items.map(([label, impact]) => `<li><strong>${escapeHtml(label)}:</strong> ${escapeHtml(impact)}</li>`).join("")}</ul>`;
+      const scoringImpacts = {
+        m365Tools: [
+          ["Office básico", "refuerza Productividad Digital porque todavía hay hábitos base de Microsoft 365 por instalar."],
+          ["Colaboración parcial", "mantiene peso en Plan 1 y puede sumar add-ons de Teams/SharePoint si hay dispersión."],
+          ["Teams + OneDrive + SharePoint instalados", "reduce la necesidad de ordenar base y permite orientar más la propuesta a casos de uso o Copilot."],
+          ["Ecosistema avanzado", "favorece planes con IA aplicada porque la base operativa está más preparada."]
+        ],
+        informationLocation: [
+          ["Bajo orden", "suma señal fuerte a Plan 1 y a add-ons de orden documental/gobierno."],
+          ["Orden medio/bajo", "suma señal moderada a Productividad Digital porque hay que ordenar prácticas antes de escalar IA."],
+          ["Orden medio/alto", "reduce riesgo operativo y habilita avanzar con adopción aplicada o Copilot."],
+          ["Orden alto", "mejora confianza y permite focalizar la propuesta en valor, no en ordenamiento."]
+        ],
+        teamsSharepointStructure: [
+          ["No existe o abandonada", "refuerza Plan 1 y add-on de arquitectura Teams + SharePoint."],
+          ["Informal", "suma desorden operativo; si además hay acompañamiento o métricas de documentos, sugiere add-ons de gobierno."],
+          ["Parcial", "mantiene necesidad de buenas prácticas, pero con menor peso que un escenario sin estructura."],
+          ["Gobernada", "baja el peso de ordenamiento y favorece adopción avanzada."]
+        ],
+        taskManagement: [
+          ["Bajo/manual", "suma señal de desorden operativo y hace más probable Plan 1 o add-ons de trazabilidad."],
+          ["Medio/bajo", "suma señal moderada: hay herramientas, pero falta adopción consistente."],
+          ["Sistema externo definido", "reduce necesidad de Planner/To Do, pero puede orientar ejemplos e integraciones."],
+          ["Alto/formal", "aumenta confianza para planes de Copilot, medición y casos avanzados."]
+        ],
+        firstChange: [
+          ["Comunicación", "orienta casos iniciales a Outlook, Teams, mensajes internos y campaña de adopción."],
+          ["Archivos y documentación", "sugiere foco en OneDrive/SharePoint y puede activar orden documental."],
+          ["Tareas y seguimiento", "sugiere trabajo sobre Planner/To Do/Listas y trazabilidad."],
+          ["Procesos administrativos", "puede sumar señal hacia automatización, agentes o add-ons específicos."],
+          ["Reportes y trazabilidad", "orienta métricas, dashboards y medición de adopción."]
+        ],
+        deliveryMode: [
+          ["Presencial", "aumenta esfuerzo logístico y puede sugerir office hours o acompañamiento más cercano."],
+          ["Virtual", "mantiene el esfuerzo más contenido y facilita olas express."],
+          ["Mixta", "aumenta coordinación y normalmente requiere materiales/comunicación más robustos."],
+          ["A definir", "baja precisión presupuestaria hasta cerrar modalidad."]
+        ],
+        sessionFrequency: [
+          ["Semanal", "encaja con adopción progresiva y medición por etapas."],
+          ["Quincenal", "alarga calendario y puede requerir más seguimiento asincrónico."],
+          ["Intensiva", "concentra esfuerzo y sirve para pilotos o lanzamientos rápidos."],
+          ["A definir", "reduce precisión de duración y presupuesto."]
+        ],
+        groupModel: [
+          ["Por área", "facilita casos concretos y segmentación de contenidos."],
+          ["Grupos mixtos", "aumenta necesidad de ejemplos transversales y priorización."],
+          ["Champions", "sugiere programa de referentes y puede activar add-on de champions si no está incluido."],
+          ["A definir", "baja precisión de alcance hasta segmentar audiencias."]
+        ],
+        successMetric: [
+          ["Reducir WhatsApp", "refuerza Productividad Digital y foco en Teams/canales."],
+          ["Uso sostenido de Teams", "puede activar add-on de arquitectura Teams + SharePoint."],
+          ["Documentos centralizados", "puede activar orden documental y gobierno básico."],
+          ["Tareas trazables", "orienta la propuesta a Planner/To Do/Listas y hábitos operativos."],
+          ["Satisfacción", "en clientes con Copilot puede sugerir medición/dashboard de adopción."]
+        ]
+      };
+      const contextCards = [
+        `<div class="decision-plan-card"><strong>Tipo de cliente</strong><span>No suma puntos directos al plan. Ajusta lenguaje, ejemplos, casos de uso por industria y resumen IA para que la propuesta sea más relevante.</span></div>`,
+        `<div class="decision-plan-card"><strong>Alcance de usuarios</strong><span>Área prioritaria mantiene alcance más acotado. Varias áreas, más usuarios o perfiles mixtos aumentan peso de escala, confianza de Plan 3 y necesidad de cambio/medición.</span><span><b>Default:</b> área prioritaria · RR.HH.</span></div>`,
+        `<div class="decision-plan-card"><strong>Dolor en comunicaciones</strong><span>No define solo el plan. Alimenta casos prácticos, roadmap, argumentos comerciales y el resumen IA.</span></div>`,
+        `<div class="decision-plan-card"><strong>Reuniones y seguimiento</strong><span>Define escenarios de adopción. Si el dolor está en minutas, acuerdos y próximos pasos, fortalece casos de Copilot y productividad diaria.</span></div>`,
+        `<div class="decision-plan-card"><strong>Creación/análisis</strong><span>Si aparece análisis de datos, reportes o documentos complejos, puede sugerir add-ons como Excel, Copilot en Excel, casos por rol o biblioteca de prompts.</span></div>`,
+        `<div class="decision-plan-card"><strong>Trabajo repetitivo</strong><span>Cuando hay preguntas repetidas, checklists o reportes recurrentes, suma señal hacia automatización, agentes o add-ons específicos.</span></div>`
+      ].join("");
       const fieldCard = (field) => `<div class="decision-plan-card">
         <strong>${escapeHtml(field.label)}</strong>
         <span>${escapeHtml(field.help)}</span>
-        <span><b>Opciones:</b> ${field.options.map(([value, label]) => `${escapeHtml(label)}${field.optionHelp && field.optionHelp[value] ? ` (${escapeHtml(field.optionHelp[value])})` : ""}`).join(" · ")}</span>
+        ${field.optionHelp
+          ? impactList(field.options.map(([value, label]) => [label, field.optionHelp[value] || field.help]))
+          : impactList(scoringImpacts[field.key] || field.options.map(([, label]) => [label, field.help]))}
       </div>`;
       const questionGuide = `
         <section class="decision-help-section">
-          <h4>5. Guía de preguntas y valor de cada respuesta</h4>
-          <p>Esta guía explica para qué sirve cada pregunta del relevamiento y cómo ayuda a acercar el plan correcto.</p>
+          <h4>5. Guía de preguntas e impacto en el cálculo</h4>
+          <p>Esta guía explica cómo cada respuesta modifica el scoring, la confianza, los add-ons sugeridos o la precisión comercial de la propuesta.</p>
           <div class="decision-help-grid">
-            <div class="decision-plan-card"><strong>Tipo de cliente</strong><span>Contextualiza ejemplos, dolores, lenguaje comercial y resumen IA. No decide solo el plan, pero ayuda a orientar la propuesta.</span>${optionList(industries)}</div>
-            <div class="decision-plan-card"><strong>Alcance de usuarios</strong><span>Define si la adopción se piensa para un área prioritaria o perfiles de varias áreas. Impacta escala, confianza y posible Plan 3.</span><span><b>Default:</b> área prioritaria · RR.HH.</span></div>
+            ${contextCards}
             ${qualificationFields.map(fieldCard).join("")}
             ${operationalFields.map(fieldCard).join("")}
-            <div class="decision-plan-card"><strong>Dolor en comunicaciones</strong><span>Alimenta argumentos, casos de uso, resumen IA y roadmap. No cambia solo el plan.</span><span><b>Opciones según industria:</b> consultas, seguimientos, aprobaciones, documentación, reporting u operación.</span></div>
-            <div class="decision-plan-card"><strong>Reuniones y seguimiento</strong><span>Define escenarios de adopción y ejemplos prácticos. La herramienta usada ayuda a contextualizar las actividades.</span>${optionList(data.meetings)}</div>
-            <div class="decision-plan-card"><strong>Creación/análisis</strong><span>Detecta si conviene sumar add-ons como Excel, Copilot en Excel, casos por rol o prompts.</span><span><b>Opciones según industria:</b> documentos, propuestas, reportes, análisis, materiales o investigación.</span></div>
-            <div class="decision-plan-card"><strong>Trabajo repetitivo</strong><span>Alimenta oportunidades de automatización, agentes y argumentos de valor.</span>${optionList(data.automate)}</div>
             ${logisticsFields.map(fieldCard).join("")}
           </div>
         </section>`;
