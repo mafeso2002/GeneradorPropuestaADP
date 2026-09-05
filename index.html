@@ -1950,13 +1950,13 @@
       { key: "users", label: "Paso 2 · Alcance de usuarios", kicker: "Relevamiento de alcance", title: "¿A qué grupo de usuarios conviene orientar la propuesta?", subtitle: "Mientras hablás con el cliente, identificá si la adopción debería empezar por un área prioritaria o por perfiles de distintas áreas. No hace falta definir una cantidad cerrada en esta etapa." },
       { key: "qualification", label: "Paso 3 · Readiness y plan recomendado", kicker: "Readiness y oportunidad", title: "¿Qué necesitamos saber para recomendar el plan correcto?", subtitle: "Estas preguntas califican la oportunidad: objetivo, licencias, madurez, escala y capacidad de cambio. Con esa información se identifica la propuesta de adopción más adecuada para el cliente." },
       { key: "operational", label: "Paso 4 · Diagnóstico operativo M365", kicker: "Uso actual y orden digital", title: "¿Cómo trabaja hoy el cliente con Microsoft 365?", subtitle: "Estas preguntas detectan dispersión de información, estructura de Teams/SharePoint, gestión de tareas y primer foco de cambio. Sirven para presupuestar mejor adopción base." },
-      { key: "logistics", label: "Paso 5 · Logística y medición", kicker: "Formato de entrega", title: "¿Cómo conviene entregar y medir la adopción?", subtitle: "Definí modalidad, frecuencia, modelo de grupos y métrica de éxito para ajustar alcance, esfuerzo y handoff con adopción." },
-      { key: "inbox", label: "Paso 6 · Dolor en comunicaciones", kicker: "Relevamiento de productividad", title: "¿Qué problema de comunicación aparece más seguido?", subtitle: "Usá esta pregunta para guiar la conversación y elegí la opción que mejor represente el impacto que el cliente quiere resolver." },
-      { key: "meeting", label: "Paso 7 · Reuniones y seguimiento", kicker: "Relevamiento de reuniones", title: "¿Qué tipo de reuniones le consumen más tiempo al cliente?", subtitle: "Identificá dónde aparece más valor: preparación previa, toma de notas, resumen, decisiones, responsables o seguimiento posterior." },
-      { key: "create", label: "Paso 8 · Crea en menos tiempo", kicker: "Crea en menos tiempo", title: "¿Qué tarda más en crear o analizar el equipo del cliente?", subtitle: "Identificá tareas de contenido, análisis o documentación que puedan convertirse en casos de valor para la propuesta." },
-      { key: "automate", label: "Paso 9 · Automatiza trabajo repetitivo", kicker: "Automatiza trabajo repetitivo", title: "¿Qué trabajo repetitivo consume más tiempo?", subtitle: "Identificá qué tareas repetitivas aparecen como oportunidad para mejorar productividad, estandarizar respuestas o acelerar entregables." },
+      { key: "inbox", label: "Paso 5 · Dolor en comunicaciones", kicker: "Relevamiento de productividad", title: "¿Qué problema de comunicación aparece más seguido?", subtitle: "Usá esta pregunta para guiar la conversación y elegí la opción que mejor represente el impacto que el cliente quiere resolver." },
+      { key: "meeting", label: "Paso 6 · Reuniones y seguimiento", kicker: "Relevamiento de reuniones", title: "¿Qué tipo de reuniones le consumen más tiempo al cliente?", subtitle: "Identificá dónde aparece más valor: preparación previa, toma de notas, resumen, decisiones, responsables o seguimiento posterior." },
+      { key: "create", label: "Paso 7 · Crea en menos tiempo", kicker: "Crea en menos tiempo", title: "¿Qué tarda más en crear o analizar el equipo del cliente?", subtitle: "Identificá tareas de contenido, análisis o documentación que puedan convertirse en casos de valor para la propuesta." },
+      { key: "automate", label: "Paso 8 · Automatiza trabajo repetitivo", kicker: "Automatiza trabajo repetitivo", title: "¿Qué trabajo repetitivo consume más tiempo?", subtitle: "Identificá qué tareas repetitivas aparecen como oportunidad para mejorar productividad, estandarizar respuestas o acelerar entregables." },
       { key: "cowork", label: "Copilot Cowork · Recomendado", kicker: "Mejora opcional", title: "¿Conviene incluir Copilot Cowork en la propuesta?", subtitle: "Cowork puede fortalecer la propuesta cuando el cliente necesita resolver tareas más grandes, de varios pasos, que combinan investigación, análisis y generación de entregables." },
-      { key: "addons", label: "Add-ons · Módulos sugeridos", kicker: "Módulos opcionales", title: "¿Qué add-ons querés sumar a la propuesta?", subtitle: "Según el plan recomendado y lo relevado, seleccioná los módulos opcionales que conviene cotizar aparte." }
+      { key: "addons", label: "Add-ons · Módulos sugeridos", kicker: "Módulos opcionales", title: "¿Qué add-ons querés sumar a la propuesta?", subtitle: "Según el plan recomendado y lo relevado, seleccioná los módulos opcionales que conviene cotizar aparte." },
+      { key: "logistics", label: "Paso 9 · Logística y medición", kicker: "Cierre de entrega", title: "¿Cómo conviene entregar y medir la adopción?", subtitle: "Como cierre del relevamiento, definí modalidad, frecuencia, modelo de grupos y métrica de éxito para ajustar esfuerzo y handoff con adopción." }
     ];
     let currentStep = 0;
 
@@ -2623,13 +2623,6 @@
           icon: "teams"
         },
         {
-          label: "Logística y medición",
-          title: discoverySummary(logisticsFields),
-          desc: `${discoveryValue(logisticsFields, "groupModel")} · Métrica: ${discoveryValue(logisticsFields, "successMetric")}`,
-          edit: stepIndexByKey("logistics"),
-          icon: "calendar"
-        },
-        {
           label: "Necesidades detectadas",
           title: "Comunicación, reuniones, creación y automatización",
           desc: "",
@@ -2645,6 +2638,13 @@
       ];
       items.push({ label: "Add-ons", title: selectedAddonItems().length ? selectedAddonItems().map((item) => item.title).join(", ") : "Sin add-ons seleccionados", desc: "Módulos opcionales para cotizar por separado", edit: stepIndexByKey("addons"), icon: "proposal-doc" });
       items.push({ label: "Copilot Cowork", title: state.cowork ? "Seleccionado como add-on" : "No incluido en la recomendación", desc: state.cowork ? "Capacidad para tareas complejas, multi-paso y de mayor valor" : "Requiere licencia/trial de Microsoft 365 Copilot o decisión comercial de incluirlo como add-on futuro.", edit: stepIndexByKey("cowork"), icon: "cowork" });
+      items.push({
+        label: "Logística y medición",
+        title: discoverySummary(logisticsFields),
+        desc: `${discoveryValue(logisticsFields, "groupModel")} · Métrica: ${discoveryValue(logisticsFields, "successMetric")}`,
+        edit: stepIndexByKey("logistics"),
+        icon: "calendar"
+      });
       items.push({ label: "Comercial", title: state.commercialName || "Sin sesión Microsoft", desc: state.commercialEmail || "Iniciá sesión para asociar la propuesta a un usuario de Possumus.", edit: null, icon: "sales" });
       $("summaryGrid").innerHTML = items.map((item) => `<div class="summary-item ${item.label === "Copilot Cowork" ? `cowork-summary ${state.cowork ? "" : "not-included"}` : ""}">
         <div class="summary-main">
