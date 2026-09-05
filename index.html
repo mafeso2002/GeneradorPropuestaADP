@@ -263,9 +263,15 @@
       border-color: var(--cp-cowork);
       color: #ffffff;
     }
+    .btn.action-dynamics {
+      background: #0f6cbd;
+      border-color: #0f6cbd;
+      color: #ffffff;
+    }
     .btn.action-ai:hover { background: #ffe44d; }
     .btn.action-pdf:hover { background: #1d4ed8; }
     .btn.action-mail:hover { background: #008944; }
+    .btn.action-dynamics:hover { background: #0b5cab; }
     .btn .btn-icon {
       display: inline-grid;
       place-items: center;
@@ -3473,6 +3479,7 @@
         "other-meeting": '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="12" rx="2"></rect><path d="M8 21l4-4 4 4"></path><path d="M9 10h6"></path><path d="M9 13h4"></path></svg>',
         calendar: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M8 3v4"></path><path d="M16 3v4"></path><path d="M4 10h16"></path><path d="M8 14h2"></path><path d="M14 14h2"></path></svg>',
         mail: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="16" height="12" rx="2"></rect><path d="M5 8l7 5 7-5"></path></svg>',
+        dynamics: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5l8-3 8 4v12l-8 4-8-3V5z"></path><path d="M12 2v20"></path><path d="M4 5l8 4 8-3"></path><path d="M12 9l8 9"></path><path d="M12 9l-8 10"></path></svg>',
         automation: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4"></path><path d="M12 17v4"></path><path d="M3 12h4"></path><path d="M17 12h4"></path><circle cx="12" cy="12" r="5"></circle><path d="M10 12l1.5 1.5L15 10"></path></svg>',
         cowork: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.5c2.2-2.2 5.8-2.2 8 0s2.2 5.8 0 8l-3 3c-1.5 1.5-3.9 1.5-5.4 0s-1.5-3.9 0-5.4l2.8-2.8"></path><path d="M15.5 18.5c-2.2 2.2-5.8 2.2-8 0s-2.2-5.8 0-8l3-3c1.5-1.5 3.9-1.5 5.4 0s1.5 3.9 0 5.4l-2.8 2.8"></path><circle cx="7" cy="7" r="1.5"></circle><circle cx="17" cy="17" r="1.5"></circle></svg>',
         rocket: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 4c3 1 5 3 6 6l-7 7-5-5 6-8z"></path><path d="M7 12l-3 1 1-3"></path><path d="M12 17l-1 3 3-1"></path><circle cx="15" cy="9" r="1.5"></circle></svg>',
@@ -5073,6 +5080,7 @@
             <button class="btn" id="editPlanBtn">Editar datos</button>
             <div class="proposal-action-buttons">
               <button class="btn action-pdf" id="printBtn">Generar PDF</button>
+              ${mode !== "user" ? `<button class="btn action-dynamics" id="dynamicsBtn" type="button"><span class="btn-icon">${iconSvg("dynamics")}</span>Subir a Dynamics</button>` : ""}
               <button class="btn action-mail" id="handoffBtn"><span class="btn-icon">${iconSvg("mail")}</span>Enviar handoff</button>
             </div>
           </div>
@@ -5189,6 +5197,9 @@
         renderPlan(mode);
       });
       $("printBtn").addEventListener("click", () => generateProposalPdf(recommendedKey));
+      if ($("dynamicsBtn")) $("dynamicsBtn").addEventListener("click", () => {
+        showToast("Integración con Dynamics pendiente: el botón ya quedó reservado para subir la propuesta.");
+      });
       $("handoffBtn").addEventListener("click", () => openHandoffModal(recommendedKey));
     }
     function buildDefaultHandoffEmail(recommendedKey = recommendedPlanKey()) {
