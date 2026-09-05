@@ -837,6 +837,24 @@
         radial-gradient(circle at right top, var(--cp-brand-lilac), transparent 14rem),
         var(--cp-surface);
     }
+    .validation-panel.consistent {
+      border-color: var(--cp-success);
+      background:
+        radial-gradient(circle at right top, var(--cp-brand-mint), transparent 14rem),
+        var(--cp-surface);
+    }
+    .validation-panel.review {
+      border-color: var(--cp-brand-yellow);
+      background:
+        radial-gradient(circle at right top, var(--cp-brand-yellow-soft), transparent 14rem),
+        var(--cp-surface);
+    }
+    .validation-panel.risky {
+      border-color: var(--cp-danger);
+      background:
+        radial-gradient(circle at right top, #fff1f2, transparent 14rem),
+        var(--cp-surface);
+    }
     .validation-panel h3 { margin-bottom: 6px; }
     .validation-panel textarea {
       margin-top: 12px;
@@ -848,6 +866,9 @@
       justify-content: flex-end;
       gap: 10px;
       margin-top: 14px;
+    }
+    .validation-actions .btn {
+      background: var(--cp-surface);
     }
     .validation-result {
       display: grid;
@@ -2159,7 +2180,7 @@
         <div id="validationPanel"></div>
         <div class="toolbar">
           <button class="btn" id="reviewBackBtn">← Atrás</button>
-          <button class="btn primary" id="buildBtn">Generar propuesta</button>
+          <button class="btn action-mail" id="buildBtn">Generar propuesta</button>
         </div>
       </main>
     </section>
@@ -2171,8 +2192,8 @@
   <div id="thinkingOverlay" class="thinking-overlay hidden" aria-live="polite" aria-busy="true">
     <div class="thinking-card">
       <div class="thinking-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z"></path><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8L18 15z"></path></svg></div>
-      <h3>Generando resumen con IA</h3>
-      <p>Estoy buscando contexto público de la empresa, armando el resumen comercial y estimando el presupuesto sugerido.</p>
+      <h3 id="thinkingTitle">Generando resumen con IA</h3>
+      <p id="thinkingText">Estoy buscando contexto público de la empresa, armando el resumen comercial y estimando el presupuesto sugerido.</p>
     </div>
   </div>
   <div id="confirmProposalModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confirmProposalTitle">
@@ -2661,13 +2682,13 @@
       userRange: "",
       m365Maturity: "",
       copilotLicenses: "",
-      copilotUsage: "",
-      concreteUseCases: "",
-      agentNeed: "",
+      copilotUsage: "not-applicable",
+      concreteUseCases: "none",
+      agentNeed: "no",
       projectStage: "",
       sponsor: "",
       governance: "",
-      iaGovernanceNeed: "",
+      iaGovernanceNeed: "none",
       accompaniment: "",
       primaryObjective: "",
       m365Tools: "",
@@ -2869,6 +2890,14 @@
       ["onboarding", "wizard", "review", "plan"].forEach((id) => $(id).classList.add("hidden"));
       $(section).classList.remove("hidden");
       window.scrollTo(0, 0);
+    }
+    function showThinking(title, text) {
+      $("thinkingTitle").textContent = title;
+      $("thinkingText").textContent = text;
+      $("thinkingOverlay").classList.remove("hidden");
+    }
+    function hideThinking() {
+      $("thinkingOverlay").classList.add("hidden");
     }
     function scrollToStepTop() {
       requestAnimationFrame(() => window.scrollTo({ top: 0, behavior: "smooth" }));
@@ -3638,10 +3667,12 @@
       const validation = state.aiValidation && state.aiValidation.validation;
       const summary = state.aiValidation && state.aiValidation.summary ? state.aiValidation.summary : "";
       const changes = validationAddonChanges();
-      $("validationPanel").innerHTML = `<div class="validation-panel">
+      const statusClass = summary ? validationStatusClass(validationStatusLabel(validation)) : "";
+      $("validationPanel").innerHTML = `<div class="validation-panel ${statusClass}">
         <span class="ai-badge">Segunda mirada IA</span>
         <h3>Validación IA del diagnóstico</h3>
-        <p>La IA revisa consistencia del plan, señales mezcladas, preguntas faltantes, add-ons y riesgos comerciales. No cambia nada automáticamente.</p>
+        <p>Antes de generar la propuesta, la IA revisa la consistencia entre respuestas, plan recomendado, confianza, add-ons y riesgos comerciales. La validación es consultiva: no modifica la propuesta automáticamente.</p>
+        ${state.aiValidation && state.aiValidation.generatedAt ? `<p class="decision-note">Última validación: ${new Date(state.aiValidation.generatedAt).toLocaleString("es-AR")}</p>` : ""}
         <label for="validationNotes">Notas comerciales adicionales para la IA</label>
         <textarea id="validationNotes" placeholder="Ej.: El cliente aclaró que por ahora solo quiere Excel.">${escapeHtml(state.validationNotes || "")}</textarea>
         ${summary ? `<div class="validation-result">
@@ -3649,10 +3680,9 @@
           ${formatAiSummaryText(summary)}
         </div>` : ""}
         <div class="validation-actions">
-          <button class="btn" id="validateDiagnosisBtn">${summary ? "Revalidar diagnóstico" : "Validar diagnóstico con IA"}</button>
+          <button class="btn action-ai" id="validateDiagnosisBtn">${summary ? "Revalidar diagnóstico" : "Validar diagnóstico con IA"}</button>
           ${summary ? `<button class="btn" id="editFromValidationBtn">Editar respuestas</button>
-          <button class="btn" id="applyValidationAddonsBtn" ${changes.add.length || changes.remove.length ? "" : "disabled"}>Aplicar add-ons sugeridos</button>
-          <button class="btn primary" id="ignoreValidationBuildBtn">Ignorar y generar propuesta</button>` : ""}
+          <button class="btn action-mail" id="applyValidationAddonsBtn" ${changes.add.length || changes.remove.length ? "" : "disabled"}>Aplicar add-ons sugeridos</button>` : ""}
         </div>
         <div class="handoff-status" id="validationStatus"></div>
       </div>`;
@@ -3664,7 +3694,6 @@
         show("wizard");
       });
       if ($("applyValidationAddonsBtn")) $("applyValidationAddonsBtn").addEventListener("click", applyValidationAddons);
-      if ($("ignoreValidationBuildBtn")) $("ignoreValidationBuildBtn").addEventListener("click", generatePlan);
     }
     function formatDate(iso) {
       if (!iso) return "";
@@ -4493,11 +4522,10 @@ ${location.href}`
     async function validateDiagnosisWithAi() {
       const button = $("validateDiagnosisBtn");
       const status = $("validationStatus");
-      const overlay = $("thinkingOverlay");
       button.disabled = true;
       status.className = "handoff-status";
       status.textContent = "Validando diagnóstico, plan y add-ons con IA...";
-      overlay.classList.remove("hidden");
+      showThinking("Validando diagnóstico con IA", "Estoy revisando consistencia del plan, respuestas, add-ons y riesgos comerciales antes de generar la propuesta.");
       try {
         const response = await fetch("/api/proposal-validation", {
           method: "POST",
@@ -4521,19 +4549,18 @@ ${location.href}`
         status.className = "handoff-status error";
         status.textContent = `No se pudo validar el diagnóstico: ${error.message}`;
       } finally {
-        overlay.classList.add("hidden");
+        hideThinking();
         if ($("validateDiagnosisBtn")) $("validateDiagnosisBtn").disabled = false;
       }
     }
     async function generateAiSummary(recommendedKey = recommendedPlanKey()) {
       const button = $("aiSummaryBtn");
       const status = $("aiSummaryStatus");
-      const overlay = $("thinkingOverlay");
       const payload = buildHandoffPayload(recommendedKey);
       button.disabled = true;
       status.className = "handoff-status";
       status.textContent = "Generando resumen ejecutivo y estimación de presupuesto con IA...";
-      overlay.classList.remove("hidden");
+      showThinking("Generando resumen con IA", "Estoy buscando contexto público de la empresa, armando el resumen comercial y estimando el presupuesto sugerido.");
       try {
         const response = await fetch("/api/ai-summary", {
           method: "POST",
@@ -4558,7 +4585,7 @@ ${location.href}`
         status.className = "handoff-status error";
         status.textContent = `No se pudo generar el resumen IA: ${error.message}`;
       } finally {
-        overlay.classList.add("hidden");
+        hideThinking();
         if ($("aiSummaryBtn")) $("aiSummaryBtn").disabled = false;
       }
     }
@@ -4932,7 +4959,7 @@ ${location.href}`
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "", department: "", departments: [], userRange: "", m365Maturity: "", copilotLicenses: "", copilotUsage: "", concreteUseCases: "", agentNeed: "", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, validationNotes: "", aiValidation: null, aiSummary: null, completed: {} });
+      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "", department: "", departments: [], userRange: "", m365Maturity: "", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, validationNotes: "", aiValidation: null, aiSummary: null, completed: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
       location.hash = "/onboarding";
