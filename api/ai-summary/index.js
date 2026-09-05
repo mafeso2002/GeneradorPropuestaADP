@@ -368,6 +368,12 @@ module.exports = async function (context, req) {
   }
 
   const companyResearch = await getCompanyResearch(payload.proposal.company, payload, context);
+  const includeBudgetEstimate = payload.proposal && payload.proposal.budgetEstimateInput
+    ? payload.proposal.budgetEstimateInput.includeBudgetEstimate !== false
+    : true;
+  const responseFormat = includeBudgetEstimate
+    ? "Devolver texto en Markdown con secciones: ## Contexto de la empresa, ## Lectura comercial, ## Recomendacion Possumus, ## Estimacion asistida de presupuesto, ## Argumentos para la reunion. En Contexto de la empresa incluir rubro, productos/servicios, escala si esta sustentada y canales/contactos publicos si existen. En Estimacion asistida de presupuesto usar proposal.budgetEstimateInput: si shouldEstimate es false, no cerrar rango y pedir validacion con preventa/adopcion; si es true, indicar rango sugerido, modalidad comercial, supuestos y alertas. No inventar precios cerrados para add-ons a cotizar. La ultima seccion debe usar bullets."
+    : "Devolver texto en Markdown con secciones: ## Contexto de la empresa, ## Lectura comercial, ## Recomendacion Possumus, ## Argumentos para la reunion. En Contexto de la empresa incluir rubro, productos/servicios, escala si esta sustentada y canales/contactos publicos si existen. No incluir estimacion de presupuesto porque el comercial la desactivo. La ultima seccion debe usar bullets.";
   const enrichedPayload = {
     ...payload,
     companyResearch,
@@ -375,7 +381,7 @@ module.exports = async function (context, req) {
       ...(payload.aiInstructions || {}),
       useCompanyResearch: companyResearch.status === "found",
       strictGrounding: "Usar companyResearch solo si status es found y tiene sources del sitio oficial probable. No usar Wikipedia, redes sociales ni fuentes que no coincidan claramente con la empresa. Si no hay datos sobre tamano, empleados, facturacion o contactos comerciales, decir 'no detectado en fuentes publicas' en vez de inventar.",
-      responseFormat: "Devolver texto en Markdown con secciones: ## Contexto de la empresa, ## Lectura comercial, ## Recomendacion Possumus, ## Estimacion asistida de presupuesto, ## Argumentos para la reunion. En Contexto de la empresa incluir rubro, productos/servicios, escala si esta sustentada y canales/contactos publicos si existen. En Estimacion asistida de presupuesto usar proposal.budgetEstimateInput: si shouldEstimate es false, no cerrar rango y pedir validacion con preventa/adopcion; si es true, indicar rango sugerido, modalidad comercial, supuestos y alertas. No inventar precios cerrados para add-ons a cotizar. La ultima seccion debe usar bullets."
+      responseFormat
     }
   };
 
