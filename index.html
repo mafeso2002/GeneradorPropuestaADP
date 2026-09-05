@@ -1378,24 +1378,31 @@
     }
     .addon-option-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
+      grid-template-columns: 1fr;
+      gap: 10px;
       margin-top: 18px;
     }
     .addon-option {
       position: relative;
       display: grid;
-      grid-template-columns: 38px 1fr;
-      gap: 10px;
+      grid-template-columns: minmax(0, 1fr) minmax(190px, .34fr);
+      gap: 12px;
       align-items: start;
-      min-height: 104px;
-      padding: 14px 40px 14px 14px;
+      min-height: auto;
+      padding: 14px 42px 14px 14px;
       border: 1px solid var(--cp-border);
       border-radius: 16px;
       background: var(--cp-surface);
       color: var(--cp-text);
       text-align: left;
       cursor: pointer;
+    }
+    .addon-functional {
+      display: grid;
+      grid-template-columns: 38px minmax(0, 1fr);
+      gap: 10px;
+      align-items: start;
+      min-width: 0;
     }
     .addon-option .stage-icon {
       width: 36px;
@@ -1411,6 +1418,14 @@
       font-size: 13px;
       line-height: 1.35;
     }
+    .addon-pricing {
+      display: grid;
+      gap: 6px;
+      justify-items: start;
+      align-self: stretch;
+      padding-left: 12px;
+      border-left: 1px solid var(--cp-border);
+    }
     .addon-option.disabled {
       opacity: .56;
       cursor: not-allowed;
@@ -1423,7 +1438,7 @@
     }
     .addon-option.compact {
       min-height: auto;
-      grid-template-columns: 34px 1fr;
+      grid-template-columns: minmax(0, 1fr);
       padding: 12px 14px;
       opacity: .48;
       cursor: not-allowed;
@@ -1437,6 +1452,7 @@
       width: 18px;
       height: 18px;
     }
+    .addon-option.compact .addon-pricing { display: none; }
     .addon-option.compact .option-check { display: none; }
     .addon-option.disabled:hover {
       border-color: var(--cp-border);
@@ -1460,7 +1476,6 @@
     .addon-price {
       display: inline-flex;
       width: fit-content;
-      margin-top: 7px;
       border-radius: 999px;
       padding: 3px 8px;
       background: var(--cp-surface-soft);
@@ -1471,8 +1486,6 @@
     .addon-requirement {
       display: inline-flex;
       width: fit-content;
-      margin-top: 7px;
-      margin-left: 6px;
       border-radius: 999px;
       padding: 3px 8px;
       border: 1px solid var(--cp-border);
@@ -1481,6 +1494,43 @@
       font-size: 12px;
       font-weight: 800;
     }
+    .addon-price-summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(260px, .45fr);
+      gap: 12px;
+      margin: 16px 0 4px;
+    }
+    .addon-price-list {
+      display: grid;
+      gap: 8px;
+    }
+    .addon-price-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--cp-border);
+      border-radius: 12px;
+      background: var(--cp-surface);
+      color: var(--cp-text-muted);
+      font-size: 13px;
+    }
+    .addon-price-row strong { color: var(--cp-text); }
+    .addon-total-box {
+      border: 1px solid var(--cp-cowork);
+      border-radius: 16px;
+      padding: 16px;
+      background:
+        radial-gradient(circle at right, var(--cp-cowork-soft), transparent 11rem),
+        var(--cp-surface);
+    }
+    .addon-total-box strong {
+      display: block;
+      font-size: 22px;
+      color: var(--cp-cowork);
+      margin-top: 6px;
+    }
+    .addon-total-box p { margin: 6px 0 0; }
     .addon-plan-context {
       display: grid;
       grid-template-columns: 1fr;
@@ -1548,8 +1598,6 @@
     .addon-status {
       display: inline-flex;
       width: fit-content;
-      margin-top: 7px;
-      margin-left: 6px;
       border-radius: 999px;
       padding: 3px 8px;
       background: var(--cp-brand-mint);
@@ -2217,7 +2265,8 @@
     .hidden { display: none !important; }
     @media (max-width: 860px) {
       .hero, .layout, .form-row, .review-grid, .roadmap, .links { grid-template-columns: 1fr; }
-      .proposal-grid, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid, .decision-help-grid { grid-template-columns: 1fr; }
+      .proposal-grid, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option { grid-template-columns: 1fr; }
+      .addon-pricing { border-left: 0; border-top: 1px solid var(--cp-border); padding-left: 0; padding-top: 10px; }
       .topbar, .top-actions { align-items: flex-start; flex-direction: column; }
       .auth-status { max-width: 100%; }
       .cowork-hero-header { grid-template-columns: 96px 1fr; }
@@ -3449,13 +3498,17 @@
       const isSelected = selectable && selected.has(addon.id);
       const compact = stateName === "unavailable";
       return `<button class="addon-option ${isSelected ? "selected" : ""} ${stateName} ${compact ? "compact" : ""}" data-addon="${addon.id}" ${selectable ? "" : "disabled"}>
-        <div class="stage-icon">${iconSvg(addon.icon)}</div>
-        <div>
-          <strong>${addon.title}</strong>
-          <p>${addon.desc}</p>
+        <div class="addon-functional">
+          <div class="stage-icon">${iconSvg(addon.icon)}</div>
+          <div>
+            <strong>${addon.title}</strong>
+            <p>${addon.desc}</p>
+          </div>
+        </div>
+        <div class="addon-pricing">
           ${compact ? "" : `<span class="addon-price"><span class="money-icon" style="width:22px;height:22px;font-size:13px;margin-right:6px">$</span> ${addon.price}</span>`}
-          <span class="addon-requirement">${addonRequirement(addon, stateName)}</span>
           <span class="addon-status ${stateName}">${addonStateLabel(stateName)}</span>
+          <span class="addon-requirement">${addonRequirement(addon, stateName)}</span>
           ${addon.pricingNotes ? `<span class="addon-requirement">${escapeHtml(addon.pricingNotes)}</span>` : ""}
         </div>
         <div class="option-check">${isSelected ? "✓" : ""}</div>
@@ -3475,6 +3528,22 @@
           <div class="addon-option-grid">${addons.map((addon) => renderAddonOption(addon, selected, planKey)).join("")}</div>
         </div>
       </details>`;
+    }
+    function renderAddonPriceSummary(planKey) {
+      const quote = quoteForPlan(planKey);
+      const selected = selectedAddonItems();
+      const total = proposalTotalEstimate(planKey);
+      return `<div class="addon-price-summary">
+        <div class="addon-total-box">
+          <span class="ai-badge">Resumen de precios</span>
+          <strong>${total.label}</strong>
+          <p>${total.detail}</p>
+        </div>
+        <div class="addon-price-list">
+          <div class="addon-price-row"><span>Plan base</span><strong>${quote.main}</strong></div>
+          ${selected.length ? selected.map((addon) => `<div class="addon-price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("") : `<div class="addon-price-row"><span>Add-ons seleccionados</span><strong>Sin adicionales</strong></div>`}
+        </div>
+      </div>`;
     }
     function shouldShowAddonsStep() {
       return true;
@@ -3784,6 +3853,7 @@
               <p>Los módulos de abajo se separan entre lo que ya cubre el plan, lo recomendado como adicional y lo disponible para cotizar aparte.</p>
             </div>
           </div>
+          ${renderAddonPriceSummary(planKey)}
           ${renderAddonSection("Add-ons sugeridos para este caso", "Se marcan por las respuestas del relevamiento y el árbol de decisión.", suggested, selected, planKey, true)}
           ${availableByCategory.map(([category, addons]) => renderAddonSection(category, "Disponibles para sumar si el comercial quiere ampliar alcance.", addons, selected, planKey)).join("")}
           ${renderAddonSection("Ya incluido en el plan probable", "No lo cotices como adicional salvo que el alcance sea mayor al previsto.", includedAddons, selected, planKey)}
