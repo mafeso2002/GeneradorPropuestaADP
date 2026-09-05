@@ -1124,6 +1124,14 @@
       font-size: 13px;
       font-weight: 900;
     }
+    button.confidence-badge {
+      cursor: pointer;
+      font-family: inherit;
+    }
+    button.confidence-badge:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(46,45,49,.12);
+    }
     .confidence-badge.high {
       border: 1px solid var(--cp-success);
       background: var(--cp-brand-mint);
@@ -1150,6 +1158,39 @@
       font-size: 14px;
     }
     .decision-evidence li { margin: 4px 0; }
+    .confidence-modal-card {
+      width: min(720px, 100%);
+    }
+    .confidence-score-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .confidence-score-row {
+      display: grid;
+      grid-template-columns: minmax(160px, .6fr) 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+    .confidence-bar {
+      height: 10px;
+      border-radius: 999px;
+      overflow: hidden;
+      background: var(--cp-surface-soft);
+      border: 1px solid var(--cp-border);
+    }
+    .confidence-bar span {
+      display: block;
+      height: 100%;
+      background: var(--cp-brand-yellow);
+    }
+    .budget-total-card {
+      border-color: var(--cp-cowork);
+      background:
+        linear-gradient(90deg, var(--cp-cowork) 0 7px, transparent 7px),
+        radial-gradient(circle at right, var(--cp-cowork-soft), transparent 12rem),
+        var(--cp-surface);
+    }
     .alternative-panel {
       margin-top: 16px;
       border: 1px solid var(--cp-border);
@@ -2343,6 +2384,19 @@
       <div id="decisionHelpContent" class="decision-help-content"></div>
     </div>
   </div>
+  <div id="confidenceModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confidenceModalTitle">
+    <div class="modal-card confidence-modal-card">
+      <div class="modal-header">
+        <div>
+          <span class="ai-badge">Detalle de cálculo</span>
+          <h3 id="confidenceModalTitle">Por qué da esta confianza</h3>
+          <p>La confianza sube cuando el plan ganador acumula señales claras y se distancia del segundo plan. Baja cuando dos caminos quedan cerca o faltan señales críticas.</p>
+        </div>
+        <button class="btn ghost" id="closeConfidenceModalBtn">Cerrar</button>
+      </div>
+      <div id="confidenceModalContent"></div>
+    </div>
+  </div>
   <div id="handoffModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="handoffModalTitle">
     <div class="modal-card">
       <div class="modal-header">
@@ -3407,9 +3461,9 @@
         <div class="option-check">${isSelected ? "✓" : ""}</div>
       </button>`;
     }
-    function renderAddonSection(title, description, addons, selected, planKey) {
+    function renderAddonSection(title, description, addons, selected, planKey, open = false) {
       if (!addons.length) return "";
-      return `<details class="addon-section">
+      return `<details class="addon-section" ${open ? "open" : ""}>
         <summary class="addon-section-header">
           <div>
             <h4>${title}</h4>
@@ -3730,7 +3784,7 @@
               <p>Los módulos de abajo se separan entre lo que ya cubre el plan, lo recomendado como adicional y lo disponible para cotizar aparte.</p>
             </div>
           </div>
-          ${renderAddonSection("Add-ons sugeridos para este caso", "Se marcan por las respuestas del relevamiento y el árbol de decisión.", suggested, selected, planKey)}
+          ${renderAddonSection("Add-ons sugeridos para este caso", "Se marcan por las respuestas del relevamiento y el árbol de decisión.", suggested, selected, planKey, true)}
           ${availableByCategory.map(([category, addons]) => renderAddonSection(category, "Disponibles para sumar si el comercial quiere ampliar alcance.", addons, selected, planKey)).join("")}
           ${renderAddonSection("Ya incluido en el plan probable", "No lo cotices como adicional salvo que el alcance sea mayor al previsto.", includedAddons, selected, planKey)}
           ${renderAddonSection("No disponible por licenciamiento", "Requieren Microsoft 365 Copilot.", unavailable, selected, planKey)}
@@ -4081,6 +4135,52 @@
       }
       return { main: "A cotizar según alcance", detail: "El PPT no publica precio base para Plan 3. Se cotiza por cantidad de grupos, olas, add-ons y nivel de acompañamiento." };
     }
+    function parseUsdRange(text) {
+      const cleaned = String(text || "").replace(/\./g, "");
+      const numbers = [...cleaned.matchAll(/([0-9]+(?:,[0-9]+)?)/g)]
+        .map((match) => Number(match[1].replace(",", ".")))
+        .filter((value) => Number.isFinite(value));
+      if (!numbers.length || !/usd/i.test(cleaned)) return null;
+      return { min: numbers[0], max: numbers[1] || numbers[0] };
+    }
+    function formatUsd(value) {
+      return `USD ${Math.round(value).toLocaleString("es-AR")} + IVA`;
+    }
+    function proposalTotalEstimate(recommendedKey = recommendedPlanKey()) {
+      const quote = quoteForPlan(recommendedKey);
+      const planRange = parseUsdRange(quote.main);
+      const addons = selectedAddonItems();
+      let addonMin = 0;
+      let addonMax = 0;
+      let unknownCount = 0;
+      addons.forEach((addon) => {
+        const range = addon.priceMinUsd && addon.priceMaxUsd
+          ? { min: addon.priceMinUsd, max: addon.priceMaxUsd }
+          : parseUsdRange(addon.price);
+        if (range) {
+          addonMin += range.min;
+          addonMax += range.max;
+        } else {
+          unknownCount += 1;
+        }
+      });
+      if (!planRange) {
+        return {
+          label: quote.main,
+          detail: unknownCount ? `Plan y ${unknownCount} add-on${unknownCount === 1 ? "" : "s"} requieren validación comercial.` : quote.detail,
+          plan: quote.main,
+          addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin add-ons adicionales"
+        };
+      }
+      const totalMin = planRange.min + addonMin;
+      const totalMax = planRange.max + addonMax;
+      return {
+        label: totalMin === totalMax ? formatUsd(totalMin) : `${formatUsd(totalMin).replace(" + IVA", "")} a ${formatUsd(totalMax)}`,
+        detail: `Incluye plan base (${quote.main}) + ${addons.length ? "add-ons seleccionados" : "sin add-ons adicionales"}.${unknownCount ? ` ${unknownCount} add-on${unknownCount === 1 ? "" : "s"} queda${unknownCount === 1 ? "" : "n"} a validar.` : ""}`,
+        plan: quote.main,
+        addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin add-ons adicionales"
+      };
+    }
     function addOnsForPlan(key) {
       return selectedAddonItems().map((item) => [item.title, item.desc, item.icon, item.price]);
     }
@@ -4239,6 +4339,30 @@
         </div>`).join("")}</div>
       </div>`;
     }
+    function renderConfidenceDetails(decision, plans) {
+      const maxScore = Math.max(...decision.ranked.map((item) => item.score), 1);
+      const top = decision.ranked[0];
+      const second = decision.ranked[1];
+      const margin = second ? top.score - second.score : top.score;
+      const scoreRows = decision.ranked.map((item) => `<div class="confidence-score-row">
+        <strong>${escapeHtml(plans[item.key].name)} · ${item.score} pts</strong>
+        <div class="confidence-bar"><span style="width:${Math.max(4, Math.round((item.score / maxScore) * 100))}%"></span></div>
+      </div>`).join("");
+      return `<div class="decision-help-section" style="margin-bottom:0">
+        <h4>${confidenceLabel(decision.level)} · ${decision.confidence}%</h4>
+        <p>Plan ganador: <strong>${escapeHtml(plans[top.key].name)}</strong>. Diferencia contra el segundo: <strong>${margin} puntos</strong>.</p>
+        <div class="confidence-score-list">${scoreRows}</div>
+        ${decision.reasons.length ? `<h4 style="margin-top:18px">Señales que más pesaron</h4><ul class="decision-evidence">${decision.reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>` : ""}
+        ${decision.alternatives.length ? `<h4 style="margin-top:18px">Por qué hay alternativa</h4><p>El segundo plan quedó relativamente cerca o algunas respuestas apuntan a otro camino posible.</p>` : ""}
+      </div>`;
+    }
+    function openConfidenceModal(decision, plans) {
+      $("confidenceModalContent").innerHTML = renderConfidenceDetails(decision, plans);
+      $("confidenceModal").classList.remove("hidden");
+    }
+    function closeConfidenceModal() {
+      $("confidenceModal").classList.add("hidden");
+    }
     function recommendationReason(key) {
       const decision = planDecision();
       const matched = decision.ranked.find((item) => item.key === key);
@@ -4309,6 +4433,7 @@
       const recommended = plans[recommendedKey];
       const roadmapItems = proposalRoadmap(recommendedKey);
       const quote = quoteForPlan(recommendedKey);
+      const totalEstimate = proposalTotalEstimate(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
       const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
       const validationProposalText = state.aiValidation && state.aiValidation.summary ? filterValidationSummaryForProposal(state.aiValidation.summary) : "";
@@ -4336,7 +4461,7 @@
               <p class="lead">${selectedLabel("industry")} · ${selectedLabel("users")}</p>
               <div class="chips">${focus.map((item) => `<span class="pill">${item}</span>`).join("")}<span class="pill license-pill ${hasCopilotLicense() ? "has-copilot" : ""}">${hasCopilotLicense() ? "Tiene M365 Copilot" : "Sin M365 Copilot"}</span><span class="pill">Cowork: ${state.cowork ? "Incluido" : "No incluido"}</span></div>
               <div class="decision-row">
-                <span class="confidence-badge ${decision.level}">${confidenceLabel(decision.level)} · ${decision.confidence}%</span>
+                <button class="confidence-badge ${decision.level}" id="confidenceBadge" type="button">${confidenceLabel(decision.level)} · ${decision.confidence}%</button>
                 <span class="decision-note">${confidenceNote(decision)}</span>
               </div>
             </div>
@@ -4346,6 +4471,7 @@
             <div class="proposal-meta-card"><strong>${formatDate(state.startDate)}</strong><span>Inicio estimado</span></div>
             <div class="proposal-meta-card"><strong>${planEndDate(recommended)}</strong><span>Fin estimado</span></div>
             <div class="proposal-meta-card quote-card"><div class="money-icon">$</div><div><strong>${quote.main}</strong><span>Cotización de referencia</span><p>${quote.detail}</p></div></div>
+            <div class="proposal-meta-card quote-card budget-total-card"><div class="money-icon">$</div><div><strong>${totalEstimate.label}</strong><span>Total estimado</span><p>${totalEstimate.detail}</p></div></div>
           </div>
           <div class="proposal-grid">
             <div class="proposal-panel">
@@ -4521,6 +4647,7 @@
         `;
       show("plan");
       $("editPlanBtn").addEventListener("click", () => { currentStep = 0; renderStep(); show("wizard"); });
+      $("confidenceBadge").addEventListener("click", () => openConfidenceModal(decision, plans));
       $("aiSummaryBtn").addEventListener("click", () => generateAiSummary(recommendedKey));
       const budgetSwitch = $("budgetEstimateSwitch");
       if (budgetSwitch) budgetSwitch.addEventListener("click", () => {
@@ -4533,6 +4660,7 @@
     function buildDefaultHandoffEmail(recommendedKey = recommendedPlanKey()) {
       const recommended = planCatalog()[recommendedKey];
       const quote = quoteForPlan(recommendedKey);
+      const totalEstimate = proposalTotalEstimate(recommendedKey);
       const decision = planDecision();
       const aiSummary = state.aiSummary ? {
         text: state.aiSummary.text || "",
@@ -4559,6 +4687,7 @@ Confianza: ${confidenceLabel(decision.level)} · ${decision.confidence}%
 Duración: ${recommended.duration}
 Alcance: ${recommended.scope}
 Cotización: ${quote.main}
+Total estimado: ${totalEstimate.label}
 Detalle: ${quote.detail}${aiSection}${validationSection}
 
 Motivo de recomendación:
@@ -4634,6 +4763,7 @@ ${location.href}`
       const plans = planCatalog();
       const recommended = plans[recommendedKey];
       const quote = quoteForPlan(recommendedKey);
+      const totalEstimate = proposalTotalEstimate(recommendedKey);
       const roadmapItems = proposalRoadmap(recommendedKey);
       const focus = [selectedLabel("inbox"), selectedLabel("meeting"), selectedLabel("create"), selectedLabel("automate")].filter(Boolean);
       const decision = planDecision();
@@ -4673,6 +4803,7 @@ ${location.href}`
           recommendedPlanScope: recommended.scope,
           quote: quote.main,
           quoteDetail: quote.detail,
+          totalEstimate,
           budgetEstimateInput: budgetEstimateInput(recommendedKey, quote, decision),
           aiValidation: state.aiValidation ? {
             summary: state.aiValidation.summary || "",
@@ -4922,6 +5053,7 @@ ${location.href}`
       const focus = [selectedLabel("inbox"), selectedLabel("meeting"), selectedLabel("create"), selectedLabel("automate")].filter(Boolean);
       const generatedAt = new Date().toLocaleDateString("es-AR");
       const quote = quoteForPlan(recommendedKey);
+      const totalEstimate = proposalTotalEstimate(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
       const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
       const validationSummaryText = state.aiValidation && state.aiValidation.summary ? filterValidationSummaryForProposal(state.aiValidation.summary) : "";
@@ -5033,6 +5165,7 @@ ${location.href}`
           <div class="grid-4">
             <div class="card metric yellow"><strong>$</strong><p>Cotización de referencia</p></div>
             <div class="card metric quote"><strong>${quote.main}</strong><p>${quote.detail}</p></div>
+            <div class="card metric quote"><strong>${totalEstimate.label}</strong><p>Total estimado con add-ons seleccionados</p></div>
             <div class="card metric"><strong>${plan.duration}</strong><p>Duración · ${formatDate(state.startDate)} a ${planEndDate(plan)}</p></div>
             <div class="card metric"><strong>${plan.shortScope}</strong><p>${plan.scope}</p></div>
           </div>
@@ -5239,6 +5372,10 @@ ${location.href}`
     $("closeDecisionHelpBtn").addEventListener("click", closeDecisionHelpModal);
     $("decisionHelpModal").addEventListener("click", (event) => {
       if (event.target === $("decisionHelpModal")) closeDecisionHelpModal();
+    });
+    $("closeConfidenceModalBtn").addEventListener("click", closeConfidenceModal);
+    $("confidenceModal").addEventListener("click", (event) => {
+      if (event.target === $("confidenceModal")) closeConfidenceModal();
     });
     $("startBtn").addEventListener("click", async () => {
       if (AUTH_ENABLED && !state.commercialEmail) {
