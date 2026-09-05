@@ -119,6 +119,28 @@
       z-index: 5;
     }
     .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; }
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+    .auth-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      max-width: 300px;
+      border: 1px solid var(--cp-border);
+      border-radius: 999px;
+      padding: 7px 11px;
+      background: var(--cp-surface-soft);
+      color: var(--cp-text-muted);
+      font-size: 13px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .auth-status.signed-in {
+      border-color: var(--cp-cowork);
+      background: var(--cp-cowork-soft);
+      color: var(--cp-brand-dark);
+    }
     .mark {
       display: grid;
       place-items: center;
@@ -768,7 +790,7 @@
     }
     .proposal-meta {
       display: grid;
-      grid-template-columns: .55fr .55fr 1.55fr;
+      grid-template-columns: .55fr .55fr 1fr 1.55fr;
       gap: 10px;
       margin: 14px 0;
       align-items: start;
@@ -1413,6 +1435,8 @@
     @media (max-width: 860px) {
       .hero, .layout, .form-row, .review-grid, .roadmap, .links { grid-template-columns: 1fr; }
       .proposal-grid, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid { grid-template-columns: 1fr; }
+      .topbar, .top-actions { align-items: flex-start; flex-direction: column; }
+      .auth-status { max-width: 100%; }
       .cowork-hero-header { grid-template-columns: 96px 1fr; }
       .cowork-toggle-card { grid-column: 1 / -1; width: fit-content; }
       .timeline-body { padding-left: 18px; }
@@ -1437,7 +1461,11 @@
 <body>
   <header class="topbar">
     <div class="brand"><div class="mark"><img alt="Possumus" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADA0lEQVRYhdWXTUhUURTHr1kkBVZQUUFtalErF1O4KGsg591z7AsXRm2KVkFSGELQQtBNBEEQfawCi1ZCUQt3RdIqE1FI5p3zKhIqxCIT0pl77jjyWmiOOjPvvdFx4YG7mnvO73//98y99ym12mK4J16VISeWJjifZriWJt0qBJfFhQaTrN+zIlC/J75WGE4LwQvLOC7cMF1wEE4JIxuCW/IZ95YFLq4+IYRDRaHFxYgwPJ5MxncsbdWjzkZD0CmM2ZLh84Zh/JlK6jMlwScG6rZZwt7lgBe5kRHWLZHgY7211Yahr2zwuYFT4sKVYNuVqjAudJUfnusL4zpHiwqwHpxb7p5HEPHJ749tyF/9cLxKuOFrRDtFCN8J60dCcE8YXgnjyLzfAxdhXX0jT4Ah52IEcNYSdBY6cHy/qTLlHT9kPWgUT7eG1Pnhf8b1CwoIw5sQ66bE082BTZSrdS18K5yTcwl/+us3CYEJToKHUeBKKWWH6g9YxkywAHiQsz+p60ImT0x8cbZHFaCUUoagJ6imYfgwf3LI/uPLUuBKKSWEV0Nq/spNDtkzS9BesgDXSQTWZJz0+2PrZifr5kC7XN1WugOgQwRM+L6qVEopZVmfDXYAn5buAFwP7gH8Pjc54+mawMmEoyOFTq8i4fuqwhC+D2ns17mE/tg6w/A7pA9uRhVgXH0h7DQ0pDsWJcGzkK41KXJOhcIJ4sL4N6RWNkVObFFi4ljoRUQohnTHWG9tdZ7tw/Eq8XSrZZwMhjdMG4I+31cVeeqF4W1Y8mxPjBkXugxBu2XdZj14MnMZRblJMWuLvZAmPV0jjOkoIpY8CLp9VWD1ORd0y4q9CTz85rt6Z2AT+UpVCOn75RZhCMZSQ4mDgfA5Ee1qjWV9WxinygJn/J5Z3PVRwjI0GcLRpcMxKwTdKU7sKhn+P/568a2W4U7gF1FBMA5YN9FY8O+2lBgfjG82rC8J4XPD+GPmrb8AmBLGQSG4m2Y8XDZwsfA/HtkiSb3Pes7+9JCzO++Nt1riH1ln/un62kkzAAAAAElFTkSuQmCC"></div><span>Possumus · Diseñador de Propuestas de Adopción</span></div>
-    <button class="btn ghost" id="resetBtn">Reiniciar</button>
+    <div class="top-actions">
+      <span class="auth-status" id="authStatus">Sin sesión Microsoft</span>
+      <button class="btn ghost" id="loginBtn">Iniciar sesión</button>
+      <button class="btn ghost" id="resetBtn">Reiniciar</button>
+    </div>
   </header>
 
   <div class="shell">
@@ -1550,7 +1578,22 @@
 
   <div id="toast" class="toast"></div>
 
+  <script src="https://alcdn.msauth.net/browser/2.38.3/js/msal-browser.min.js"></script>
   <script>
+    const msalConfig = {
+      auth: {
+        clientId: "1b7446c2-78b7-4478-a159-dc0588cde896",
+        authority: "https://login.microsoftonline.com/ffc5d1e4-c896-4fc6-8fc8-577734894ffc",
+        redirectUri: `${location.origin}${location.pathname}`
+      },
+      cache: {
+        cacheLocation: "sessionStorage",
+        storeAuthStateInCookie: false
+      }
+    };
+    const loginRequest = { scopes: ["User.Read"] };
+    const msalClient = window.msal ? new msal.PublicClientApplication(msalConfig) : null;
+
     const industries = [
       ["healthcare", "Salud y clínicas", "El cliente atiende pacientes y necesita reducir carga administrativa, agenda, documentación y seguimiento.", "health"],
       ["professional", "Servicios profesionales", "El cliente vende conocimiento o servicios por proyecto y busca acelerar entregables, reuniones y comunicaciones.", "services"],
@@ -1772,6 +1815,8 @@
       addonsReviewed: false,
       planId: "",
       userId: "",
+      commercialName: "",
+      commercialEmail: "",
       completed: {}
     };
     const steps = [
@@ -1796,6 +1841,60 @@
       $("toast").textContent = message;
       $("toast").classList.add("show");
       setTimeout(() => $("toast").classList.remove("show"), 1800);
+    }
+    function updateAuthUi() {
+      const label = state.commercialEmail
+        ? `${state.commercialName || "Comercial"} · ${state.commercialEmail}`
+        : "Sin sesión Microsoft";
+      $("authStatus").textContent = label;
+      $("authStatus").title = label;
+      $("authStatus").classList.toggle("signed-in", Boolean(state.commercialEmail));
+      $("loginBtn").textContent = state.commercialEmail ? "Cambiar sesión" : "Iniciar sesión";
+    }
+    function applyAccountToState(account) {
+      if (!account) return;
+      state.commercialName = account.name || account.username || "";
+      state.commercialEmail = account.username || "";
+      updateAuthUi();
+    }
+    async function signInWithMicrosoft() {
+      if (!msalClient) {
+        showToast("No se pudo cargar Microsoft Login. Revisá la conexión y recargá la página.");
+        return false;
+      }
+      try {
+        const response = await msalClient.loginPopup(loginRequest);
+        msalClient.setActiveAccount(response.account);
+        applyAccountToState(response.account);
+        const token = await msalClient.acquireTokenSilent({ ...loginRequest, account: response.account });
+        const profileResponse = await fetch("https://graph.microsoft.com/v1.0/me?$select=displayName,mail,userPrincipalName", {
+          headers: { Authorization: `Bearer ${token.accessToken}` }
+        });
+        if (!profileResponse.ok) throw new Error(`Graph profile failed: ${profileResponse.status}`);
+        const profile = await profileResponse.json();
+        state.commercialName = profile.displayName || response.account.name || "";
+        state.commercialEmail = profile.mail || profile.userPrincipalName || response.account.username || "";
+        updateAuthUi();
+        showToast(`Sesión iniciada: ${state.commercialEmail}`);
+        return true;
+      } catch (error) {
+        console.error(error);
+        showToast("No se pudo iniciar sesión con Microsoft.");
+        return false;
+      }
+    }
+    function restoreMicrosoftSession() {
+      if (!msalClient) {
+        updateAuthUi();
+        return;
+      }
+      const account = msalClient.getActiveAccount() || msalClient.getAllAccounts()[0];
+      if (account) {
+        msalClient.setActiveAccount(account);
+        applyAccountToState(account);
+      } else {
+        updateAuthUi();
+      }
     }
     function show(section) {
       ["onboarding", "wizard", "review", "ready", "plan"].forEach((id) => $(id).classList.add("hidden"));
@@ -2339,6 +2438,7 @@
       ];
       items.push({ label: "Add-ons", title: selectedAddonItems().length ? selectedAddonItems().map((item) => item.title).join(", ") : "Sin add-ons seleccionados", desc: "Módulos opcionales para cotizar por separado", edit: 8, icon: "proposal-doc" });
       items.push({ label: "Copilot Cowork", title: state.cowork ? "Seleccionado como add-on" : "No incluido en la recomendación", desc: state.cowork ? "Capacidad para tareas complejas, multi-paso y de mayor valor" : "Requiere licencia/trial de Microsoft 365 Copilot o decisión comercial de incluirlo como add-on futuro.", edit: 7, icon: "cowork" });
+      items.push({ label: "Comercial", title: state.commercialName || "Sin sesión Microsoft", desc: state.commercialEmail || "Iniciá sesión para asociar la propuesta a un usuario de Possumus.", edit: null, icon: "sales" });
       $("summaryGrid").innerHTML = items.map((item) => `<div class="summary-item ${item.label === "Copilot Cowork" ? `cowork-summary ${state.cowork ? "" : "not-included"}` : ""}">
         <div class="summary-main">
           <div class="option-icon">${iconSvg(item.icon)}</div>
@@ -2564,6 +2664,7 @@
       const roadmapItems = proposalRoadmap(recommendedKey);
       const quote = quoteForPlan(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
+      const commercialLabel = state.commercialEmail ? `${state.commercialName || "Comercial"} · ${state.commercialEmail}` : "Sin comercial asociado";
       $("plan").innerHTML = `
         <div class="result-hero">
           <div class="result-top">
@@ -2579,6 +2680,7 @@
           <div class="proposal-meta">
             <div class="proposal-meta-card"><strong>${formatDate(state.startDate)}</strong><span>Inicio estimado</span></div>
             <div class="proposal-meta-card"><strong>${planEndDate(recommended)}</strong><span>Fin estimado</span></div>
+            <div class="proposal-meta-card"><strong>${commercialLabel}</strong><span>Comercial responsable</span></div>
             <div class="proposal-meta-card quote-card"><div class="money-icon">$</div><div><strong>${quote.main}</strong><span>Cotización de referencia</span><p>${quote.detail}</p></div></div>
           </div>
           <div class="proposal-grid">
@@ -2710,6 +2812,7 @@
       const generatedAt = new Date().toLocaleDateString("es-AR");
       const quote = quoteForPlan(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
+      const commercialLabel = state.commercialEmail ? `${state.commercialName || "Comercial"} · ${state.commercialEmail}` : "Sin comercial asociado";
       const css = `
         <style>
           @page { size: A4 landscape; margin: 0; }
@@ -2758,7 +2861,7 @@
             <div>
               <p style="font-size:24pt;color:#ffffff;font-weight:900">${state.company}</p>
               <p>Inicio estimado: ${formatDate(state.startDate)} · Fin estimado: ${planEndDate(plan)}</p>
-              <p>Documento generado a partir del relevamiento comercial realizado por sales/preventa.</p>
+              <p>Documento generado a partir del relevamiento comercial realizado por ${commercialLabel}.</p>
             </div>
             <div class="brand"><span class="logo">P</span><span>Possumus</span></div>
           </div>
@@ -2857,7 +2960,12 @@
       return "Acción de sponsor/admin para preparar el lanzamiento.";
     }
 
-    $("startBtn").addEventListener("click", () => {
+    $("loginBtn").addEventListener("click", signInWithMicrosoft);
+    $("startBtn").addEventListener("click", async () => {
+      if (!state.commercialEmail) {
+        const signedIn = await signInWithMicrosoft();
+        if (!signedIn) return;
+      }
       state.company = $("company").value.trim();
       state.startDate = $("startDate").value;
       if (!state.company || !state.startDate) {
@@ -2886,7 +2994,9 @@
     $("buildBtn").addEventListener("click", generatePlan);
     $("viewPlanBtn").addEventListener("click", () => { location.hash = `/admin/${state.planId}`; renderPlan("admin"); });
     $("resetBtn").addEventListener("click", () => {
-      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "", department: "", departments: [], userRange: "", m365Maturity: "", copilotLicenses: "", projectStage: "", sponsor: "", governance: "", accompaniment: "", primaryObjective: "", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", completed: {} });
+      const currentCommercialName = state.commercialName;
+      const currentCommercialEmail = state.commercialEmail;
+      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "", department: "", departments: [], userRange: "", m365Maturity: "", copilotLicenses: "", projectStage: "", sponsor: "", governance: "", accompaniment: "", primaryObjective: "", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, completed: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
       location.hash = "/onboarding";
@@ -2901,6 +3011,7 @@
       if (routeName === "done") { loadPlan(id); show("ready"); return; }
       show("onboarding");
     }
+    restoreMicrosoftSession();
     route();
   </script>
 </body>
