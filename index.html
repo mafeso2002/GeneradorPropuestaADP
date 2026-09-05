@@ -1184,6 +1184,28 @@
       cursor: not-allowed;
       background: var(--cp-surface-soft);
     }
+    .addon-option.included {
+      cursor: default;
+      border-color: var(--cp-brand-yellow);
+      background: var(--cp-brand-yellow-soft);
+    }
+    .addon-option.compact {
+      min-height: auto;
+      grid-template-columns: 34px 1fr;
+      padding: 12px 14px;
+      opacity: .48;
+      cursor: not-allowed;
+      background: var(--cp-surface-soft);
+    }
+    .addon-option.compact .stage-icon {
+      width: 32px;
+      height: 32px;
+    }
+    .addon-option.compact .stage-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+    .addon-option.compact .option-check { display: none; }
     .addon-option.disabled:hover {
       border-color: var(--cp-border);
       box-shadow: none;
@@ -1226,6 +1248,56 @@
       color: var(--cp-text-muted);
       font-size: 12px;
       font-weight: 800;
+    }
+    .addon-plan-context {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 18px;
+      padding: 16px;
+      border: 1px solid var(--cp-brand-yellow);
+      border-radius: 16px;
+      background:
+        radial-gradient(circle at right, var(--cp-brand-yellow-soft), transparent 12rem),
+        var(--cp-surface);
+    }
+    .addon-plan-context h3 { margin-bottom: 4px; }
+    .addon-plan-context p { margin: 0; }
+    .addon-section {
+      margin-top: 18px;
+    }
+    .addon-section-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .addon-section-header h4 { margin: 0; }
+    .addon-section-header span {
+      color: var(--cp-text-muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .addon-status {
+      display: inline-flex;
+      width: fit-content;
+      margin-top: 8px;
+      border-radius: 999px;
+      padding: 4px 9px;
+      background: var(--cp-brand-mint);
+      color: #116b2f;
+      font-size: 12px;
+      font-weight: 900;
+    }
+    .addon-status.included {
+      background: var(--cp-brand-yellow);
+      color: var(--cp-brand-dark);
+    }
+    .addon-status.unavailable {
+      background: #fff1f2;
+      color: var(--cp-danger);
     }
     .value-strip {
       display: grid;
@@ -1757,7 +1829,7 @@
     .hidden { display: none !important; }
     @media (max-width: 860px) {
       .hero, .layout, .form-row, .review-grid, .roadmap, .links { grid-template-columns: 1fr; }
-      .proposal-grid, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid { grid-template-columns: 1fr; }
+      .proposal-grid, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context { grid-template-columns: 1fr; }
       .topbar, .top-actions { align-items: flex-start; flex-direction: column; }
       .auth-status { max-width: 100%; }
       .cowork-hero-header { grid-template-columns: 96px 1fr; }
@@ -2731,39 +2803,60 @@
     }
     function addOnCatalog() {
       return [
-        { id: "excel", title: "Excel intermedio / avanzado", desc: "Formación específica para análisis, reportes y modelos en Excel.", icon: "measurement", price: "A cotizar", requirement: "Disponible para todos" },
-        { id: "cowork", title: "Agents & Cowork", desc: "Módulo para procesos de varios pasos, agentes y automatización asistida.", icon: "cowork", price: "A cotizar", requiresCopilot: true },
-        { id: "role-cases", title: "Casos de uso por rol", desc: "Diseño de escenarios específicos por área, rol o audiencia. En planes sin licencia queda acotado a Copilot Chat.", icon: "users-mix", price: "A cotizar", requirement: "Disponible para todos" },
-        { id: "prompt-library", title: "Prompt Library propia", desc: "Biblioteca de prompts adaptada al negocio del cliente. En planes sin licencia queda acotada a Copilot Chat.", icon: "spark", price: "A cotizar", requirement: "Disponible para todos" },
-        { id: "leaders", title: "Casos para líderes", desc: "Escenarios de Copilot para dirección, seguimiento, decisiones y reporting.", icon: "leadership", price: "A cotizar", requirement: "Disponible para todos" },
-        { id: "webinar", title: "Webinar / kickoff ejecutivo", desc: "Evento de lanzamiento, alineación o cierre ejecutivo.", icon: "communication", price: "A cotizar", requirement: "Disponible para todos" },
-        { id: "champions", title: "Programa Champions", desc: "Activación y acompañamiento de referentes internos.", icon: "training", price: "A cotizar", requirement: "Disponible para todos" },
-        { id: "office-hours", title: "Office Hours / acompañamiento", desc: "Espacios de consulta, acompañamiento en piso y soporte post-sesión.", icon: "support", price: "A cotizar", requirement: "Disponible para todos" },
-        { id: "teams-sharepoint", title: "Arquitectura Teams + SharePoint", desc: "Diseño funcional de equipos, canales, bibliotecas y repositorios para ordenar colaboración.", icon: "teams", price: "A cotizar", requirement: "Disponible para todos" },
-        { id: "document-governance", title: "Orden documental y trazabilidad", desc: "Estructura de archivos, criterios de uso, migración desde canales dispersos y buenas prácticas.", icon: "proposal-doc", price: "A cotizar", requirement: "Disponible para todos" },
-        { id: "readiness", title: "Readiness técnico", desc: "Revisión de SharePoint, oversharing, Purview, permisos y preparación para IA.", icon: "shield", price: "A cotizar", requirement: "Disponible para todos" },
-        { id: "change", title: "Gestión del cambio", desc: "Comunicación interna, sponsors, adopción, medición y acompañamiento del cambio.", icon: "communication", price: "A cotizar", requirement: "Disponible para todos" },
-        { id: "support-desk", title: "Mesa de ayuda post-programa", desc: "Acompañamiento posterior para consultas, adopción y continuidad.", icon: "support", price: "A cotizar", requirement: "Disponible para todos" },
-        { id: "dashboard", title: "Copilot Dashboard / reporte de adopción", desc: "Medición, seguimiento y lectura ejecutiva de adopción con datos de Copilot.", icon: "diagnostic", price: "A cotizar", requiresCopilot: true },
-        { id: "copilot-studio", title: "Agentes a medida con Copilot Studio", desc: "Diseño de agentes y automatizaciones avanzadas sobre procesos específicos.", icon: "automation", price: "A cotizar", requiresCopilot: true },
-        { id: "copilot-excel", title: "Copilot en Excel y análisis de datos", desc: "Escenarios de análisis con Copilot sobre datos corporativos.", icon: "measurement", price: "A cotizar", requiresCopilot: true }
+        { id: "excel-intermediate", title: "Excel intermedio", category: "Formación focalizada", desc: "Fórmulas, tablas, reportes y adopción práctica de Excel para usuarios de negocio.", icon: "measurement", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "excel-advanced", title: "Excel avanzado", category: "Formación focalizada", desc: "Modelado, Power Query, tableros y análisis más avanzado sobre información operativa.", icon: "measurement", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "tool-module", title: "Módulo a medida de herramienta puntual", category: "Formación focalizada", desc: "Adopción específica de una herramienta Microsoft 365 puntual fuera del alcance base.", icon: "training", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "cowork", title: "Cowork y Copilot", category: "IA aplicada", desc: "Trabajo colaborativo asistido por IA para tareas complejas, investigación y entregables de varios pasos.", icon: "cowork", price: "A cotizar", requiresCopilot: true },
+        { id: "agents-cowork", title: "Agents & Cowork", category: "IA aplicada", desc: "Agentes a medida para procesos del área y automatización asistida con revisión humana.", icon: "cowork", price: "A cotizar", requiresCopilot: true },
+        { id: "role-cases", title: "Casos de uso por rol", category: "IA aplicada", desc: "Diseño de escenarios específicos por área, rol o audiencia. En planes sin licencia queda acotado a Copilot Chat.", icon: "users-mix", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "prompt-library", title: "Prompt Library propia", category: "IA aplicada", desc: "Biblioteca de prompts adaptada al negocio del cliente. En planes sin licencia queda acotada a Copilot Chat.", icon: "spark", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "leaders", title: "Casos para líderes", category: "IA aplicada", desc: "Escenarios de Copilot para dirección, seguimiento, decisiones y reporting.", icon: "leadership", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "copilot-excel", title: "Copilot en Excel y análisis de datos", category: "IA aplicada", desc: "Escenarios de análisis con Copilot sobre datos corporativos.", icon: "measurement", price: "A cotizar", requiresCopilot: true },
+        { id: "copilot-studio", title: "Agentes a medida con Copilot Studio", category: "IA aplicada", desc: "Diseño de agentes y automatizaciones avanzadas sobre procesos específicos.", icon: "automation", price: "A cotizar", requiresCopilot: true },
+        { id: "webinar", title: "Webinar / kickoff ejecutivo", category: "Activación y cambio", desc: "Evento de lanzamiento, alineación o cierre ejecutivo.", icon: "communication", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "champions", title: "Programa Champions", category: "Activación y cambio", desc: "Activación y acompañamiento de referentes internos.", icon: "training", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "office-hours", title: "Office Hours / acompañamiento", category: "Activación y cambio", desc: "Espacios de consulta, acompañamiento en piso y soporte post-sesión.", icon: "support", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "change", title: "Gestión del cambio", category: "Activación y cambio", desc: "Comunicación interna, sponsors, adopción, medición y acompañamiento del cambio.", icon: "communication", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "support-desk", title: "Mesa de ayuda post-programa", category: "Activación y cambio", desc: "Acompañamiento posterior para consultas, adopción y continuidad.", icon: "support", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "teams-sharepoint", title: "Arquitectura Teams + SharePoint", category: "Gobierno y orden digital", desc: "Diseño funcional de equipos, canales, bibliotecas y repositorios para ordenar colaboración.", icon: "teams", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "document-governance", title: "Orden documental y trazabilidad", category: "Gobierno y orden digital", desc: "Estructura de archivos, criterios de uso, migración desde canales dispersos y buenas prácticas.", icon: "proposal-doc", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "readiness", title: "Readiness técnico", category: "Gobierno y orden digital", desc: "Revisión de SharePoint, oversharing, Purview, permisos y preparación para IA.", icon: "shield", price: "A cotizar", requirement: "Disponible para todos" },
+        { id: "dashboard", title: "Copilot Dashboard / reporte de adopción", category: "Gobierno y orden digital", desc: "Medición, seguimiento y lectura ejecutiva de adopción con datos de Copilot.", icon: "diagnostic", price: "A cotizar", requiresCopilot: true }
       ];
     }
-    function suggestedAddonIds() {
+    function includedAddonIdsForPlan(planKey = recommendedPlanKey()) {
+      const included = new Set();
+      if (planKey === "plan2") {
+        ["role-cases", "prompt-library", "dashboard", "copilot-excel"].forEach((id) => included.add(id));
+      }
+      if (planKey === "plan3") {
+        ["role-cases", "prompt-library", "dashboard", "champions", "change", "webinar", "copilot-excel"].forEach((id) => included.add(id));
+      }
+      return included;
+    }
+    function suggestedAddonIds(planKey = recommendedPlanKey()) {
       const ids = new Set();
+      const included = includedAddonIdsForPlan(planKey);
+      const addIfExtra = (id) => { if (!included.has(id)) ids.add(id); };
       if (state.cowork) ids.add("cowork");
-      if (["data-analysis", "sales-analysis", "student-analysis", "operations-analysis"].includes(state.create) || state.primaryObjective === "integral-transformation") ids.add("copilot-excel");
-      if (state.primaryObjective === "copilot-roi" || state.primaryObjective === "integral-transformation") ids.add("role-cases");
-      if (state.primaryObjective === "copilot-roi") ids.add("prompt-library");
-      if (state.agentNeed === "explore" || state.agentNeed === "active" || state.primaryObjective === "agent-automation") ids.add("copilot-studio");
-      if (state.sponsor === "yes") ids.add("webinar");
-      if (state.accompaniment !== "training") ids.add("champions");
-      if (state.teamsSharepointStructure && state.teamsSharepointStructure !== "governed") ids.add("teams-sharepoint");
-      if (state.informationLocation === "scattered" || state.informationLocation === "mixed" || state.successMetric === "document-centralization") ids.add("document-governance");
-      if (state.deliveryMode === "onsite" || state.deliveryMode === "hybrid") ids.add("office-hours");
-      if (state.governance !== "high" || state.iaGovernanceNeed === "governance" || state.iaGovernanceNeed === "coe" || state.iaGovernanceNeed === "corporate") ids.add("readiness");
-      if (state.accompaniment === "change-management" || state.iaGovernanceNeed === "coe" || state.iaGovernanceNeed === "corporate") ids.add("change");
-      if (state.copilotLicenses === "licensed" || state.copilotLicenses === "trial") ids.add("dashboard");
+      if (state.agentNeed === "explore" || state.agentNeed === "active" || state.primaryObjective === "agent-automation") {
+        addIfExtra("agents-cowork");
+        addIfExtra("copilot-studio");
+      }
+      const excelNeed = ["data-analysis", "sales-analysis", "student-analysis", "operations-analysis"].includes(state.create) || state.successMetric === "task-traceability";
+      if (excelNeed && hasCopilotLicense()) addIfExtra("copilot-excel");
+      if (excelNeed && !hasCopilotLicense()) addIfExtra(state.accompaniment === "training" ? "excel-intermediate" : "excel-advanced");
+      if (!excelNeed && state.accompaniment === "training" && state.primaryObjective === "digital-productivity") addIfExtra("tool-module");
+      if (state.primaryObjective === "copilot-roi" || state.primaryObjective === "integral-transformation") addIfExtra("role-cases");
+      if (state.primaryObjective === "copilot-roi" && state.concreteUseCases !== "none") addIfExtra("prompt-library");
+      if (state.sponsor === "yes" && (state.userRange !== "small" || selectedDepartments().length > 1 || state.projectStage === "scale")) addIfExtra("webinar");
+      if (state.accompaniment !== "training" && planKey !== "plan3") addIfExtra("champions");
+      if (state.teamsSharepointStructure === "none" || (state.teamsSharepointStructure === "informal" && state.accompaniment !== "training") || state.successMetric === "teams-adoption" || state.successMetric === "document-centralization") addIfExtra("teams-sharepoint");
+      if (state.informationLocation === "scattered" || state.firstChange === "documents" || state.successMetric === "document-centralization") addIfExtra("document-governance");
+      if (state.deliveryMode === "onsite" || state.deliveryMode === "hybrid" || state.accompaniment === "change-management") addIfExtra("office-hours");
+      if (state.governance === "low" || state.iaGovernanceNeed === "governance" || state.iaGovernanceNeed === "coe" || state.iaGovernanceNeed === "corporate") addIfExtra("readiness");
+      if (state.accompaniment === "change-management" && planKey !== "plan3") addIfExtra("change");
+      if ((state.copilotLicenses === "licensed" || state.copilotLicenses === "trial") && state.successMetric === "satisfaction") addIfExtra("dashboard");
       return Array.from(ids).filter((id) => isAddonEnabled(addOnCatalog().find((item) => item.id === id)));
     }
     function hasCopilotLicense() {
@@ -2774,7 +2867,55 @@
     }
     function selectedAddonItems() {
       const selected = state.selectedAddons && state.selectedAddons.length ? state.selectedAddons : suggestedAddonIds();
-      return addOnCatalog().filter((item) => selected.includes(item.id));
+      const included = includedAddonIdsForPlan();
+      return addOnCatalog().filter((item) => selected.includes(item.id) && !included.has(item.id));
+    }
+    function addonState(addon, planKey = recommendedPlanKey()) {
+      if (includedAddonIdsForPlan(planKey).has(addon.id)) return "included";
+      if (!isAddonEnabled(addon)) return "unavailable";
+      if (suggestedAddonIds(planKey).includes(addon.id)) return "suggested";
+      return "available";
+    }
+    function addonStateLabel(stateName) {
+      if (stateName === "included") return "Incluido en el plan";
+      if (stateName === "suggested") return "Sugerido";
+      if (stateName === "unavailable") return "No disponible";
+      return "Disponible";
+    }
+    function addonRequirement(addon, stateName) {
+      if (stateName === "included") return "Ya cubierto por el plan base";
+      if (stateName === "unavailable") return "Requiere licencia/trial de Microsoft 365 Copilot";
+      return addon.requiresCopilot ? "Requiere licencia Copilot" : addon.requirement;
+    }
+    function renderAddonOption(addon, selected, planKey) {
+      const stateName = addonState(addon, planKey);
+      const selectable = stateName === "suggested" || stateName === "available";
+      const isSelected = selectable && selected.has(addon.id);
+      const compact = stateName === "unavailable";
+      return `<button class="addon-option ${isSelected ? "selected" : ""} ${stateName} ${compact ? "compact" : ""}" data-addon="${addon.id}" ${selectable ? "" : "disabled"}>
+        <div class="stage-icon">${iconSvg(addon.icon)}</div>
+        <div>
+          <strong>${addon.title}</strong>
+          <p>${addon.desc}</p>
+          ${compact ? "" : `<span class="addon-price"><span class="money-icon" style="width:22px;height:22px;font-size:13px;margin-right:6px">$</span> ${addon.price}</span>`}
+          <span class="addon-requirement">${addonRequirement(addon, stateName)}</span>
+          <span class="addon-status ${stateName}">${addonStateLabel(stateName)}</span>
+        </div>
+        <div class="option-check">${isSelected ? "✓" : ""}</div>
+      </button>`;
+    }
+    function renderAddonSection(title, description, addons, selected, planKey) {
+      if (!addons.length) return "";
+      return `<section class="addon-section">
+        <div class="addon-section-header">
+          <div>
+            <h4>${title}</h4>
+            <span>${description}</span>
+          </div>
+          <span>${addons.length} módulo${addons.length === 1 ? "" : "s"}</span>
+        </div>
+        <div class="addon-option-grid">${addons.map((addon) => renderAddonOption(addon, selected, planKey)).join("")}</div>
+      </section>`;
     }
     function shouldShowAddonsStep() {
       return true;
@@ -3030,26 +3171,36 @@
         </div>`;
       }
       if (step.key === "addons") {
-        if (!state.selectedAddons.length) state.selectedAddons = suggestedAddonIds();
+        const planKey = recommendedPlanKey();
+        const decision = planDecision();
+        const plan = planCatalog()[planKey];
+        const included = includedAddonIdsForPlan(planKey);
+        if (!state.selectedAddons.length) state.selectedAddons = suggestedAddonIds(planKey);
+        state.selectedAddons = state.selectedAddons.filter((id) => !included.has(id));
         const selected = new Set(state.selectedAddons);
+        const catalog = addOnCatalog();
+        const suggested = catalog.filter((addon) => addonState(addon, planKey) === "suggested");
+        const available = catalog.filter((addon) => addonState(addon, planKey) === "available");
+        const includedAddons = catalog.filter((addon) => addonState(addon, planKey) === "included");
+        const unavailable = catalog.filter((addon) => addonState(addon, planKey) === "unavailable");
+        const availableByCategory = Object.entries(available.reduce((groups, addon) => {
+          groups[addon.category] = groups[addon.category] || [];
+          groups[addon.category].push(addon);
+          return groups;
+        }, {}));
         body = `<div class="addons-panel">
-          <h3>Add-ons sugeridos para ${planCatalog()[recommendedPlanKey()].name}</h3>
-          <p>Todos los planes pueden llevar add-ons. Los de comunicación, gobierno, Excel y cambio aplican siempre; los de IA avanzada requieren licencia de Microsoft 365 Copilot.</p>
-          <div class="addon-option-grid">${addOnCatalog().map((addon) => {
-            const isSelected = selected.has(addon.id);
-            const enabled = isAddonEnabled(addon);
-            const requirement = addon.requiresCopilot ? "Requiere licencia Copilot" : addon.requirement;
-            return `<button class="addon-option ${isSelected ? "selected" : ""} ${enabled ? "" : "disabled"}" data-addon="${addon.id}" ${enabled ? "" : "disabled"}>
-              <div class="stage-icon">${iconSvg(addon.icon)}</div>
-              <div>
-                <strong>${addon.title}</strong>
-                <p>${addon.desc}</p>
-                <span class="addon-price"><span class="money-icon" style="width:22px;height:22px;font-size:13px;margin-right:6px">$</span> ${addon.price}</span>
-                <span class="addon-requirement">${requirement}</span>
-              </div>
-              <div class="option-check">${isSelected ? "✓" : ""}</div>
-            </button>`;
-          }).join("")}</div>
+          <div class="addon-plan-context">
+            <div>
+              <span class="badge">Plan probable · ${confidenceLabel(decision.level)} ${decision.confidence}%</span>
+              <h3>${plan.name}</h3>
+              <p>Los módulos de abajo se separan entre lo que ya cubre el plan, lo recomendado como adicional y lo disponible para cotizar aparte.</p>
+            </div>
+            <div class="score">${plan.duration}</div>
+          </div>
+          ${renderAddonSection("Add-ons sugeridos para este caso", "Se marcan por las respuestas del relevamiento y el árbol de decisión.", suggested, selected, planKey)}
+          ${availableByCategory.map(([category, addons]) => renderAddonSection(category, "Disponibles para sumar si el comercial quiere ampliar alcance.", addons, selected, planKey)).join("")}
+          ${renderAddonSection("Ya incluido en el plan probable", "No lo cotices como adicional salvo que el alcance sea mayor al previsto.", includedAddons, selected, planKey)}
+          ${renderAddonSection("No disponible por licenciamiento", "Requieren Microsoft 365 Copilot; quedan al final para no agrandar la selección principal.", unavailable, selected, planKey)}
         </div>`;
       }
       $("stepBody").innerHTML = body;
@@ -3098,7 +3249,8 @@
       $("stepBody").querySelectorAll("[data-app]").forEach((btn) => btn.addEventListener("click", () => { state.meetingApp = btn.dataset.app; renderStep(); }));
       $("stepBody").querySelectorAll("[data-addon]").forEach((btn) => btn.addEventListener("click", () => {
         const addon = addOnCatalog().find((item) => item.id === btn.dataset.addon);
-        if (!isAddonEnabled(addon)) return;
+        const stateName = addonState(addon);
+        if (stateName !== "suggested" && stateName !== "available") return;
         const selected = new Set(state.selectedAddons);
         if (selected.has(btn.dataset.addon)) selected.delete(btn.dataset.addon);
         else selected.add(btn.dataset.addon);
