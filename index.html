@@ -4671,6 +4671,7 @@
       const second = ranked[1] || { score: 0 };
       const margin = Math.max(0, top.score - second.score);
       let confidence = Math.min(96, Math.max(45, Math.round(36 + Math.min(18, top.score * 0.08) + Math.min(42, margin * 0.8))));
+      const plan0Candidate = ranked.find((item) => item.key === "plan0");
       const plan3Candidate = ranked.find((item) => item.key === "plan3");
       const plan1Candidate = ranked.find((item) => item.key === "plan1");
       const plan0WithScaleChangeRisk = top.key === "plan0"
@@ -4686,8 +4687,23 @@
         && hasCopilot
         && (state.m365Maturity === "low" || state.m365Tools === "basic")
         && operationalDisorder;
+      const plan3WithoutLicensesRisk = top.key === "plan3"
+        && Boolean(plan0Candidate && plan0Candidate.score > 0)
+        && !hasCopilot
+        && strategicNeed;
+      const plan3WithOperationalRisk = top.key === "plan3"
+        && Boolean(plan1Candidate && plan1Candidate.score > 0)
+        && (state.m365Maturity === "low" || state.m365Tools === "basic")
+        && operationalDisorder;
+      const plan2WithAdvancedNoSponsorRisk = top.key === "plan2"
+        && Boolean(plan3Candidate && plan3Candidate.score > 0)
+        && hasCopilot
+        && agentSignal
+        && state.concreteUseCases === "many"
+        && state.copilotUsage === "over-60"
+        && state.sponsor === "no";
       const scaleChangeRisk = plan0WithScaleChangeRisk || plan1WithScaleChangeRisk;
-      if (scaleChangeRisk || plan2WithOperationalRisk) confidence = Math.min(confidence, 64);
+      if (scaleChangeRisk || plan2WithOperationalRisk || plan3WithoutLicensesRisk || plan3WithOperationalRisk || plan2WithAdvancedNoSponsorRisk) confidence = Math.min(confidence, 64);
       const level = confidence >= 70 ? "high" : confidence >= 50 ? "medium" : "low";
       const alternatives = confidence >= 70
         ? []
@@ -4697,6 +4713,15 @@
       }
       if (plan2WithOperationalRisk && plan1Candidate && !alternatives.some((item) => item.key === "plan1")) {
         alternatives.unshift(plan1Candidate);
+      }
+      if (plan3WithoutLicensesRisk && plan0Candidate && !alternatives.some((item) => item.key === "plan0")) {
+        alternatives.unshift(plan0Candidate);
+      }
+      if (plan3WithOperationalRisk && plan1Candidate && !alternatives.some((item) => item.key === "plan1")) {
+        alternatives.unshift(plan1Candidate);
+      }
+      if (plan2WithAdvancedNoSponsorRisk && plan3Candidate && !alternatives.some((item) => item.key === "plan3")) {
+        alternatives.unshift(plan3Candidate);
       }
 
       return {
