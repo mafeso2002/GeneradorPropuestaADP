@@ -3572,8 +3572,8 @@
     const directSteps = [
       { key: "direct-start", label: "Paso 1 · Plan", kicker: "Propuesta directa", title: "Elegí el plan que querés presentar", subtitle: "Cargá cliente, fecha y plan. El plan queda definido por el comercial y no se calcula por scoring." },
       { key: "direct-industry", label: "Paso 2 · Tipo de cliente", kicker: "Contexto comercial", title: "¿Qué tipo de cliente es?", subtitle: "Usá este contexto para que la propuesta hable el idioma del cliente: ejemplos, dolores típicos y foco ejecutivo." },
-      { key: "direct-users", label: "Paso 3 · Alcance", kicker: "Audiencia objetivo", title: "¿Cuál es el alcance inicial?", subtitle: "Seleccioná el área o perfiles involucrados y el tamaño aproximado del grupo que participará en la adopción." },
-      { key: "direct-logistics", label: "Paso 4 · Entrega y medición", kicker: "Cierre de entrega", title: "¿Cómo conviene entregar y medir la adopción?", subtitle: "Definí modalidad, frecuencia, modelo de grupos y métrica para que el PDF y el handoff salgan completos." }
+      { key: "direct-users", label: "Paso 3 · Audiencia", kicker: "Audiencia objetivo", title: "¿Qué áreas o perfiles participarán?", subtitle: "Seleccioná si la propuesta se orienta a un área prioritaria o a perfiles de distintas áreas." },
+      { key: "direct-logistics", label: "Paso 4 · Alcance y entrega", kicker: "Cierre de entrega", title: "¿Cómo conviene dimensionar y entregar la adopción?", subtitle: "Definí tamaño del grupo, modalidad, frecuencia, modelo de trabajo y métrica para que el PDF y el handoff salgan completos." }
     ];
     let currentStep = 0;
     let currentDirectStep = 0;
@@ -4297,13 +4297,6 @@
         aiPlanComparisons: {}
       }, directDefaultsForPlan(planKey));
     }
-    function directPlanRecommendation(planKey = state.directPlanKey) {
-      if (planKey === "plan0") return "Recomendado: un área piloto o grupo acotado para validar valor y business case.";
-      if (planKey === "plan1") return "Recomendado: un área prioritaria o varias áreas si el objetivo es ordenar hábitos transversales.";
-      if (planKey === "plan2") return "Recomendado: usuarios con licencia Copilot, idealmente un piloto o grupo inicial medible.";
-      if (planKey === "plan3") return "Recomendado: varias áreas, sponsors y referentes para sostener cambio e IA a escala.";
-      return "Elegí la audiencia que mejor represente lo conversado con el cliente.";
-    }
     function renderDirectNav() {
       $("directNavList").innerHTML = directSteps.map((step, index) => {
         const completed = index < currentDirectStep && isDirectStepComplete(step.key);
@@ -4342,8 +4335,8 @@
     function isDirectStepComplete(key) {
       if (key === "direct-start") return Boolean(state.company && state.startDate && state.directPlanKey);
       if (key === "direct-industry") return Boolean(state.industry);
-      if (key === "direct-users") return Boolean(state.usersMode && selectedDepartments().length && state.userRange);
-      if (key === "direct-logistics") return logisticsFields.every((field) => Boolean(state[field.key]));
+      if (key === "direct-users") return Boolean(state.usersMode && selectedDepartments().length);
+      if (key === "direct-logistics") return Boolean(state.userRange) && logisticsFields.every((field) => Boolean(state[field.key]));
       return true;
     }
     function canContinueDirect() {
@@ -4352,8 +4345,8 @@
     function directStepTitle(step) {
       const company = state.company ? state.company : "este cliente";
       if (step.key === "direct-industry") return `¿Qué tipo de cliente es ${company}?`;
-      if (step.key === "direct-users") return `¿Cuál es el alcance inicial para ${company}?`;
-      if (step.key === "direct-logistics") return `¿Cómo conviene entregar y medir la adopción en ${company}?`;
+      if (step.key === "direct-users") return `¿Qué áreas o perfiles participarán en ${company}?`;
+      if (step.key === "direct-logistics") return `¿Cómo conviene dimensionar y entregar la adopción en ${company}?`;
       return step.title;
     }
     function renderDirectStep() {
@@ -4381,14 +4374,7 @@
         body = `<div class="options">${industries.map((item) => optionButton(item, state.industry, "industry")).join("")}</div>`;
       }
       if (step.key === "direct-users") {
-        body = `<div class="conversation-guide">
-          <div class="stage-icon">${iconSvg("users-mix")}</div>
-          <div>
-            <strong>${directPlanRecommendation()}</strong>
-            <p>Completá audiencia y tamaño del grupo para que el alcance, roadmap y handoff salgan alineados al plan elegido.</p>
-          </div>
-        </div>
-        <div class="options">
+        body = `<div class="options">
           <button class="option with-icon ${state.usersMode === "mix" ? "selected" : ""}" data-direct-mode="mix">
             <div class="option-icon">${iconSvg("users-mix")}</div>
             <div><strong>Perfiles de distintas áreas</strong><span>Usalo cuando la propuesta involucra varias áreas, sponsors o referentes.</span></div>
@@ -4407,19 +4393,11 @@
             <strong>${dept}</strong>
             <div class="option-check">${selected ? "✓" : ""}</div>
           </button>`;
-        }).join("")}</div>
-        <div style="margin-top:22px">${renderDiscoveryFields([qualificationFields.find((field) => field.key === "userRange")])}</div>`;
+        }).join("")}</div>`;
       }
       if (step.key === "direct-logistics") {
         ensureLogisticsDefaults();
-        body = `<div class="conversation-guide">
-          <div class="stage-icon">${iconSvg("calendar")}</div>
-          <div>
-            <strong>Entrega y medición</strong>
-            <p>Estos datos completan la propuesta final, el roadmap y el handoff.</p>
-          </div>
-        </div>
-        ${renderDiscoveryFields(logisticsFields)}`;
+        body = `${renderDiscoveryFields([qualificationFields.find((field) => field.key === "userRange"), ...logisticsFields])}`;
       }
       $("directStepBody").innerHTML = body;
       if (step.key === "direct-start") {
