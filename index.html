@@ -4972,6 +4972,7 @@
       return {
         plan0: {
           name: "Plan 0 · Envisioning IA",
+          shortName: "Envisioning IA (P0)",
           maturityOrder: 2,
           maturityLevel: "Nivel 2",
           maturityName: "IA inicial sin licencias",
@@ -4994,6 +4995,7 @@
         },
         plan1: {
           name: "Plan 1 · Productividad Digital",
+          shortName: "Productividad Digital (P1)",
           maturityOrder: 1,
           maturityLevel: "Nivel 1",
           maturityName: "Madurez Digital",
@@ -5016,6 +5018,7 @@
         },
         plan2: {
           name: "Plan 2 · IA aplicada al trabajo",
+          shortName: "IA aplicada al trabajo (P2)",
           maturityOrder: 3,
           maturityLevel: "Nivel 3",
           maturityName: "IA empresarial con Copilot",
@@ -5038,6 +5041,7 @@
         },
         plan3: {
           name: "Plan 3 · Productividad Digital + Microsoft 365 Copilot",
+          shortName: "Productividad Digital + Microsoft 365 Copilot (P3)",
           maturityOrder: 4,
           maturityLevel: "Nivel 4",
           maturityName: "IA transformacional",
@@ -5064,7 +5068,7 @@
       return `${plan.maturityLevel} · ${plan.maturityName}`;
     }
     function planReferenceLabel(plan) {
-      return `Referencia comercial: ${plan.name}`;
+      return `Referencia comercial: ${plan.shortName || plan.name}`;
     }
     function maturityPlanEntries(plans = planCatalog()) {
       return Object.entries(plans).sort(([, a], [, b]) => a.maturityOrder - b.maturityOrder);
@@ -6122,12 +6126,12 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         from: "adopcion@possumus.tech",
         to,
         cc: "",
-        subject: `Handoff adopción - ${state.company} - ${planMaturityTitle(recommended)}`,
+        subject: `Handoff adopción - ${state.company} - ${planMaturityTitle(recommended)} - ${recommended.shortName || recommended.name}`,
         body: `Nuevo handoff de propuesta de adopción
 
 Cliente: ${state.company}
 Plan principal seleccionado (Versión 1): ${planMaturityTitle(recommended)}
-Referencia comercial: ${recommended.name}
+Referencia comercial: ${recommended.shortName || recommended.name}
 ${directMode ? "Modo: Propuesta directa seleccionada por el comercial." : `Plan original sugerido por la app: ${original.name}
 ${changed ? "Cambio manual: Sí, el comercial promovió una alternativa como plan principal." : "Cambio manual: No, coincide con el plan original."}
 Confianza: ${confidenceLabel(decision.level)} · ${decision.confidence}%`}
@@ -6262,6 +6266,7 @@ ${location.href}`
           planWasChangedByCommercial: planChangedByCommercial,
           planSelectionNote: directMode ? "Propuesta directa: el comercial seleccionó manualmente el plan para la Versión 1." : planChangedByCommercial ? "El comercial promovió una alternativa como plan principal para la Versión 1." : "El plan final coincide con el plan original sugerido por la app.",
           recommendedPlanName: recommended.name,
+          recommendedPlanShortName: recommended.shortName || recommended.name,
           maturityLevel: recommended.maturityLevel,
           maturityName: recommended.maturityName,
           maturityTitle: planMaturityTitle(recommended),
@@ -6285,6 +6290,7 @@ ${location.href}`
             alternatives: directMode ? [] : decision.alternatives.map((item) => ({
               planKey: item.key,
               planName: plans[item.key].name,
+              planShortName: plans[item.key].shortName || plans[item.key].name,
               maturityTitle: planMaturityTitle(plans[item.key]),
               score: item.score,
               reasons: item.reasons.slice(0, 3)
