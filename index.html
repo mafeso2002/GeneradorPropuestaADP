@@ -1382,6 +1382,51 @@
       font-size: 18px;
       color: var(--cp-text);
     }
+    .wave-plan-panel {
+      margin-top: 14px;
+      border: 1px solid var(--cp-brand-yellow);
+      border-radius: 16px;
+      padding: 16px;
+      background:
+        radial-gradient(circle at right top, var(--cp-brand-yellow-soft), transparent 12rem),
+        var(--cp-surface);
+    }
+    .wave-plan-panel > strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--cp-text);
+      font-size: 16px;
+    }
+    .wave-plan-panel > p {
+      margin: 0;
+      font-size: 14px;
+    }
+    .wave-plan-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .wave-plan-item {
+      border: 1px solid var(--cp-border);
+      border-radius: 14px;
+      padding: 12px;
+      background: rgba(255,255,255,.78);
+    }
+    .wave-plan-item span {
+      display: block;
+      color: var(--cp-text-muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .wave-plan-item strong {
+      display: block;
+      margin-top: 5px;
+      color: var(--cp-text);
+      font-size: 17px;
+    }
     .decision-row {
       display: flex;
       flex-wrap: wrap;
@@ -2799,7 +2844,7 @@
     .hidden { display: none !important; }
     @media (max-width: 860px) {
       .hero, .layout, .form-row, .review-grid, .roadmap, .links, .mode-grid, .direct-plan-grid { grid-template-columns: 1fr; }
-      .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-selection-panel, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option { grid-template-columns: 1fr; }
+      .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-selection-panel, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .wave-plan-grid, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option { grid-template-columns: 1fr; }
       .proposal-price-panel { position: static; }
       .addon-pricing { border-left: 0; border-top: 1px solid var(--cp-border); padding-left: 0; padding-top: 10px; }
       .topbar, .top-actions { align-items: flex-start; flex-direction: column; }
@@ -5147,13 +5192,87 @@
     function planReferenceLabel(plan) {
       return `Referencia comercial: ${plan.shortName || plan.name}`;
     }
+    function adoptionWaveModel(planKey = selectedProposalPlanKey()) {
+      if (planKey !== "plan1") return null;
+      const range = state.userRange || "small";
+      const groupModel = discoveryValue(logisticsFields, "groupModel") || "Por área";
+      const departments = selectedDepartments();
+      if (range === "small") {
+        return {
+          label: "Ola Express",
+          title: "1 ola de adopción",
+          users: "Hasta 45 usuarios",
+          groups: "2 a 3 grupos",
+          duration: "30 días",
+          cadence: `${groupModel} · sesiones semanales`,
+          note: "Alcance pensado para un piloto o área prioritaria, con grupos chicos y cierre rápido de hábitos base."
+        };
+      }
+      if (range === "medium") {
+        return {
+          label: "Ola Estándar / Completa",
+          title: "Hasta 5 olas de adopción",
+          users: "46 a 300 usuarios",
+          groups: "Olas de hasta 60 usuarios",
+          duration: "60 a 90 días",
+          cadence: `${groupModel} · secuencial por área o perfil`,
+          note: `Para 300 usuarios, la propuesta se divide en hasta 5 olas de 60 usuarios para mantener práctica, seguimiento y medición por grupo${departments.length > 1 ? ` (${departments.join(", ")})` : ""}.`
+        };
+      }
+      return {
+        label: "Programa anual por olas",
+        title: "Hasta 10 olas de adopción",
+        users: "Más de 300 usuarios",
+        groups: "Olas de hasta 60 usuarios",
+        duration: "Calendario anual",
+        cadence: `${groupModel} · despliegue progresivo`,
+        note: "Para escalar sin perder calidad, se trabaja un calendario anual por olas hasta 600 colaboradores, priorizando áreas, referentes y medición."
+      };
+    }
+    function renderWavePlanPanel(planKey = selectedProposalPlanKey()) {
+      const wave = adoptionWaveModel(planKey);
+      if (!wave) return "";
+      return `<div class="wave-plan-panel">
+        <strong>Modelo de olas para este alcance</strong>
+        <p>${escapeHtml(wave.note)}</p>
+        <div class="wave-plan-grid">
+          <div class="wave-plan-item"><span>Modalidad</span><strong>${escapeHtml(wave.label)}</strong></div>
+          <div class="wave-plan-item"><span>Despliegue</span><strong>${escapeHtml(wave.title)}</strong></div>
+          <div class="wave-plan-item"><span>Segmentación</span><strong>${escapeHtml(wave.groups)}</strong></div>
+        </div>
+      </div>`;
+    }
+    function proposalDurationLabel(planKey = selectedProposalPlanKey()) {
+      const wave = adoptionWaveModel(planKey);
+      return wave ? wave.duration : planCatalog()[planKey].duration;
+    }
+    function proposalEffortLabel(planKey = selectedProposalPlanKey()) {
+      const wave = adoptionWaveModel(planKey);
+      return wave ? wave.label : planCatalog()[planKey].effort;
+    }
+    function proposalScopeLabel(planKey = selectedProposalPlanKey()) {
+      const wave = adoptionWaveModel(planKey);
+      return wave ? wave.users : planCatalog()[planKey].shortScope;
+    }
+    function proposalScopeDetail(planKey = selectedProposalPlanKey()) {
+      const wave = adoptionWaveModel(planKey);
+      return wave ? `${wave.groups} · ${wave.cadence}` : planCatalog()[planKey].scope;
+    }
+    function proposalDurationDays(planKey = selectedProposalPlanKey()) {
+      const wave = adoptionWaveModel(planKey);
+      if (wave && state.userRange === "small") return 30;
+      if (wave && state.userRange === "medium") return 90;
+      if (wave && state.userRange === "large") return 365;
+      return planCatalog()[planKey].durationDays || 30;
+    }
+    function proposalEndDate(planKey = selectedProposalPlanKey()) {
+      const start = state.startDate || todayIso;
+      const plan = planCatalog()[planKey];
+      if (plan.durationMonths && planKey !== "plan1") return formatDate(addMonths(start, plan.durationMonths));
+      return formatDate(addDays(start, proposalDurationDays(planKey)));
+    }
     function maturityPlanEntries(plans = planCatalog()) {
       return Object.entries(plans).sort(([, a], [, b]) => a.maturityOrder - b.maturityOrder);
-    }
-    function planEndDate(plan) {
-      const start = state.startDate || todayIso;
-      if (plan.durationMonths) return formatDate(addMonths(start, plan.durationMonths));
-      return formatDate(addDays(start, plan.durationDays || 30));
     }
     function addMonths(iso, months) {
       const date = new Date(`${iso}T00:00:00`);
@@ -5166,9 +5285,9 @@
       if (key === "plan0") return { main: "USD 3.500", detail: "Precio base del Plan 0. IVA no incluido." };
       if (key === "plan2") return { main: "USD 5.900", detail: "Precio base del Plan 2. IVA no incluido." };
       if (key === "plan1") {
-        if (userRange === "small") return { main: "USD 3.300 a 4.200 + IVA", detail: "Ola Express: 1 a 2 grupos, hasta 50 usuarios." };
-        if (userRange === "medium") return { main: "USD 4.700 a 7.900 + IVA", detail: "Ola Estándar o Completa según cantidad final de grupos." };
-        return { main: "USD 30.000 + IVA", detail: "Programa anual de 4 olas, hasta 600 usuarios." };
+        if (userRange === "small") return { main: "USD 3.300 a 4.200 + IVA", detail: "Ola Express: 2 a 3 grupos, hasta 45 usuarios." };
+        if (userRange === "medium") return { main: "USD 4.700 a 7.900 + IVA", detail: "Ola Estándar o Completa: hasta 5 olas de 60 usuarios para cubrir hasta 300 personas." };
+        return { main: "USD 30.000 + IVA", detail: "Programa anual por olas: hasta 10 olas de 60 usuarios para cubrir hasta 600 colaboradores." };
       }
       return { main: "A cotizar según alcance", detail: "No hay precio base fijo para Plan 3; se cotiza por cantidad de grupos, olas, add-ons y nivel de acompañamiento." };
     }
@@ -5187,6 +5306,7 @@
       const quote = quoteForPlan(recommendedKey);
       const planRange = parseUsdRange(quote.main);
       const addons = selectedAddonItems(recommendedKey);
+      const wave = adoptionWaveModel(recommendedKey);
       let addonMin = 0;
       let addonMax = 0;
       let unknownCount = 0;
@@ -5206,6 +5326,14 @@
           label: quote.main,
           detail: unknownCount ? `Plan y ${unknownCount} add-on${unknownCount === 1 ? "" : "s"} requieren validación comercial.` : quote.detail,
           plan: quote.main,
+          addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin add-ons adicionales"
+        };
+      }
+      if (recommendedKey === "plan1" && state.userRange === "medium" && wave) {
+        return {
+          label: `${quote.main} por ola`,
+          detail: `Referencia por ola. ${wave.note}${addons.length ? " Los add-ons se suman según alcance final." : ""}${unknownCount ? ` ${unknownCount} add-on${unknownCount === 1 ? "" : "s"} queda${unknownCount === 1 ? "" : "n"} a validar.` : ""}`,
+          plan: `${quote.main} por ola`,
           addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin add-ons adicionales"
         };
       }
@@ -5495,8 +5623,9 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           primaryPlanKey: primaryKey,
           primaryPlan: {
             name: plans[primaryKey].name,
-            scope: plans[primaryKey].scope,
-            duration: plans[primaryKey].duration,
+            scope: proposalScopeDetail(primaryKey),
+            duration: proposalDurationLabel(primaryKey),
+            adoptionWaveModel: adoptionWaveModel(primaryKey),
             bestFor: plans[primaryKey].bestFor,
             quote: quoteForPlan(primaryKey).main,
             reasons: decision.reasons
@@ -5504,8 +5633,9 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           alternativePlanKey: alternativeKey,
           alternativePlan: {
             name: plans[alternativeKey].name,
-            scope: plans[alternativeKey].scope,
-            duration: plans[alternativeKey].duration,
+            scope: proposalScopeDetail(alternativeKey),
+            duration: proposalDurationLabel(alternativeKey),
+            adoptionWaveModel: adoptionWaveModel(alternativeKey),
             bestFor: plans[alternativeKey].bestFor,
             quote: quoteForPlan(alternativeKey).main,
             difference: quoteDifference(primaryKey, alternativeKey),
@@ -5865,8 +5995,9 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           startDateFormatted: formatDate(state.startDate),
           recommendedPlanKey: recommendedKey,
           recommendedPlanName: plans[recommendedKey].name,
-          recommendedPlanDuration: plans[recommendedKey].duration,
-          recommendedPlanScope: plans[recommendedKey].scope,
+          recommendedPlanDuration: proposalDurationLabel(recommendedKey),
+          recommendedPlanScope: proposalScopeDetail(recommendedKey),
+          adoptionWaveModel: adoptionWaveModel(recommendedKey),
           confidence: decision.confidence,
           confidenceLabel: confidenceLabel(decision.level),
           reasons: decision.reasons,
@@ -5906,6 +6037,11 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const quote = quoteForPlan(recommendedKey);
       const totalEstimate = proposalTotalEstimate(recommendedKey);
       const addons = addOnsForPlan(recommendedKey);
+      const durationLabel = proposalDurationLabel(recommendedKey);
+      const effortLabel = proposalEffortLabel(recommendedKey);
+      const scopeLabel = proposalScopeLabel(recommendedKey);
+      const scopeDetail = proposalScopeDetail(recommendedKey);
+      const endDate = proposalEndDate(recommendedKey);
       const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
       const validationProposalText = state.aiValidation && state.aiValidation.summary ? filterValidationSummaryForProposal(state.aiValidation.summary) : "";
       const companyResearchMarkup = formatCompanyResearch(state.aiSummary && state.aiSummary.companyResearch);
@@ -5936,11 +6072,11 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                 <span class="decision-note">${directMode ? "El comercial seleccionó el plan directamente para generar la Versión 1." : recommendedKey === algorithmRecommendedKey ? confidenceNote(decision) : `Plan ajustado manualmente. Original: ${plans[algorithmRecommendedKey].name}.`}</span>
               </div>
             </div>
-            <div class="score">${recommended.duration}</div>
+            <div class="score">${durationLabel}</div>
           </div>
           <div class="proposal-meta">
             <div class="proposal-meta-card"><strong>${formatDate(state.startDate)}</strong><span>Inicio estimado</span></div>
-            <div class="proposal-meta-card"><strong>${planEndDate(recommended)}</strong><span>Fin estimado</span></div>
+            <div class="proposal-meta-card"><strong>${endDate}</strong><span>Fin estimado</span></div>
           </div>
           <div class="proposal-commercial-grid">
             <div class="proposal-functional-stack">
@@ -5970,10 +6106,11 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                   ${decisionAlternativesMarkup(decision, plans, recommendedKey, mode)}
                   <p>${recommended.desc}</p>
                   <div class="plan-metric-row">
-                    <div class="plan-metric"><strong>${recommended.duration}</strong><span>Duración</span></div>
-                    <div class="plan-metric"><strong>${recommended.effort}</strong><span>Modelo</span></div>
-                    <div class="plan-metric"><strong>${recommended.shortScope}</strong><span>${recommended.scope}</span></div>
+                    <div class="plan-metric"><strong>${durationLabel}</strong><span>Duración</span></div>
+                    <div class="plan-metric"><strong>${effortLabel}</strong><span>Modelo</span></div>
+                    <div class="plan-metric"><strong>${scopeLabel}</strong><span>${scopeDetail}</span></div>
                   </div>
+                  ${renderWavePlanPanel(recommendedKey)}
                 </div>
                 <div class="proposal-panel includes-panel">
                   <h3>Qué incluye este plan</h3>
@@ -6058,7 +6195,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
               <article class="plan-option-card recommended">
                 <div class="stage-icon">${iconSvg(recommended.icon)}</div>
                 <h4>${recommended.name}</h4>
-                <span class="badge">${recommended.duration} · ${recommended.effort}</span>
+                <span class="badge">${durationLabel} · ${effortLabel}</span>
                 <p>${recommended.bestFor}</p>
               </article>
               <article class="plan-option-card">
@@ -6071,7 +6208,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                 <div class="stage-icon">${iconSvg("users-mix")}</div>
                 <h4>Alcance relevado y alcance del plan final</h4>
                 <p>Inicial relevado: ${qualificationValue("userRange")} · Sponsor: ${qualificationValue("sponsor")} · ${qualificationValue("accompaniment")}</p>
-                <p>Plan principal seleccionado: ${recommended.scope}</p>
+                <p>Plan principal seleccionado: ${scopeDetail}</p>
               </article>
               <article class="plan-option-card">
                 <div class="stage-icon">${iconSvg("teams")}</div>
@@ -6185,6 +6322,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const totalEstimate = proposalTotalEstimate(recommendedKey);
       const decision = planDecision();
       const original = planCatalog()[decision.recommendedKey];
+      const wave = adoptionWaveModel(recommendedKey);
       const directMode = state.proposalMode === "direct";
       const changed = !directMode && recommendedKey !== decision.recommendedKey;
       const aiSummary = state.aiSummary ? {
@@ -6212,8 +6350,9 @@ Referencia comercial: ${recommended.shortName || recommended.name}
 ${directMode ? "Modo: Propuesta directa seleccionada por el comercial." : `Plan original sugerido por la app: ${original.name}
 ${changed ? "Cambio manual: Sí, el comercial promovió una alternativa como plan principal." : "Cambio manual: No, coincide con el plan original."}
 Confianza: ${confidenceLabel(decision.level)} · ${decision.confidence}%`}
-Duración: ${recommended.duration}
-Alcance: ${recommended.scope}
+Duración: ${proposalDurationLabel(recommendedKey)}
+Alcance: ${proposalScopeDetail(recommendedKey)}
+${wave ? `Modelo de olas: ${wave.title} · ${wave.groups} · ${wave.note}` : ""}
 Cotización: ${quote.main}
 Total estimado: ${totalEstimate.label}
 Detalle: ${quote.detail}${aiSection}${validationSection}
@@ -6305,6 +6444,7 @@ ${location.href}`
       const algorithmRecommendedKey = decision.recommendedKey;
       const directMode = state.proposalMode === "direct";
       const planChangedByCommercial = !directMode && recommendedKey !== algorithmRecommendedKey;
+      const wave = adoptionWaveModel(recommendedKey);
       return {
         source: "GeneradorPropuestaADP",
         createdAt: new Date().toISOString(),
@@ -6333,7 +6473,7 @@ ${location.href}`
           proposalMode: directMode ? "direct" : "guided",
           startDate: state.startDate,
           startDateFormatted: formatDate(state.startDate),
-          endDateFormatted: planEndDate(recommended),
+          endDateFormatted: proposalEndDate(recommendedKey),
           pageUrl: location.href,
           recommendedPlanKey: recommendedKey,
           selectedPlanKey: recommendedKey,
@@ -6348,8 +6488,9 @@ ${location.href}`
           maturityName: recommended.maturityName,
           maturityTitle: planMaturityTitle(recommended),
           recommendedPlanBadge: recommended.badge,
-          recommendedPlanDuration: recommended.duration,
-          recommendedPlanScope: recommended.scope,
+          recommendedPlanDuration: proposalDurationLabel(recommendedKey),
+          recommendedPlanScope: proposalScopeDetail(recommendedKey),
+          adoptionWaveModel: wave,
           quote: quote.main,
           quoteDetail: quote.detail,
           totalEstimate,
@@ -6742,6 +6883,11 @@ ${location.href}`
       const addons = addOnsForPlan(recommendedKey);
       const roadmapState = roadmapStatus(recommendedKey);
       const selectedAddons = selectedAddonItems();
+      const wave = adoptionWaveModel(recommendedKey);
+      const durationLabel = proposalDurationLabel(recommendedKey);
+      const scopeLabel = proposalScopeLabel(recommendedKey);
+      const scopeDetail = proposalScopeDetail(recommendedKey);
+      const endDate = proposalEndDate(recommendedKey);
       const printableAddonRows = selectedAddons.length
         ? selectedAddons.map((addon) => `<div class="price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("")
         : `<div class="price-row"><span>Add-ons seleccionados</span><strong>Sin add-ons</strong></div>`;
@@ -6800,6 +6946,11 @@ ${location.href}`
           .card.yellow { background: #fff7bf; border-color: #fcd702; }
           .card strong { display: block; margin-bottom: 2mm; font-size: 16pt; color: #2e2d31; }
           .metric strong { font-size: 23pt; }
+          .wave-card { border-color: #fcd702; background: #fffdf0; }
+          .wave-card .wave-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-top: 4mm; }
+          .wave-card .wave-meta div { border: 1px solid #eadf9a; border-radius: 3mm; padding: 3mm; background: #ffffff; }
+          .wave-card .wave-meta span { display: block; color: #73757d; font-size: 8.5pt; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; }
+          .wave-card .wave-meta strong { display: block; margin-top: 1.5mm; font-size: 12pt; }
           .quote { border-color: #fcd702; background: #fff7bf; }
           .quote strong { font-size: 27pt; }
           .cowork-pdf { border-color: #00a351; background: #e8f8ef; }
@@ -6844,7 +6995,7 @@ ${location.href}`
           <div class="hero-bottom">
             <div>
               <p style="font-size:24pt;color:#ffffff;font-weight:900">${state.company}</p>
-              <p>Inicio estimado: ${formatDate(state.startDate)} · Fin estimado: ${planEndDate(plan)}</p>
+              <p>Inicio estimado: ${formatDate(state.startDate)} · Fin estimado: ${endDate}</p>
               <p>Documento generado a partir del relevamiento cargado en el diseñador.</p>
             </div>
             <div class="brand"><span class="logo">P</span><span>Possumus</span></div>
@@ -6884,14 +7035,15 @@ ${location.href}`
             <div>
               <div class="pdf-compact-grid">
                 <div class="card"><strong>Contexto relevado</strong><p>${selectedLabel("industry")} · ${selectedLabel("users")}</p><p>${focus.join(" · ")}</p></div>
-                <div class="card"><strong>Alcance de referencia</strong><p>${plan.scope}</p><p>${plan.bestFor}</p></div>
+                <div class="card"><strong>Alcance de referencia</strong><p>${scopeDetail}</p><p>${plan.bestFor}</p></div>
                 <div class="card"><strong>Diagnóstico operativo M365</strong><p>${operationalSummary.join(" · ")}</p></div>
                 <div class="card"><strong>Logística y medición</strong><p>${logisticsSummary.join(" · ")}</p></div>
               </div>
               <div class="pdf-compact-grid">
-                <div class="card metric"><strong>${plan.duration}</strong><p>Duración · ${formatDate(state.startDate)} a ${planEndDate(plan)}</p></div>
-                <div class="card metric"><strong>${plan.shortScope}</strong><p>${plan.scope}</p></div>
+                <div class="card metric"><strong>${durationLabel}</strong><p>Duración · ${formatDate(state.startDate)} a ${endDate}</p></div>
+                <div class="card metric"><strong>${scopeLabel}</strong><p>${scopeDetail}</p></div>
               </div>
+              ${wave ? `<div class="card wave-card" style="margin-top:5mm"><strong>Modelo de olas para este alcance</strong><p>${escapeHtml(wave.note)}</p><div class="wave-meta"><div><span>Modalidad</span><strong>${escapeHtml(wave.label)}</strong></div><div><span>Despliegue</span><strong>${escapeHtml(wave.title)}</strong></div><div><span>Segmentación</span><strong>${escapeHtml(wave.groups)}</strong></div></div></div>` : ""}
             </div>
             <div class="card price-card">
               <strong>Resumen económico</strong>
