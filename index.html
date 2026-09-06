@@ -218,23 +218,6 @@
       gap: 8px;
       margin-top: 10px;
     }
-    .direct-basics {
-      margin-top: 26px;
-      border: 1px solid var(--cp-border);
-      border-radius: 20px;
-      padding: 20px;
-      background:
-        radial-gradient(circle at right top, var(--cp-brand-yellow-soft), transparent 14rem),
-        var(--cp-surface);
-    }
-    .direct-basics h3 { margin-bottom: 6px; }
-    .direct-basics > p { margin-top: 0; }
-    .direct-basics-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 14px;
-      margin-top: 16px;
-    }
     .version-badge {
       display: inline-flex;
       align-items: center;
@@ -2732,7 +2715,7 @@
     .toast.show { opacity: 1; transform: translateY(0); }
     .hidden { display: none !important; }
     @media (max-width: 860px) {
-      .hero, .layout, .form-row, .review-grid, .roadmap, .links, .mode-grid, .direct-plan-grid, .direct-basics-grid { grid-template-columns: 1fr; }
+      .hero, .layout, .form-row, .review-grid, .roadmap, .links, .mode-grid, .direct-plan-grid { grid-template-columns: 1fr; }
       .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-selection-panel, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option { grid-template-columns: 1fr; }
       .proposal-price-panel { position: static; }
       .addon-pricing { border-left: 0; border-top: 1px solid var(--cp-border); padding-left: 0; padding-top: 10px; }
@@ -2778,7 +2761,7 @@
     <div class="top-actions">
       <span class="auth-status hidden" id="authStatus">Login Microsoft deshabilitado para pruebas</span>
       <button class="btn ghost hidden" id="loginBtn">Iniciar sesión</button>
-      <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.9.3 · técnico</a>
+      <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.9.4 · técnico</a>
       <button class="btn ghost icon-only" id="decisionHelpBtn" title="Ayuda · lógica de decisión" aria-label="Ayuda · lógica de decisión"><span class="btn-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.8 9a2.4 2.4 0 0 1 4.4 1.3c0 1.7-1.5 2.2-2.2 3"></path><path d="M12 17h.01"></path></svg></span></button>
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
@@ -2855,33 +2838,23 @@
     <section id="directPlan" class="layout hidden">
       <aside class="side side-nav">
         <h2>Propuesta directa</h2>
-        <p>Elegí un plan ya definido y generá la versión final sin diagnóstico ni alternativas.</p>
+        <p>Un camino breve para generar una propuesta cuando el plan ya está definido comercialmente.</p>
         <div class="mini-stat"><strong>Uso recomendado</strong><p>Cuando el comercial ya validó con el cliente qué plan corresponde.</p></div>
+        <div class="nav-list" id="directNavList"></div>
       </aside>
       <main class="card content-card">
         <div class="step-header">
           <div>
-            <span class="badge">Camino rápido</span>
-            <p class="eyebrow">Plan definido por el comercial</p>
-            <h2>Elegí el plan que querés presentar</h2>
-            <p>La propuesta final se va a generar como Versión 1 sobre el plan seleccionado, sin scoring ni alternativas.</p>
+            <span class="badge" id="directStepCount"></span>
+            <p class="eyebrow" id="directStepKicker"></p>
+            <h2 id="directStepTitle"></h2>
+            <p id="directStepSubtitle"></p>
           </div>
         </div>
-        <div class="form-row">
-          <div>
-            <label for="directCompany">Nombre de la compañía</label>
-            <input id="directCompany" placeholder="Ej.: Contoso">
-          </div>
-          <div>
-            <label for="directStartDate">Fecha esperada de inicio</label>
-            <input id="directStartDate" type="date">
-          </div>
-        </div>
-        <div id="directPlanGrid" class="direct-plan-grid"></div>
-        <div id="directBasics"></div>
+        <div id="directStepBody"></div>
         <div class="toolbar">
           <button class="btn" id="directBackBtn">← Volver</button>
-          <button class="btn action-mail" id="directBuildBtn">Generar propuesta</button>
+          <button class="btn action-mail" id="directBuildBtn">Continuar</button>
         </div>
       </main>
     </section>
@@ -3498,7 +3471,14 @@
       { key: "logistics", label: "Paso 9 · Logística y medición", kicker: "Cierre de entrega", title: "¿Cómo conviene entregar y medir la adopción?", subtitle: "Definí modalidad, frecuencia, modelo de grupos y métrica de éxito antes de add-ons, para que las sugerencias de módulos usen esta información." },
       { key: "addons", label: "Add-ons · Módulos sugeridos", kicker: "Módulos opcionales", title: "¿Qué add-ons querés sumar a la propuesta?", subtitle: "Según el plan recomendado y lo relevado (incluida la logística recién definida), seleccioná los módulos opcionales que conviene cotizar aparte." }
     ];
+    const directSteps = [
+      { key: "direct-start", label: "Paso 1 · Plan", kicker: "Propuesta directa", title: "Elegí el plan que querés presentar", subtitle: "Cargá cliente, fecha y plan. El plan queda definido por el comercial y no se calcula por scoring." },
+      { key: "direct-industry", label: "Paso 2 · Tipo de cliente", kicker: "Contexto comercial", title: "¿Qué tipo de cliente es?", subtitle: "Este dato no cambia el plan, pero ajusta ejemplos, contexto y lenguaje de la propuesta." },
+      { key: "direct-users", label: "Paso 3 · Alcance", kicker: "Audiencia objetivo", title: "¿A qué grupo de usuarios se orienta?", subtitle: "Definí si es un área piloto o varias áreas, según lo conversado con el cliente y el plan elegido." },
+      { key: "direct-logistics", label: "Paso 4 · Entrega y medición", kicker: "Cierre de entrega", title: "¿Cómo conviene entregar y medir la adopción?", subtitle: "Definí modalidad, frecuencia, modelo de grupos y métrica para que el PDF y el handoff salgan completos." }
+    ];
     let currentStep = 0;
+    let currentDirectStep = 0;
 
     const $ = (id) => document.getElementById(id);
     const find = (collection, key) => collection.find((item) => item[0] === key) || ["", "", ""];
@@ -4121,6 +4101,9 @@
           m365Tools: "collaboration",
           projectStage: "evaluation",
           accompaniment: "training",
+          usersMode: "department",
+          department: "RR. HH.",
+          departments: ["RR. HH."],
           userRange: "small",
           sponsor: "no",
           governance: "high",
@@ -4136,6 +4119,9 @@
           m365Tools: "basic",
           projectStage: "evaluation",
           accompaniment: "adoption-program",
+          usersMode: "department",
+          department: "RR. HH.",
+          departments: ["RR. HH."],
           userRange: "small",
           sponsor: "partial",
           governance: "medium",
@@ -4151,6 +4137,9 @@
           m365Tools: "collaboration",
           projectStage: "pilot",
           accompaniment: "training",
+          usersMode: "department",
+          department: "RR. HH.",
+          departments: ["RR. HH."],
           userRange: "small",
           sponsor: "yes",
           governance: "medium",
@@ -4166,6 +4155,9 @@
           m365Tools: "collaboration",
           projectStage: "scale",
           accompaniment: "change-management",
+          usersMode: "mix",
+          department: "RR. HH.",
+          departments: ["RR. HH.", "Ventas", "Operaciones", "Finanzas"],
           userRange: "medium",
           sponsor: "yes",
           governance: "medium",
@@ -4207,86 +4199,30 @@
         aiPlanComparisons: {}
       }, directDefaultsForPlan(planKey));
     }
-    function directSelectOptions(options, selectedValue) {
-      return options.map(([value, label]) => `<option value="${value}" ${selectedValue === value ? "selected" : ""}>${escapeHtml(label)}</option>`).join("");
+    function directPlanRecommendation(planKey = state.directPlanKey) {
+      if (planKey === "plan0") return "Recomendado: un área piloto o grupo acotado para validar valor y business case.";
+      if (planKey === "plan1") return "Recomendado: un área prioritaria o varias áreas si el objetivo es ordenar hábitos transversales.";
+      if (planKey === "plan2") return "Recomendado: usuarios con licencia Copilot, idealmente un piloto o grupo inicial medible.";
+      if (planKey === "plan3") return "Recomendado: varias áreas, sponsors y referentes para sostener cambio e IA a escala.";
+      return "Elegí la audiencia que mejor represente lo conversado con el cliente.";
     }
-    function directBasicsValues(planKey = state.directPlanKey || "plan1") {
-      const defaults = directDefaultsForPlan(planKey);
-      const fieldOptions = (fields, key) => fields.find((field) => field.key === key).options;
-      return {
-        industry: state.industry || "professional",
-        department: selectedDepartments()[0] || "RR. HH.",
-        userRange: state.userRange || defaults.userRange || "small",
-        deliveryMode: state.deliveryMode || "remote",
-        sessionFrequency: state.sessionFrequency || "weekly",
-        groupModel: state.groupModel || "by-area",
-        successMetric: state.successMetric || "satisfaction",
-        industryOptions: industries.map(([value, label]) => [value, label]),
-        departmentOptions: departments.map(([label]) => [label, label]),
-        userRangeOptions: fieldOptions(qualificationFields, "userRange"),
-        deliveryModeOptions: fieldOptions(logisticsFields, "deliveryMode"),
-        sessionFrequencyOptions: fieldOptions(logisticsFields, "sessionFrequency"),
-        groupModelOptions: fieldOptions(logisticsFields, "groupModel"),
-        successMetricOptions: fieldOptions(logisticsFields, "successMetric")
-      };
+    function renderDirectNav() {
+      $("directNavList").innerHTML = directSteps.map((step, index) => {
+        const completed = isDirectStepComplete(step.key);
+        return `<button class="nav-step ${index === currentDirectStep ? "active" : ""} ${completed ? "completed" : ""}" data-direct-index="${index}">
+          <strong>${step.label}</strong>
+        </button>`;
+      }).join("");
+      $("directNavList").querySelectorAll("[data-direct-index]").forEach((button) => {
+        button.addEventListener("click", () => {
+          currentDirectStep = Number(button.dataset.directIndex);
+          renderDirectStep();
+        });
+      });
     }
-    function renderDirectBasics(planKey = state.directPlanKey || "plan1") {
-      const values = directBasicsValues(planKey);
-      $("directBasics").innerHTML = `<section class="direct-basics">
-        <span class="ai-badge">Datos mínimos</span>
-        <h3>Ajustes necesarios para personalizar la propuesta</h3>
-        <p>Estas preguntas no recalculan el plan. Sirven para que el PDF, el roadmap, la logística y el handoff salgan con información útil del cliente.</p>
-        <div class="direct-basics-grid">
-          <div>
-            <label for="directIndustry">Tipo de cliente</label>
-            <select id="directIndustry">${directSelectOptions(values.industryOptions, values.industry)}</select>
-          </div>
-          <div>
-            <label for="directDepartment">Área o grupo principal</label>
-            <select id="directDepartment">${directSelectOptions(values.departmentOptions, values.department)}</select>
-          </div>
-          <div>
-            <label for="directUserRange">Alcance estimado</label>
-            <select id="directUserRange">${directSelectOptions(values.userRangeOptions, values.userRange)}</select>
-          </div>
-          <div>
-            <label for="directDeliveryMode">Modalidad preferida</label>
-            <select id="directDeliveryMode">${directSelectOptions(values.deliveryModeOptions, values.deliveryMode)}</select>
-          </div>
-          <div>
-            <label for="directSessionFrequency">Frecuencia esperada</label>
-            <select id="directSessionFrequency">${directSelectOptions(values.sessionFrequencyOptions, values.sessionFrequency)}</select>
-          </div>
-          <div>
-            <label for="directGroupModel">Modelo de grupos</label>
-            <select id="directGroupModel">${directSelectOptions(values.groupModelOptions, values.groupModel)}</select>
-          </div>
-          <div>
-            <label for="directSuccessMetric">Métrica principal de éxito</label>
-            <select id="directSuccessMetric">${directSelectOptions(values.successMetricOptions, values.successMetric)}</select>
-          </div>
-        </div>
-      </section>`;
-    }
-    function readDirectBasics() {
-      const department = $("directDepartment").value;
-      return {
-        industry: $("directIndustry").value,
-        usersMode: "department",
-        department,
-        departments: [department],
-        userRange: $("directUserRange").value,
-        deliveryMode: $("directDeliveryMode").value,
-        sessionFrequency: $("directSessionFrequency").value,
-        groupModel: $("directGroupModel").value,
-        successMetric: $("directSuccessMetric").value
-      };
-    }
-    function renderDirectPlanSelection() {
+    function directPlanCardsMarkup() {
       const plans = planCatalog();
-      $("directCompany").value = state.company || $("company").value || "";
-      $("directStartDate").value = state.startDate || todayIso;
-      $("directPlanGrid").innerHTML = Object.entries(plans).map(([key, plan]) => {
+      return Object.entries(plans).map(([key, plan]) => {
         const defaults = directDefaultsForPlan(key);
         const quote = quoteForPlan(key, defaults.userRange);
         return `<button class="direct-plan-card ${state.directPlanKey === key ? "selected" : ""}" data-direct-plan="${key}" type="button">
@@ -4303,14 +4239,139 @@
           </div>
         </button>`;
       }).join("");
-      $("directPlanGrid").querySelectorAll("[data-direct-plan]").forEach((button) => {
+    }
+    function isDirectStepComplete(key) {
+      if (key === "direct-start") return Boolean(state.company && state.startDate && state.directPlanKey);
+      if (key === "direct-industry") return Boolean(state.industry);
+      if (key === "direct-users") return Boolean(state.usersMode && selectedDepartments().length && state.userRange);
+      if (key === "direct-logistics") return logisticsFields.every((field) => Boolean(state[field.key]));
+      return true;
+    }
+    function canContinueDirect() {
+      return isDirectStepComplete(directSteps[currentDirectStep].key);
+    }
+    function renderDirectStep() {
+      const step = directSteps[currentDirectStep];
+      $("directStepCount").textContent = `Paso ${currentDirectStep + 1} de ${directSteps.length}`;
+      $("directStepKicker").textContent = step.kicker;
+      $("directStepTitle").textContent = step.title;
+      $("directStepSubtitle").textContent = step.subtitle;
+      renderDirectNav();
+      let body = "";
+      if (step.key === "direct-start") {
+        body = `<div class="form-row">
+          <div>
+            <label for="directCompany">Nombre de la compañía</label>
+            <input id="directCompany" placeholder="Ej.: Contoso" value="${escapeHtml(state.company || "")}">
+          </div>
+          <div>
+            <label for="directStartDate">Fecha esperada de inicio</label>
+            <input id="directStartDate" type="date" value="${escapeHtml(state.startDate || todayIso)}">
+          </div>
+        </div>
+        <div class="direct-plan-grid">${directPlanCardsMarkup()}</div>`;
+      }
+      if (step.key === "direct-industry") {
+        body = `<div class="conversation-guide">
+          <div class="stage-icon">${iconSvg("client-context")}</div>
+          <div>
+            <strong>Contexto para ajustar la propuesta</strong>
+            <p>Elegí el tipo de cliente para adaptar ejemplos, lenguaje comercial y resumen ejecutivo.</p>
+          </div>
+        </div>
+        <div class="options">${industries.map((item) => optionButton(item, state.industry, "industry")).join("")}</div>`;
+      }
+      if (step.key === "direct-users") {
+        body = `<div class="conversation-guide">
+          <div class="stage-icon">${iconSvg("users-mix")}</div>
+          <div>
+            <strong>${directPlanRecommendation()}</strong>
+            <p>Este dato define cómo se redacta alcance, roadmap, logística y handoff; no cambia el plan elegido.</p>
+          </div>
+        </div>
+        <div class="options">
+          <button class="option with-icon ${state.usersMode === "mix" ? "selected" : ""}" data-direct-mode="mix">
+            <div class="option-icon">${iconSvg("users-mix")}</div>
+            <div><strong>Perfiles de distintas áreas</strong><span>Usalo cuando la propuesta involucra varias áreas, sponsors o referentes.</span></div>
+            <div class="option-check">${state.usersMode === "mix" ? "✓" : ""}</div>
+          </button>
+          <button class="option with-icon ${state.usersMode === "department" ? "selected" : ""}" data-direct-mode="department">
+            <div class="option-icon">${iconSvg("users-dept")}</div>
+            <div><strong>Un área prioritaria</strong><span>Usalo para piloto, área foco o grupo inicial del cliente.</span></div>
+            <div class="option-check">${state.usersMode === "department" ? "✓" : ""}</div>
+          </button>
+        </div>
+        <div class="dept-grid">${departments.map(([dept, icon]) => {
+          const selected = selectedDepartments().includes(dept);
+          return `<button class="dept-card ${selected ? "selected" : ""}" data-direct-dept="${dept}">
+            <div class="option-icon">${iconSvg(icon)}</div>
+            <strong>${dept}</strong>
+            <div class="option-check">${selected ? "✓" : ""}</div>
+          </button>`;
+        }).join("")}</div>
+        <div style="margin-top:22px">${renderDiscoveryFields([qualificationFields.find((field) => field.key === "userRange")])}</div>`;
+      }
+      if (step.key === "direct-logistics") {
+        ensureLogisticsDefaults();
+        body = `<div class="conversation-guide">
+          <div class="stage-icon">${iconSvg("calendar")}</div>
+          <div>
+            <strong>Entrega y medición</strong>
+            <p>Estos datos completan la propuesta final, el roadmap y el handoff.</p>
+          </div>
+        </div>
+        ${renderDiscoveryFields(logisticsFields)}`;
+      }
+      $("directStepBody").innerHTML = body;
+      if (step.key === "direct-start") {
+        $("directCompany").addEventListener("input", (event) => { state.company = event.target.value.trim(); renderDirectNav(); });
+        $("directStartDate").addEventListener("input", (event) => { state.startDate = event.target.value; renderDirectNav(); });
+        $("directStepBody").querySelectorAll("[data-direct-plan]").forEach((button) => {
+          button.addEventListener("click", () => {
+            const nextPlan = button.dataset.directPlan;
+            applyDirectPlanDefaults(nextPlan);
+            $("directStepBody").querySelectorAll("[data-direct-plan]").forEach((item) => item.classList.toggle("selected", item === button));
+            renderDirectNav();
+          });
+        });
+      }
+      $("directStepBody").querySelectorAll(".option[data-key]").forEach((button) => {
         button.addEventListener("click", () => {
-          state.directPlanKey = button.dataset.directPlan;
-          $("directPlanGrid").querySelectorAll("[data-direct-plan]").forEach((item) => item.classList.toggle("selected", item === button));
-          renderDirectBasics(state.directPlanKey);
+          state.industry = button.dataset.key;
+          renderDirectStep();
         });
       });
-      renderDirectBasics(state.directPlanKey || "plan1");
+      $("directStepBody").querySelectorAll("[data-direct-mode]").forEach((button) => button.addEventListener("click", () => {
+        state.usersMode = button.dataset.directMode;
+        if (state.usersMode === "department") {
+          const selected = selectedDepartments()[0] || state.department || "RR. HH.";
+          state.department = selected;
+          state.departments = [selected];
+        }
+        renderDirectStep();
+      }));
+      $("directStepBody").querySelectorAll("[data-direct-dept]").forEach((button) => button.addEventListener("click", () => {
+        const dept = button.dataset.directDept;
+        if (state.usersMode === "mix") {
+          const selected = new Set(selectedDepartments());
+          if (selected.has(dept)) selected.delete(dept);
+          else selected.add(dept);
+          state.departments = Array.from(selected);
+          state.department = state.departments[0] || "";
+        } else {
+          state.usersMode = "department";
+          state.department = dept;
+          state.departments = [dept];
+        }
+        renderDirectStep();
+      }));
+      $("directStepBody").querySelectorAll("[data-discovery]").forEach((select) => select.addEventListener("change", () => {
+        state[select.dataset.discovery] = select.value;
+        select.closest(".qualification-field").classList.toggle("answered", Boolean(select.value));
+        renderDirectNav();
+      }));
+      $("directBackBtn").textContent = currentDirectStep === 0 ? "← Volver" : "← Atrás";
+      $("directBuildBtn").textContent = currentDirectStep === directSteps.length - 1 ? "Generar propuesta" : "Continuar";
     }
     function selectedDepartments() {
       if (Array.isArray(state.departments) && state.departments.length) {
@@ -4878,8 +4939,6 @@
       renderPlan("admin");
     }
     function generateDirectPlan() {
-      state.company = $("directCompany").value.trim();
-      state.startDate = $("directStartDate").value;
       if (!state.company || !state.startDate) {
         showToast("Completa compañía y fecha de inicio.");
         return;
@@ -4888,9 +4947,10 @@
         showToast("Seleccioná un plan para generar la propuesta.");
         return;
       }
-      const directBasics = readDirectBasics();
-      applyDirectPlanDefaults(state.directPlanKey);
-      Object.assign(state, directBasics);
+      if (!isDirectStepComplete("direct-industry") || !isDirectStepComplete("direct-users") || !isDirectStepComplete("direct-logistics")) {
+        showToast("Completá los datos mínimos antes de generar la propuesta.");
+        return;
+      }
       ensureLogisticsDefaults();
       state.planId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
       state.userId = crypto.randomUUID ? crypto.randomUUID() : `user-${Date.now()}`;
@@ -5970,7 +6030,8 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       show("plan");
       $("editPlanBtn").addEventListener("click", () => {
         if (directMode) {
-          renderDirectPlanSelection();
+          currentDirectStep = 0;
+          renderDirectStep();
           show("directPlan");
           return;
         }
@@ -6994,11 +7055,30 @@ ${location.href}`
       state.directPlanKey = "";
       state.company = $("company").value.trim();
       state.startDate = $("startDate").value || todayIso;
-      renderDirectPlanSelection();
+      currentDirectStep = 0;
+      renderDirectStep();
       show("directPlan");
     });
-    $("directBackBtn").addEventListener("click", () => show("modeSelect"));
-    $("directBuildBtn").addEventListener("click", generateDirectPlan);
+    $("directBackBtn").addEventListener("click", () => {
+      if (currentDirectStep === 0) {
+        show("modeSelect");
+        return;
+      }
+      currentDirectStep -= 1;
+      renderDirectStep();
+    });
+    $("directBuildBtn").addEventListener("click", () => {
+      if (!canContinueDirect()) {
+        showToast("Completá este paso para continuar.");
+        return;
+      }
+      if (currentDirectStep < directSteps.length - 1) {
+        currentDirectStep += 1;
+        renderDirectStep();
+        return;
+      }
+      generateDirectPlan();
+    });
     $("startBtn").addEventListener("click", async () => {
       if (AUTH_ENABLED && !state.commercialEmail) {
         const signedIn = await signInWithMicrosoft();
@@ -7051,8 +7131,8 @@ ${location.href}`
       Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, proposalMode: "guided", directPlanKey: "", planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, addonPrices: {}, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, overridePlanKey: "", aiPlanComparisons: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
-      $("directCompany").value = "";
-      $("directStartDate").value = todayIso;
+      if ($("directCompany")) $("directCompany").value = "";
+      if ($("directStartDate")) $("directStartDate").value = todayIso;
       location.hash = "/mode";
       show("modeSelect");
     });
