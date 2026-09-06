@@ -218,6 +218,23 @@
       gap: 8px;
       margin-top: 10px;
     }
+    .direct-basics {
+      margin-top: 26px;
+      border: 1px solid var(--cp-border);
+      border-radius: 20px;
+      padding: 20px;
+      background:
+        radial-gradient(circle at right top, var(--cp-brand-yellow-soft), transparent 14rem),
+        var(--cp-surface);
+    }
+    .direct-basics h3 { margin-bottom: 6px; }
+    .direct-basics > p { margin-top: 0; }
+    .direct-basics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
     .version-badge {
       display: inline-flex;
       align-items: center;
@@ -2715,7 +2732,7 @@
     .toast.show { opacity: 1; transform: translateY(0); }
     .hidden { display: none !important; }
     @media (max-width: 860px) {
-      .hero, .layout, .form-row, .review-grid, .roadmap, .links, .mode-grid, .direct-plan-grid { grid-template-columns: 1fr; }
+      .hero, .layout, .form-row, .review-grid, .roadmap, .links, .mode-grid, .direct-plan-grid, .direct-basics-grid { grid-template-columns: 1fr; }
       .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-selection-panel, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option { grid-template-columns: 1fr; }
       .proposal-price-panel { position: static; }
       .addon-pricing { border-left: 0; border-top: 1px solid var(--cp-border); padding-left: 0; padding-top: 10px; }
@@ -2761,7 +2778,7 @@
     <div class="top-actions">
       <span class="auth-status hidden" id="authStatus">Login Microsoft deshabilitado para pruebas</span>
       <button class="btn ghost hidden" id="loginBtn">Iniciar sesión</button>
-      <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.9.2 · técnico</a>
+      <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.9.3 · técnico</a>
       <button class="btn ghost icon-only" id="decisionHelpBtn" title="Ayuda · lógica de decisión" aria-label="Ayuda · lógica de decisión"><span class="btn-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.8 9a2.4 2.4 0 0 1 4.4 1.3c0 1.7-1.5 2.2-2.2 3"></path><path d="M12 17h.01"></path></svg></span></button>
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
@@ -2861,6 +2878,7 @@
           </div>
         </div>
         <div id="directPlanGrid" class="direct-plan-grid"></div>
+        <div id="directBasics"></div>
         <div class="toolbar">
           <button class="btn" id="directBackBtn">← Volver</button>
           <button class="btn action-mail" id="directBuildBtn">Generar propuesta</button>
@@ -4189,6 +4207,81 @@
         aiPlanComparisons: {}
       }, directDefaultsForPlan(planKey));
     }
+    function directSelectOptions(options, selectedValue) {
+      return options.map(([value, label]) => `<option value="${value}" ${selectedValue === value ? "selected" : ""}>${escapeHtml(label)}</option>`).join("");
+    }
+    function directBasicsValues(planKey = state.directPlanKey || "plan1") {
+      const defaults = directDefaultsForPlan(planKey);
+      const fieldOptions = (fields, key) => fields.find((field) => field.key === key).options;
+      return {
+        industry: state.industry || "professional",
+        department: selectedDepartments()[0] || "RR. HH.",
+        userRange: state.userRange || defaults.userRange || "small",
+        deliveryMode: state.deliveryMode || "remote",
+        sessionFrequency: state.sessionFrequency || "weekly",
+        groupModel: state.groupModel || "by-area",
+        successMetric: state.successMetric || "satisfaction",
+        industryOptions: industries.map(([value, label]) => [value, label]),
+        departmentOptions: departments.map(([label]) => [label, label]),
+        userRangeOptions: fieldOptions(qualificationFields, "userRange"),
+        deliveryModeOptions: fieldOptions(logisticsFields, "deliveryMode"),
+        sessionFrequencyOptions: fieldOptions(logisticsFields, "sessionFrequency"),
+        groupModelOptions: fieldOptions(logisticsFields, "groupModel"),
+        successMetricOptions: fieldOptions(logisticsFields, "successMetric")
+      };
+    }
+    function renderDirectBasics(planKey = state.directPlanKey || "plan1") {
+      const values = directBasicsValues(planKey);
+      $("directBasics").innerHTML = `<section class="direct-basics">
+        <span class="ai-badge">Datos mínimos</span>
+        <h3>Ajustes necesarios para personalizar la propuesta</h3>
+        <p>Estas preguntas no recalculan el plan. Sirven para que el PDF, el roadmap, la logística y el handoff salgan con información útil del cliente.</p>
+        <div class="direct-basics-grid">
+          <div>
+            <label for="directIndustry">Tipo de cliente</label>
+            <select id="directIndustry">${directSelectOptions(values.industryOptions, values.industry)}</select>
+          </div>
+          <div>
+            <label for="directDepartment">Área o grupo principal</label>
+            <select id="directDepartment">${directSelectOptions(values.departmentOptions, values.department)}</select>
+          </div>
+          <div>
+            <label for="directUserRange">Alcance estimado</label>
+            <select id="directUserRange">${directSelectOptions(values.userRangeOptions, values.userRange)}</select>
+          </div>
+          <div>
+            <label for="directDeliveryMode">Modalidad preferida</label>
+            <select id="directDeliveryMode">${directSelectOptions(values.deliveryModeOptions, values.deliveryMode)}</select>
+          </div>
+          <div>
+            <label for="directSessionFrequency">Frecuencia esperada</label>
+            <select id="directSessionFrequency">${directSelectOptions(values.sessionFrequencyOptions, values.sessionFrequency)}</select>
+          </div>
+          <div>
+            <label for="directGroupModel">Modelo de grupos</label>
+            <select id="directGroupModel">${directSelectOptions(values.groupModelOptions, values.groupModel)}</select>
+          </div>
+          <div>
+            <label for="directSuccessMetric">Métrica principal de éxito</label>
+            <select id="directSuccessMetric">${directSelectOptions(values.successMetricOptions, values.successMetric)}</select>
+          </div>
+        </div>
+      </section>`;
+    }
+    function readDirectBasics() {
+      const department = $("directDepartment").value;
+      return {
+        industry: $("directIndustry").value,
+        usersMode: "department",
+        department,
+        departments: [department],
+        userRange: $("directUserRange").value,
+        deliveryMode: $("directDeliveryMode").value,
+        sessionFrequency: $("directSessionFrequency").value,
+        groupModel: $("directGroupModel").value,
+        successMetric: $("directSuccessMetric").value
+      };
+    }
     function renderDirectPlanSelection() {
       const plans = planCatalog();
       $("directCompany").value = state.company || $("company").value || "";
@@ -4214,8 +4307,10 @@
         button.addEventListener("click", () => {
           state.directPlanKey = button.dataset.directPlan;
           $("directPlanGrid").querySelectorAll("[data-direct-plan]").forEach((item) => item.classList.toggle("selected", item === button));
+          renderDirectBasics(state.directPlanKey);
         });
       });
+      renderDirectBasics(state.directPlanKey || "plan1");
     }
     function selectedDepartments() {
       if (Array.isArray(state.departments) && state.departments.length) {
@@ -4793,7 +4888,9 @@
         showToast("Seleccioná un plan para generar la propuesta.");
         return;
       }
+      const directBasics = readDirectBasics();
       applyDirectPlanDefaults(state.directPlanKey);
+      Object.assign(state, directBasics);
       ensureLogisticsDefaults();
       state.planId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
       state.userId = crypto.randomUUID ? crypto.randomUUID() : `user-${Date.now()}`;

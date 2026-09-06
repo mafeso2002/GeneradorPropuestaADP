@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.9.2**
+Versión documentada: **MVP 0.9.3**
 Última actualización funcional: **2026-09-06**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -67,9 +67,21 @@ No hay framework frontend ni build step obligatorio. La app corre como HTML/CSS/
 | Modo | Uso | Comportamiento |
 | --- | --- | --- |
 | Diagnóstico guiado | Cuando no está claro qué plan corresponde | Ejecuta wizard, scoring, confianza, alternativas, validación IA, comparador y selección manual de plan principal |
-| Propuesta directa | Cuando el comercial ya sabe qué plan presentar | Selecciona plan manualmente, crea la Versión 1 sin alternativas ni scoring visible, y permite PDF/handoff inmediato |
+| Propuesta directa | Cuando el comercial ya sabe qué plan presentar | Selecciona plan manualmente, carga datos mínimos de ajuste, crea la Versión 1 sin alternativas ni scoring visible, y permite PDF/handoff inmediato |
 
 En modo directo se guarda `proposalMode: "direct"` y `directPlanKey`. En modo guiado se guarda `proposalMode: "guided"`.
+
+Datos mínimos del modo directo:
+
+- tipo de cliente;
+- área o grupo principal;
+- alcance estimado;
+- modalidad preferida;
+- frecuencia esperada;
+- modelo de grupos;
+- métrica principal de éxito.
+
+Estos datos no recalculan el plan elegido; solo enriquecen propuesta final, roadmap, PDF y handoff.
 
 ## 4. Modelo de decisión
 
