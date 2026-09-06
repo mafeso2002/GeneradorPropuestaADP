@@ -1320,6 +1320,53 @@
       font-size: 13px;
     }
     .alternative-quote strong { color: var(--cp-text); }
+    .plan-selection-panel {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin: 16px 0 4px;
+    }
+    .plan-selection-card {
+      border: 1px solid var(--cp-border);
+      border-radius: 14px;
+      padding: 12px;
+      background: var(--cp-surface-soft);
+    }
+    .plan-selection-card.active {
+      border-color: var(--cp-cowork);
+      background:
+        linear-gradient(90deg, var(--cp-cowork) 0 5px, transparent 5px),
+        var(--cp-cowork-soft);
+    }
+    .plan-selection-card.original {
+      border-color: var(--cp-brand-yellow);
+      background:
+        linear-gradient(90deg, var(--cp-brand-yellow) 0 5px, transparent 5px),
+        var(--cp-brand-yellow-soft);
+    }
+    .plan-selection-card span {
+      display: block;
+      margin-bottom: 5px;
+      color: var(--cp-text-muted);
+      font-size: 12px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .plan-selection-card strong { display: block; }
+    .plan-selection-card p { margin: 5px 0 0; font-size: 13px; }
+    .manual-plan-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .swap-plan-btn {
+      width: 100%;
+      justify-content: center;
+      margin-top: 12px;
+    }
     .comparison-panel {
       margin-top: 14px;
       border: 1px solid var(--cp-brand-yellow);
@@ -2605,7 +2652,7 @@
     <div class="top-actions">
       <span class="auth-status hidden" id="authStatus">Login Microsoft deshabilitado para pruebas</span>
       <button class="btn ghost hidden" id="loginBtn">Iniciar sesión</button>
-      <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.9.0 · técnico</a>
+      <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.9.1 · técnico</a>
       <button class="btn ghost icon-only" id="decisionHelpBtn" title="Ayuda · lógica de decisión" aria-label="Ayuda · lógica de decisión"><span class="btn-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.8 9a2.4 2.4 0 0 1 4.4 1.3c0 1.7-1.5 2.2-2.2 3"></path><path d="M12 17h.01"></path></svg></span></button>
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
@@ -3239,6 +3286,7 @@
       aiSummary: null,
       aiRoadmap: null,
       useAiRoadmap: true,
+      overridePlanKey: "",
       aiPlanComparisons: {}
     };
     const steps = [
@@ -3542,6 +3590,7 @@
         calendar: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M8 3v4"></path><path d="M16 3v4"></path><path d="M4 10h16"></path><path d="M8 14h2"></path><path d="M14 14h2"></path></svg>',
         mail: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="16" height="12" rx="2"></rect><path d="M5 8l7 5 7-5"></path></svg>',
         dynamics: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5l8-3 8 4v12l-8 4-8-3V5z"></path><path d="M12 2v20"></path><path d="M4 5l8 4 8-3"></path><path d="M12 9l8 9"></path><path d="M12 9l-8 10"></path></svg>',
+        swap: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3"></path><path d="M18 7l-3 3"></path><path d="M17 17H6l3 3"></path><path d="M6 17l3-3"></path></svg>',
         automation: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4"></path><path d="M12 17v4"></path><path d="M3 12h4"></path><path d="M17 12h4"></path><circle cx="12" cy="12" r="5"></circle><path d="M10 12l1.5 1.5L15 10"></path></svg>',
         cowork: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 5.5c2.2-2.2 5.8-2.2 8 0s2.2 5.8 0 8l-3 3c-1.5 1.5-3.9 1.5-5.4 0s-1.5-3.9 0-5.4l2.8-2.8"></path><path d="M15.5 18.5c-2.2 2.2-5.8 2.2-8 0s-2.2-5.8 0-8l3-3c1.5-1.5 3.9-1.5 5.4 0s1.5 3.9 0 5.4l-2.8 2.8"></path><circle cx="7" cy="7" r="1.5"></circle><circle cx="17" cy="17" r="1.5"></circle></svg>',
         rocket: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 4c3 1 5 3 6 6l-7 7-5-5 6-8z"></path><path d="M7 12l-3 1 1-3"></path><path d="M12 17l-1 3 3-1"></path><circle cx="15" cy="9" r="1.5"></circle></svg>',
@@ -3694,7 +3743,7 @@
       ];
       return baseAddons.map(applyAddonPrice).filter((addon) => addonPriceData(addon.id)?.active !== false);
     }
-    function includedAddonIdsForPlan(planKey = recommendedPlanKey()) {
+    function includedAddonIdsForPlan(planKey = selectedProposalPlanKey()) {
       const included = new Set();
       if (planKey === "plan2") {
         ["role-cases", "prompt-library", "dashboard", "copilot-excel"].forEach((id) => included.add(id));
@@ -3704,7 +3753,7 @@
       }
       return included;
     }
-    function suggestedAddonIds(planKey = recommendedPlanKey()) {
+    function suggestedAddonIds(planKey = selectedProposalPlanKey()) {
       const ids = new Set();
       const included = includedAddonIdsForPlan(planKey);
       const addIfExtra = (id) => { if (!included.has(id)) ids.add(id); };
@@ -3743,11 +3792,12 @@
       state.aiValidation = null;
       state.aiRoadmap = null;
       state.useAiRoadmap = true;
+      state.overridePlanKey = "";
       state.aiPlanComparisons = {};
     }
-    function selectedAddonItems() {
-      const selected = state.selectedAddons && state.selectedAddons.length ? state.selectedAddons : suggestedAddonIds();
-      const included = includedAddonIdsForPlan();
+    function selectedAddonItems(planKey = selectedProposalPlanKey()) {
+      const selected = state.selectedAddons && state.selectedAddons.length ? state.selectedAddons : suggestedAddonIds(planKey);
+      const included = includedAddonIdsForPlan(planKey);
       return addOnCatalog().filter((item) => selected.includes(item.id) && !included.has(item.id) && isAddonEnabled(item));
     }
     function addonIdFromAiValue(value) {
@@ -3786,7 +3836,7 @@
       showToast("Add-ons sugeridos aplicados.");
       renderReview();
     }
-    function addonState(addon, planKey = recommendedPlanKey()) {
+    function addonState(addon, planKey = selectedProposalPlanKey()) {
       const isIncludedInPlan = includedAddonIdsForPlan(planKey).has(addon.id);
       // Plan 3 incorpora el recorrido/licenciamiento Copilot como parte del programa, por eso sus
       // add-ons "incluidos" se muestran como tales aunque el cliente todavía no tenga licencia hoy.
@@ -4542,10 +4592,10 @@
     function formatUsd(value) {
       return `USD ${Math.round(value).toLocaleString("es-AR")} + IVA`;
     }
-    function proposalTotalEstimate(recommendedKey = recommendedPlanKey()) {
+    function proposalTotalEstimate(recommendedKey = selectedProposalPlanKey()) {
       const quote = quoteForPlan(recommendedKey);
       const planRange = parseUsdRange(quote.main);
-      const addons = selectedAddonItems();
+      const addons = selectedAddonItems(recommendedKey);
       let addonMin = 0;
       let addonMax = 0;
       let unknownCount = 0;
@@ -4578,7 +4628,7 @@
       };
     }
     function addOnsForPlan(key) {
-      return selectedAddonItems().map((item) => [item.title, item.desc, item.icon, item.price]);
+      return selectedAddonItems(key).map((item) => [item.title, item.desc, item.icon, item.price]);
     }
     function planDecision() {
       const deptCount = selectedDepartments().length;
@@ -4737,6 +4787,32 @@
     function recommendedPlanKey() {
       return planDecision().recommendedKey;
     }
+    function selectedProposalPlanKey() {
+      const plans = planCatalog();
+      return state.overridePlanKey && plans[state.overridePlanKey] ? state.overridePlanKey : recommendedPlanKey();
+    }
+    function clearPlanDependentAiArtifacts() {
+      state.aiSummary = null;
+      state.aiValidation = null;
+      state.aiRoadmap = null;
+      state.useAiRoadmap = true;
+      state.aiPlanComparisons = {};
+    }
+    function promoteAlternativePlan(planKey, mode = "admin") {
+      if (!planCatalog()[planKey] || planKey === recommendedPlanKey()) return;
+      state.overridePlanKey = planKey;
+      clearPlanDependentAiArtifacts();
+      if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
+      showToast("Plan alternativo seleccionado como principal.");
+      renderPlan(mode);
+    }
+    function revertToOriginalPlan(mode = "admin") {
+      state.overridePlanKey = "";
+      clearPlanDependentAiArtifacts();
+      if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
+      showToast("Volviste al plan original.");
+      renderPlan(mode);
+    }
     function confidenceLabel(level) {
       if (level === "high") return "Confianza alta";
       if (level === "medium") return "Confianza media";
@@ -4775,7 +4851,7 @@
       const key = planComparisonKey(primaryKey, alternativeKey);
       return (state.aiPlanComparisons && state.aiPlanComparisons[key]) || null;
     }
-    function activePlanComparisons(primaryKey = recommendedPlanKey(), decision = planDecision()) {
+    function activePlanComparisons(primaryKey = selectedProposalPlanKey(), decision = planDecision()) {
       return decision.alternatives
         .map((item) => currentPlanComparison(primaryKey, item.key))
         .filter(Boolean);
@@ -4873,6 +4949,25 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         ${formatAiSummaryText(comparison.summary)}
       </div>`;
     }
+    function renderPlanSelectionPanel(decision, plans, selectedKey, mode = "admin") {
+      if (mode === "user") return "";
+      const original = plans[decision.recommendedKey];
+      const selected = plans[selectedKey];
+      const changed = selectedKey !== decision.recommendedKey;
+      return `<div class="plan-selection-panel">
+        <div class="plan-selection-card original">
+          <span>Plan original sugerido por la app</span>
+          <strong>${escapeHtml(original.name)}</strong>
+          <p>${confidenceLabel(decision.level)} · ${decision.confidence}% · ${escapeHtml(quoteForPlan(decision.recommendedKey).main)}</p>
+        </div>
+        <div class="plan-selection-card active">
+          <span>Plan principal seleccionado · Versión 1</span>
+          <strong>${escapeHtml(selected.name)}</strong>
+          <p>${escapeHtml(quoteForPlan(selectedKey).main)} · ${changed ? "Ajustado manualmente por el comercial." : "Coincide con el plan original del algoritmo."}</p>
+          ${changed ? `<div class="manual-plan-actions"><button class="btn ghost" id="revertPlanBtn" type="button"><span class="btn-icon">${iconSvg("swap")}</span>Volver al plan original</button></div>` : ""}
+        </div>
+      </div>`;
+    }
     function renderProposalPricePanel(recommendedKey) {
       const quote = quoteForPlan(recommendedKey);
       const totalEstimate = proposalTotalEstimate(recommendedKey);
@@ -4892,20 +4987,22 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         <p style="margin-top:12px;font-size:13px">Referencia comercial sujeta a validación de alcance, cantidad de participantes, modalidad y calendario final.</p>
       </aside>`;
     }
-    function decisionAlternativesMarkup(decision, plans) {
-      if (!decision.alternatives.length) return "";
+    function decisionAlternativesMarkup(decision, plans, selectedKey = selectedProposalPlanKey(), mode = "admin") {
+      const alternativeItems = decision.alternatives.filter((item) => item.key !== selectedKey);
+      if (!alternativeItems.length) return "";
       return `<div class="alternative-panel">
-        <strong>También podría aplicar</strong>
-        <p class="decision-note">Estas opciones aparecen porque algunas respuestas apuntan a otro camino posible.</p>
-        <div class="alternative-grid">${decision.alternatives.map((item) => `<div class="alternative-card">
+        <strong>Planes alternativos para evaluar</strong>
+        <p class="decision-note">Estas opciones aparecen porque algunas respuestas apuntan a otro camino posible. El comercial puede promover una alternativa como versión final antes de generar PDF o handoff.</p>
+        <div class="alternative-grid">${alternativeItems.map((item) => `<div class="alternative-card">
           <h4>${plans[item.key].name}</h4>
           <p>${item.reasons.slice(0, 2).map(escapeHtml).join(". ") || plans[item.key].bestFor}</p>
           <div class="alternative-quote">
             <span><strong>Cotización:</strong> ${escapeHtml(quoteForPlan(item.key).main)}</span>
-            <span><strong>Diferencia:</strong> ${escapeHtml(quoteDifference(decision.recommendedKey, item.key))}</span>
+            <span><strong>Diferencia vs plan principal:</strong> ${escapeHtml(quoteDifference(selectedKey, item.key))}</span>
           </div>
+          ${mode !== "user" ? `<button class="btn action-mail swap-plan-btn" type="button" data-promote-plan="${item.key}"><span class="btn-icon">${iconSvg("swap")}</span>Usar como principal</button>` : ""}
           <button class="btn action-ai compare-plan-btn" type="button" data-compare-plan="${item.key}" style="margin-top:12px"><span class="btn-icon">${iconSvg("spark")}</span>Comparar con IA</button>
-          ${renderPlanComparison(currentPlanComparison(decision.recommendedKey, item.key))}
+          ${renderPlanComparison(currentPlanComparison(selectedKey, item.key))}
         </div>`).join("")}</div>
       </div>`;
     }
@@ -5012,7 +5109,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         };
       }).filter((item) => item.title && item.desc && item.tasks.length);
     }
-    function roadmapForPlan(planKey = recommendedPlanKey()) {
+    function roadmapForPlan(planKey = selectedProposalPlanKey()) {
       const aiRoadmap = state.aiRoadmap;
       if (state.useAiRoadmap !== false && aiRoadmap && aiRoadmap.planKey === planKey && Array.isArray(aiRoadmap.items) && aiRoadmap.items.length) {
         return normalizeRoadmapItems(aiRoadmap.items, planKey);
@@ -5072,7 +5169,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         </div>
       </div>`;
     }
-    function roadmapStatus(planKey = recommendedPlanKey()) {
+    function roadmapStatus(planKey = selectedProposalPlanKey()) {
       const roadmap = state.aiRoadmap;
       const hasCustom = Boolean(roadmap && roadmap.planKey === planKey && Array.isArray(roadmap.items) && roadmap.items.length);
       if (!hasCustom) {
@@ -5103,7 +5200,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         button: isAi ? "Regenerar roadmap con IA" : "Reintentar con IA"
       };
     }
-    function fallbackPersonalizedRoadmap(planKey = recommendedPlanKey()) {
+    function fallbackPersonalizedRoadmap(planKey = selectedProposalPlanKey()) {
       const base = proposalRoadmap(planKey);
       const industry = selectedLabel("industry");
       const departmentsText = selectedDepartments().join(", ") || state.department || "el área prioritaria";
@@ -5134,7 +5231,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         };
       });
     }
-    function buildAiRoadmapPayload(recommendedKey = recommendedPlanKey()) {
+    function buildAiRoadmapPayload(recommendedKey = selectedProposalPlanKey()) {
       const plans = planCatalog();
       const decision = planDecision();
       return {
@@ -5178,7 +5275,8 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const focus = [selectedLabel("inbox"), selectedLabel("meeting"), selectedLabel("create"), selectedLabel("automate")].filter(Boolean);
       const plans = planCatalog();
       const decision = planDecision();
-      const recommendedKey = decision.recommendedKey;
+      const algorithmRecommendedKey = decision.recommendedKey;
+      const recommendedKey = selectedProposalPlanKey();
       const recommended = plans[recommendedKey];
       const roadmapItems = roadmapForPlan(recommendedKey);
       const roadmapState = roadmapStatus(recommendedKey);
@@ -5206,13 +5304,13 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           <div class="result-top">
             <div>
               <p class="eyebrow">POSSUMUS · PROPUESTA INTEGRAL DE ADOPCIÓN</p>
-              <h2>${mode === "user" ? "Plan recomendado para la iniciativa" : "Propuesta recomendada: " + recommended.name}</h2>
+              <h2>${mode === "user" ? "Plan recomendado para la iniciativa" : "Propuesta versión final: " + recommended.name}</h2>
               <div class="client-highlight">${state.company}</div>
               <p class="lead">${selectedLabel("industry")} · ${selectedLabel("users")}</p>
               <div class="chips">${focus.map((item) => `<span class="pill">${item}</span>`).join("")}<span class="pill license-pill ${hasCopilotLicense() ? "has-copilot" : ""}">${hasCopilotLicense() ? "Tiene M365 Copilot" : "Sin M365 Copilot"}</span><span class="pill">Cowork: ${state.cowork ? "Incluido" : "No incluido"}</span></div>
               <div class="decision-row">
                 <button class="confidence-badge ${decision.level}" id="confidenceBadge" type="button">${confidenceLabel(decision.level)} · ${decision.confidence}%</button>
-                <span class="decision-note">${confidenceNote(decision)}</span>
+                <span class="decision-note">${recommendedKey === algorithmRecommendedKey ? confidenceNote(decision) : `Plan ajustado manualmente. Original: ${plans[algorithmRecommendedKey].name}.`}</span>
               </div>
             </div>
             <div class="score">${recommended.duration}</div>
@@ -5242,9 +5340,10 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                       <p>${recommended.aiLevel}<span>${recommended.aiLevelDetail}</span></p>
                     </div>
                   </div>
+                  ${renderPlanSelectionPanel(decision, plans, recommendedKey, mode)}
                   <p><strong>Análisis comercial:</strong> ${recommendationReason(recommendedKey)}</p>
                   ${decisionEvidenceMarkup(decision)}
-                  ${decisionAlternativesMarkup(decision, plans)}
+                  ${decisionAlternativesMarkup(decision, plans, recommendedKey, mode)}
                   <p>${recommended.desc}</p>
                   <div class="plan-metric-row">
                     <div class="plan-metric"><strong>${recommended.duration}</strong><span>Duración</span></div>
@@ -5346,9 +5445,9 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
               </article>
               <article class="plan-option-card">
                 <div class="stage-icon">${iconSvg("users-mix")}</div>
-                <h4>Alcance relevado y alcance del plan</h4>
+                <h4>Alcance relevado y alcance del plan final</h4>
                 <p>Inicial relevado: ${qualificationValue("userRange")} · Sponsor: ${qualificationValue("sponsor")} · ${qualificationValue("accompaniment")}</p>
-                <p>Plan recomendado: ${recommended.scope}</p>
+                <p>Plan principal seleccionado: ${recommended.scope}</p>
               </article>
               <article class="plan-option-card">
                 <div class="stage-icon">${iconSvg("teams")}</div>
@@ -5419,6 +5518,10 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       $("plan").querySelectorAll("[data-compare-plan]").forEach((button) => {
         button.addEventListener("click", () => generatePlanComparison(recommendedKey, button.dataset.comparePlan, mode));
       });
+      $("plan").querySelectorAll("[data-promote-plan]").forEach((button) => {
+        button.addEventListener("click", () => promoteAlternativePlan(button.dataset.promotePlan, mode));
+      });
+      if ($("revertPlanBtn")) $("revertPlanBtn").addEventListener("click", () => revertToOriginalPlan(mode));
       $("aiSummaryBtn").addEventListener("click", () => generateAiSummary(recommendedKey, mode));
       $("aiRoadmapBtn").addEventListener("click", () => generateAiRoadmap(recommendedKey, mode));
       if ($("useOriginalRoadmapBtn")) $("useOriginalRoadmapBtn").addEventListener("click", () => {
@@ -5442,11 +5545,13 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       });
       $("handoffBtn").addEventListener("click", () => openHandoffModal(recommendedKey));
     }
-    function buildDefaultHandoffEmail(recommendedKey = recommendedPlanKey()) {
+    function buildDefaultHandoffEmail(recommendedKey = selectedProposalPlanKey()) {
       const recommended = planCatalog()[recommendedKey];
       const quote = quoteForPlan(recommendedKey);
       const totalEstimate = proposalTotalEstimate(recommendedKey);
       const decision = planDecision();
+      const original = planCatalog()[decision.recommendedKey];
+      const changed = recommendedKey !== decision.recommendedKey;
       const aiSummary = state.aiSummary ? {
         text: state.aiSummary.text || "",
         generatedAt: state.aiSummary.generatedAt || "",
@@ -5467,7 +5572,9 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         body: `Nuevo handoff de propuesta de adopción
 
 Cliente: ${state.company}
-Plan recomendado: ${recommended.name}
+Plan principal seleccionado (Versión 1): ${recommended.name}
+Plan original sugerido por la app: ${original.name}
+${changed ? "Cambio manual: Sí, el comercial promovió una alternativa como plan principal." : "Cambio manual: No, coincide con el plan original."}
 Confianza: ${confidenceLabel(decision.level)} · ${decision.confidence}%
 Duración: ${recommended.duration}
 Alcance: ${recommended.scope}
@@ -5521,7 +5628,7 @@ ${location.href}`
         ].filter(Boolean)
       };
     }
-    function openHandoffModal(recommendedKey = recommendedPlanKey()) {
+    function openHandoffModal(recommendedKey = selectedProposalPlanKey()) {
       const email = buildDefaultHandoffEmail(recommendedKey);
       $("handoffModal").dataset.recommendedKey = recommendedKey;
       $("handoffFrom").value = email.from;
@@ -5548,7 +5655,7 @@ ${location.href}`
         body: $("handoffBody").value.trim()
       };
     }
-    function buildHandoffPayload(recommendedKey = recommendedPlanKey(), emailOverride = null) {
+    function buildHandoffPayload(recommendedKey = selectedProposalPlanKey(), emailOverride = null) {
       const plans = planCatalog();
       const recommended = plans[recommendedKey];
       const quote = quoteForPlan(recommendedKey);
@@ -5556,6 +5663,8 @@ ${location.href}`
       const roadmapItems = roadmapForPlan(recommendedKey);
       const focus = [selectedLabel("inbox"), selectedLabel("meeting"), selectedLabel("create"), selectedLabel("automate")].filter(Boolean);
       const decision = planDecision();
+      const algorithmRecommendedKey = decision.recommendedKey;
+      const planChangedByCommercial = recommendedKey !== algorithmRecommendedKey;
       return {
         source: "GeneradorPropuestaADP",
         createdAt: new Date().toISOString(),
@@ -5585,7 +5694,13 @@ ${location.href}`
           startDateFormatted: formatDate(state.startDate),
           endDateFormatted: planEndDate(recommended),
           pageUrl: location.href,
-          recommendedPlanKey,
+          recommendedPlanKey: recommendedKey,
+          selectedPlanKey: recommendedKey,
+          selectedPlanName: recommended.name,
+          algorithmRecommendedPlanKey: algorithmRecommendedKey,
+          algorithmRecommendedPlanName: plans[algorithmRecommendedKey].name,
+          planWasChangedByCommercial: planChangedByCommercial,
+          planSelectionNote: planChangedByCommercial ? "El comercial promovió una alternativa como plan principal para la Versión 1." : "El plan final coincide con el plan original sugerido por la app.",
           recommendedPlanName: recommended.name,
           recommendedPlanBadge: recommended.badge,
           recommendedPlanDuration: recommended.duration,
@@ -5763,7 +5878,7 @@ ${location.href}`
         if ($("validateDiagnosisBtn")) $("validateDiagnosisBtn").disabled = false;
       }
     }
-    async function generateAiSummary(recommendedKey = recommendedPlanKey(), mode = "admin") {
+    async function generateAiSummary(recommendedKey = selectedProposalPlanKey(), mode = "admin") {
       const button = $("aiSummaryBtn");
       const status = $("aiSummaryStatus");
       const payload = buildHandoffPayload(recommendedKey);
@@ -5799,7 +5914,7 @@ ${location.href}`
         if ($("aiSummaryBtn")) $("aiSummaryBtn").disabled = false;
       }
     }
-    async function generateAiRoadmap(recommendedKey = recommendedPlanKey(), mode = "admin") {
+    async function generateAiRoadmap(recommendedKey = selectedProposalPlanKey(), mode = "admin") {
       const button = $("aiRoadmapBtn");
       const status = $("aiRoadmapStatus");
       const payload = buildAiRoadmapPayload(recommendedKey);
@@ -5916,7 +6031,7 @@ ${location.href}`
         console.error(error);
       }
     }
-    async function sendHandoff(recommendedKey = recommendedPlanKey(), emailOverride = null) {
+    async function sendHandoff(recommendedKey = selectedProposalPlanKey(), emailOverride = null) {
       const button = $("handoffBtn");
       const status = $("handoffStatus");
       const modalStatus = $("handoffModalStatus");
@@ -5956,7 +6071,7 @@ ${location.href}`
         $("confirmHandoffBtn").disabled = false;
       }
     }
-    function generateProposalPdf(recommendedKey = recommendedPlanKey()) {
+    function generateProposalPdf(recommendedKey = selectedProposalPlanKey()) {
       const html = buildPrintableProposal(recommendedKey);
       const printWindow = window.open("", "_blank");
       if (!printWindow) {
@@ -5969,7 +6084,7 @@ ${location.href}`
       printWindow.focus();
       setTimeout(() => printWindow.print(), 450);
     }
-    function buildPrintableProposal(recommendedKey) {
+    function buildPrintableProposal(recommendedKey = selectedProposalPlanKey()) {
       const plans = planCatalog();
       const plan = plans[recommendedKey];
       const roadmapItems = roadmapForPlan(recommendedKey);
@@ -6440,13 +6555,13 @@ ${location.href}`
       if (event.target === $("handoffModal")) closeHandoffModal();
     });
     $("confirmHandoffBtn").addEventListener("click", () => {
-      const recommendedKey = $("handoffModal").dataset.recommendedKey || recommendedPlanKey();
+      const recommendedKey = $("handoffModal").dataset.recommendedKey || selectedProposalPlanKey();
       sendHandoff(recommendedKey, handoffEmailFromModal());
     });
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, addonPrices: {}, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, aiPlanComparisons: {} });
+      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, addonPrices: {}, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, overridePlanKey: "", aiPlanComparisons: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
       location.hash = "/onboarding";

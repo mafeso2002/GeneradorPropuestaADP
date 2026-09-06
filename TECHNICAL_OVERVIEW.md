@@ -1,7 +1,7 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.9.0**  
-Última actualización funcional: **2026-09-06**  
+Versión documentada: **MVP 0.9.1**
+Última actualización funcional: **2026-09-06**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
 ## 1. Objetivo de la aplicación
@@ -48,6 +48,7 @@ No hay framework frontend ni build step obligatorio. La app corre como HTML/CSS/
 4. El comercial puede validar el diagnóstico con IA.
 5. Se genera la propuesta final con:
    - plan recomendado;
+   - selección manual de plan principal cuando hay alternativas;
    - razones de recomendación;
    - confianza;
    - resumen económico;
@@ -91,6 +92,21 @@ El algoritmo devuelve:
 - nivel de confianza;
 - razones principales;
 - alternativas cercanas cuando la decisión no es obvia.
+
+## 4.1 Selección comercial de plan principal
+
+La app separa la recomendación algorítmica de la versión final que el comercial decide presentar:
+
+| Concepto | Campo / uso |
+| --- | --- |
+| Plan original sugerido por algoritmo | `planDecision().recommendedKey` |
+| Plan principal seleccionado | `selectedProposalPlanKey()` |
+| Override manual | `state.overridePlanKey` |
+| Trazabilidad en handoff | `algorithmRecommendedPlanKey`, `selectedPlanKey`, `planWasChangedByCommercial` |
+
+Si hay alternativas, el comercial puede promover una alternativa con **Usar como principal**. La propuesta final, el PDF y el handoff se recalculan con ese plan seleccionado. En la vista interna queda visible el plan original y el plan final seleccionado; para el cliente se mantiene una propuesta limpia con un único plan principal.
+
+La reversión se hace con **Volver al plan original**.
 
 ## 5. Add-ons y precios
 
@@ -238,7 +254,9 @@ Incluye:
 El handoff se construye en `buildHandoffPayload()` e incluye:
 
 - datos de propuesta;
-- plan recomendado;
+- plan principal seleccionado;
+- plan original sugerido por el algoritmo;
+- indicador de cambio manual de plan;
 - scoring y confianza;
 - add-ons seleccionados;
 - total estimado;
@@ -289,4 +307,3 @@ Próximos pasos técnicos recomendados:
 3. Conectar el botón Dynamics.
 4. Persistir propuestas en Dataverse o Dynamics.
 5. Separar `index.html` en módulos si la app sigue creciendo.
-
