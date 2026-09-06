@@ -4308,6 +4308,7 @@
         button.addEventListener("click", () => {
           currentDirectStep = Number(button.dataset.directIndex);
           renderDirectStep();
+          scrollToStepTop();
         });
       });
     }
@@ -7193,6 +7194,7 @@ ${location.href}`
       }
       currentDirectStep -= 1;
       renderDirectStep();
+      scrollToStepTop();
     });
     $("directBuildBtn").addEventListener("click", () => {
       if (!canContinueDirect()) {
@@ -7202,6 +7204,7 @@ ${location.href}`
       if (currentDirectStep < directSteps.length - 1) {
         currentDirectStep += 1;
         renderDirectStep();
+        scrollToStepTop();
         return;
       }
       generateDirectPlan();
