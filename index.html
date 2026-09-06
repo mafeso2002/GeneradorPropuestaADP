@@ -2761,7 +2761,7 @@
     <div class="top-actions">
       <span class="auth-status hidden" id="authStatus">Login Microsoft deshabilitado para pruebas</span>
       <button class="btn ghost hidden" id="loginBtn">Iniciar sesión</button>
-      <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.9.4 · técnico</a>
+      <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.9.5 · técnico</a>
       <button class="btn ghost icon-only" id="decisionHelpBtn" title="Ayuda · lógica de decisión" aria-label="Ayuda · lógica de decisión"><span class="btn-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.8 9a2.4 2.4 0 0 1 4.4 1.3c0 1.7-1.5 2.2-2.2 3"></path><path d="M12 17h.01"></path></svg></span></button>
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
@@ -4222,15 +4222,16 @@
     }
     function directPlanCardsMarkup() {
       const plans = planCatalog();
-      return Object.entries(plans).map(([key, plan]) => {
+      return maturityPlanEntries(plans).map(([key, plan]) => {
         const defaults = directDefaultsForPlan(key);
         const quote = quoteForPlan(key, defaults.userRange);
         return `<button class="direct-plan-card ${state.directPlanKey === key ? "selected" : ""}" data-direct-plan="${key}" type="button">
           <div class="stage-icon">${iconSvg(plan.icon)}</div>
           <div>
             <span class="badge">${escapeHtml(plan.badge)}</span>
-            <h3>${escapeHtml(plan.name)}</h3>
-            <p>${escapeHtml(plan.bestFor)}</p>
+            <h3>${escapeHtml(planMaturityTitle(plan))}</h3>
+            <p><strong>${escapeHtml(planReferenceLabel(plan))}</strong></p>
+            <p>${escapeHtml(plan.maturityDesc)}</p>
             <div class="direct-plan-meta">
               <span class="pill">${escapeHtml(plan.duration)}</span>
               <span class="pill">${escapeHtml(plan.scope)}</span>
@@ -4971,6 +4972,10 @@
       return {
         plan0: {
           name: "Plan 0 · Envisioning IA",
+          maturityOrder: 2,
+          maturityLevel: "Nivel 2",
+          maturityName: "IA inicial sin licencias",
+          maturityDesc: "Explorar IA, casos de uso y business case antes de avanzar a Microsoft 365 Copilot.",
           badge: "Exploración y business case",
           duration: "4 semanas",
           durationDays: 28,
@@ -4989,6 +4994,10 @@
         },
         plan1: {
           name: "Plan 1 · Productividad Digital",
+          maturityOrder: 1,
+          maturityLevel: "Nivel 1",
+          maturityName: "Madurez Digital",
+          maturityDesc: "Ordenar herramientas, hábitos y colaboración Microsoft 365 antes de escalar IA.",
           badge: "Adopción Microsoft 365",
           duration: "30/60/90 días u olas anuales",
           durationDays: 90,
@@ -5007,6 +5016,10 @@
         },
         plan2: {
           name: "Plan 2 · IA aplicada al trabajo",
+          maturityOrder: 3,
+          maturityLevel: "Nivel 3",
+          maturityName: "IA empresarial con Copilot",
+          maturityDesc: "Activar Microsoft 365 Copilot con licencias, casos por rol y medición de valor.",
           badge: "Microsoft 365 Copilot",
           duration: "30 días",
           durationDays: 30,
@@ -5025,6 +5038,10 @@
         },
         plan3: {
           name: "Plan 3 · Productividad Digital + Microsoft 365 Copilot",
+          maturityOrder: 4,
+          maturityLevel: "Nivel 4",
+          maturityName: "IA transformacional",
+          maturityDesc: "Escalar adopción, cambio, gobierno, Copilot y agentes en un programa integral.",
           badge: "Programa integral",
           duration: "6 meses",
           durationMonths: 6,
@@ -5042,6 +5059,15 @@
           deliverables: ["Diagnóstico inicial", "Formación integral Microsoft 365", "Formación integral Copilot", "Mapa de agentes y automatizaciones", "Reportes de avance por ola", "Plan de mejora continua"]
         }
       };
+    }
+    function planMaturityTitle(plan) {
+      return `${plan.maturityLevel} · ${plan.maturityName}`;
+    }
+    function planReferenceLabel(plan) {
+      return `Referencia comercial: ${plan.name}`;
+    }
+    function maturityPlanEntries(plans = planCatalog()) {
+      return Object.entries(plans).sort(([, a], [, b]) => a.maturityOrder - b.maturityOrder);
     }
     function planEndDate(plan) {
       const start = state.startDate || todayIso;
@@ -5458,8 +5484,8 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         return `<div class="plan-selection-panel">
           <div class="plan-selection-card active" style="grid-column:1 / -1">
             <span>Propuesta directa · Versión 1</span>
-            <strong>${escapeHtml(selected.name)}</strong>
-            <p>${escapeHtml(quoteForPlan(selectedKey).main)} · Plan seleccionado manualmente por el comercial, sin diagnóstico ni alternativas.</p>
+            <strong>${escapeHtml(planMaturityTitle(selected))}</strong>
+            <p>${escapeHtml(planReferenceLabel(selected))} · ${escapeHtml(quoteForPlan(selectedKey).main)} · Plan seleccionado manualmente por el comercial, sin diagnóstico ni alternativas.</p>
           </div>
         </div>`;
       }
@@ -5469,13 +5495,13 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       return `<div class="plan-selection-panel">
         <div class="plan-selection-card original">
           <span>Plan original sugerido por la app</span>
-          <strong>${escapeHtml(original.name)}</strong>
-          <p>${confidenceLabel(decision.level)} · ${decision.confidence}% · ${escapeHtml(quoteForPlan(decision.recommendedKey).main)}</p>
+          <strong>${escapeHtml(planMaturityTitle(original))}</strong>
+          <p>${escapeHtml(planReferenceLabel(original))} · ${confidenceLabel(decision.level)} · ${decision.confidence}% · ${escapeHtml(quoteForPlan(decision.recommendedKey).main)}</p>
         </div>
         <div class="plan-selection-card active">
           <span>Plan principal seleccionado · Versión 1</span>
-          <strong>${escapeHtml(selected.name)}</strong>
-          <p>${escapeHtml(quoteForPlan(selectedKey).main)} · ${changed ? "Ajustado manualmente por el comercial." : "Coincide con el plan original del algoritmo."}</p>
+          <strong>${escapeHtml(planMaturityTitle(selected))}</strong>
+          <p>${escapeHtml(planReferenceLabel(selected))} · ${escapeHtml(quoteForPlan(selectedKey).main)} · ${changed ? "Ajustado manualmente por el comercial." : "Coincide con el plan original del algoritmo."}</p>
           ${changed ? `<div class="manual-plan-actions"><button class="btn ghost" id="revertPlanBtn" type="button"><span class="btn-icon">${iconSvg("swap")}</span>Volver al plan original</button></div>` : ""}
         </div>
         ${changed ? addonPlanAdjustmentNotice(decision.recommendedKey, selectedKey) : ""}
@@ -5508,7 +5534,8 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         <strong>Planes alternativos para evaluar</strong>
         <p class="decision-note">Estas opciones aparecen porque algunas respuestas apuntan a otro camino posible. El comercial puede promover una alternativa como versión final antes de generar PDF o handoff.</p>
         <div class="alternative-grid">${alternativeItems.map((item) => `<div class="alternative-card">
-          <h4>${plans[item.key].name}</h4>
+          <h4>${planMaturityTitle(plans[item.key])}</h4>
+          <p><strong>${escapeHtml(planReferenceLabel(plans[item.key]))}</strong></p>
           <p>${item.reasons.slice(0, 2).map(escapeHtml).join(". ") || plans[item.key].bestFor}</p>
           <div class="alternative-quote">
             <span><strong>Cotización:</strong> ${escapeHtml(quoteForPlan(item.key).main)}</span>
@@ -5819,7 +5846,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           <div class="result-top">
             <div>
               <p class="eyebrow">POSSUMUS · PROPUESTA INTEGRAL DE ADOPCIÓN</p>
-              <h2>${mode === "user" ? "Plan recomendado para la iniciativa" : directMode ? "Propuesta directa: " + recommended.name : "Propuesta versión final: " + recommended.name}</h2>
+              <h2>${mode === "user" ? "Plan recomendado para la iniciativa" : directMode ? "Propuesta directa: " + planMaturityTitle(recommended) : "Propuesta versión final: " + planMaturityTitle(recommended)}</h2>
               <div class="client-highlight">${state.company}</div>
               <p class="lead">${selectedLabel("industry")} · ${selectedLabel("users")}</p>
               <div class="chips">${focus.map((item) => `<span class="pill">${item}</span>`).join("")}<span class="pill license-pill ${hasCopilotLicense() ? "has-copilot" : ""}">${hasCopilotLicense() ? "Tiene M365 Copilot" : "Sin M365 Copilot"}</span><span class="pill">Cowork: ${state.cowork ? "Incluido" : "No incluido"}</span></div>
@@ -5842,7 +5869,8 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                     <div class="stage-icon">${iconSvg(recommended.icon)}</div>
                     <div>
                       <span class="badge">${recommended.badge}</span>
-                      <h3>${recommended.name}</h3>
+                      <h3>${planMaturityTitle(recommended)}</h3>
+                      <p class="decision-note">${planReferenceLabel(recommended)}</p>
                     </div>
                   </div>
                   <div class="plan-context-grid">
@@ -6094,11 +6122,12 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         from: "adopcion@possumus.tech",
         to,
         cc: "",
-        subject: `Handoff adopción - ${state.company} - ${recommended.name}`,
+        subject: `Handoff adopción - ${state.company} - ${planMaturityTitle(recommended)}`,
         body: `Nuevo handoff de propuesta de adopción
 
 Cliente: ${state.company}
-Plan principal seleccionado (Versión 1): ${recommended.name}
+Plan principal seleccionado (Versión 1): ${planMaturityTitle(recommended)}
+Referencia comercial: ${recommended.name}
 ${directMode ? "Modo: Propuesta directa seleccionada por el comercial." : `Plan original sugerido por la app: ${original.name}
 ${changed ? "Cambio manual: Sí, el comercial promovió una alternativa como plan principal." : "Cambio manual: No, coincide con el plan original."}
 Confianza: ${confidenceLabel(decision.level)} · ${decision.confidence}%`}
@@ -6233,6 +6262,9 @@ ${location.href}`
           planWasChangedByCommercial: planChangedByCommercial,
           planSelectionNote: directMode ? "Propuesta directa: el comercial seleccionó manualmente el plan para la Versión 1." : planChangedByCommercial ? "El comercial promovió una alternativa como plan principal para la Versión 1." : "El plan final coincide con el plan original sugerido por la app.",
           recommendedPlanName: recommended.name,
+          maturityLevel: recommended.maturityLevel,
+          maturityName: recommended.maturityName,
+          maturityTitle: planMaturityTitle(recommended),
           recommendedPlanBadge: recommended.badge,
           recommendedPlanDuration: recommended.duration,
           recommendedPlanScope: recommended.scope,
@@ -6253,6 +6285,7 @@ ${location.href}`
             alternatives: directMode ? [] : decision.alternatives.map((item) => ({
               planKey: item.key,
               planName: plans[item.key].name,
+              maturityTitle: planMaturityTitle(plans[item.key]),
               score: item.score,
               reasons: item.reasons.slice(0, 3)
             }))
@@ -6759,7 +6792,8 @@ ${location.href}`
         </section>
         <section class="slide">
           <p class="eyebrow">${directMode ? "Propuesta directa" : "Recomendación generada"}</p>
-          <h2>Plan recomendado: <span class="accent">${plan.name}</span></h2>
+          <h2>Plan recomendado: <span class="accent">${planMaturityTitle(plan)}</span></h2>
+          <p><strong>${planReferenceLabel(plan)}</strong></p>
           <div class="confidence">${directMode ? "Selección manual" : `${confidenceLabel(decision.level)} · ${decision.confidence}%`}</div>
           <p>${recommendationReason(recommendedKey)}</p>
           ${!directMode && decision.reasons.length ? `<ul class="evidence">${decision.reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>` : ""}
@@ -6790,7 +6824,7 @@ ${location.href}`
         ${!directMode && decision.alternatives.length ? `<section class="slide">
           <p class="eyebrow">Alternativas posibles</p>
           <h2>Planes a validar si cambia el alcance.</h2>
-          <div class="grid-2">${decision.alternatives.map((item) => `<div class="card alternative"><strong>${plans[item.key].name}</strong><p>${item.reasons.slice(0, 3).map(escapeHtml).join(". ") || plans[item.key].bestFor}</p><p><strong>Cotización:</strong> ${quoteForPlan(item.key).main}</p><p><strong>Diferencia:</strong> ${quoteDifference(decision.recommendedKey, item.key)}</p></div>`).join("")}</div>${footer}
+          <div class="grid-2">${decision.alternatives.map((item) => `<div class="card alternative"><strong>${planMaturityTitle(plans[item.key])}</strong><p>${planReferenceLabel(plans[item.key])}</p><p>${item.reasons.slice(0, 3).map(escapeHtml).join(". ") || plans[item.key].bestFor}</p><p><strong>Cotización:</strong> ${quoteForPlan(item.key).main}</p><p><strong>Diferencia:</strong> ${quoteDifference(decision.recommendedKey, item.key)}</p></div>`).join("")}</div>${footer}
         </section>` : ""}
         ${activeComparisons.length ? `<section class="slide">
           <p class="eyebrow">Comparación de planes</p>
@@ -6938,10 +6972,12 @@ ${location.href}`
             ${logisticsFields.map(fieldCard).join("")}
           </div>
         </section>`;
-      const planCards = Object.entries(plans).map(([key, plan]) => {
+      const planCards = maturityPlanEntries(plans).map(([key, plan]) => {
         const included = addOnCatalog().filter((addon) => includedAddonIdsForPlan(key).has(addon.id)).map((addon) => addon.title);
         return `<div class="decision-plan-card">
-          <strong>${escapeHtml(plan.name)}</strong>
+          <strong>${escapeHtml(planMaturityTitle(plan))}</strong>
+          <span><b>Referencia:</b> ${escapeHtml(plan.name)}</span>
+          <span><b>Madurez:</b> ${escapeHtml(plan.maturityDesc)}</span>
           <span><b>Caso:</b> ${escapeHtml(plan.customerCase)}</span>
           <span><b>Nivel de IA:</b> ${escapeHtml(plan.aiLevel)} (${escapeHtml(plan.aiLevelDetail)})</span>
           <span><b>Incluye:</b> ${escapeHtml(plan.execution.slice(0, 3).join(" · "))}</span>
@@ -6956,7 +6992,7 @@ ${location.href}`
       $("decisionHelpContent").innerHTML = `
         <section class="decision-help-section">
           <h4>1. Planes disponibles</h4>
-          <p>Estos nombres respetan la presentación comercial vigente. La app no inventa planes nuevos; usa add-ons para ampliar alcance.</p>
+          <p>La app muestra una escalera de madurez para orientar la conversación, manteniendo como referencia los nombres comerciales de la presentación vigente.</p>
           <div class="decision-help-grid">${planCards}</div>
         </section>
         <section class="decision-help-section">

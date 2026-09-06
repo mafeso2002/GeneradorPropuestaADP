@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.9.4**
+Versión documentada: **MVP 0.9.5**
 Última actualización funcional: **2026-09-06**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -84,14 +84,16 @@ Estos datos no recalculan el plan elegido; solo enriquecen propuesta final, road
 
 La recomendación del plan se calcula en `planDecision()` con un scoring ponderado.
 
-Planes disponibles:
+Planes disponibles por escalera de madurez:
 
-| Plan | Enfoque |
-| --- | --- |
-| Plan 0 · Envisioning IA | Exploración, business case y primeros casos de IA |
-| Plan 1 · Productividad Digital | Ordenar hábitos Microsoft 365, colaboración, documentos y tareas |
-| Plan 2 · IA aplicada al trabajo | Activar uso y ROI de Microsoft 365 Copilot |
-| Plan 3 · Productividad Digital + Microsoft 365 Copilot | Programa integral con cambio, adopción e IA |
+| Nivel de madurez | Nombre visible | Referencia comercial vigente | Enfoque |
+| --- | --- | --- | --- |
+| Nivel 1 | Madurez Digital | Plan 1 · Productividad Digital | Ordenar hábitos Microsoft 365, colaboración, documentos y tareas |
+| Nivel 2 | IA inicial sin licencias | Plan 0 · Envisioning IA | Exploración, business case y primeros casos de IA sin Microsoft 365 Copilot completo |
+| Nivel 3 | IA empresarial con Copilot | Plan 2 · IA aplicada al trabajo | Activar uso y ROI de Microsoft 365 Copilot |
+| Nivel 4 | IA transformacional | Plan 3 · Productividad Digital + Microsoft 365 Copilot | Programa integral con cambio, adopción, gobierno e IA |
+
+La lógica interna conserva las claves `plan0`, `plan1`, `plan2`, `plan3` para no romper referencias técnicas ni la presentación comercial existente. La UI muestra primero el nivel de madurez y debajo la referencia comercial.
 
 Variables principales del scoring:
 
