@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.9.1**
+Versión documentada: **MVP 0.9.2**
 Última actualización funcional: **2026-09-06**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -8,7 +8,7 @@ Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
 La aplicación permite que un comercial o preventa de Possumus releve información de un cliente y genere una propuesta de adopción Microsoft 365 / Copilot con:
 
-- plan recomendado;
+- plan recomendado o propuesta directa;
 - confianza del diagnóstico;
 - add-ons sugeridos;
 - resumen económico;
@@ -34,8 +34,11 @@ No hay framework frontend ni build step obligatorio. La app corre como HTML/CSS/
 
 ## 3. Flujo comercial
 
-1. El comercial carga compañía y fecha estimada.
-2. Completa un wizard de diagnóstico:
+1. El comercial elige el modo de trabajo:
+   - **Recomendar plan con diagnóstico**;
+   - **Crear propuesta directa**.
+2. En modo diagnóstico, carga compañía y fecha estimada.
+3. Completa un wizard de diagnóstico:
    - contexto del cliente;
    - alcance de usuarios;
    - readiness y oportunidad;
@@ -44,9 +47,10 @@ No hay framework frontend ni build step obligatorio. La app corre como HTML/CSS/
    - Copilot Cowork;
    - logística y medición;
    - add-ons sugeridos.
-3. La app calcula un plan recomendado mediante scoring.
-4. El comercial puede validar el diagnóstico con IA.
-5. Se genera la propuesta final con:
+4. La app calcula un plan recomendado mediante scoring.
+5. El comercial puede validar el diagnóstico con IA.
+6. En modo propuesta directa, el comercial carga compañía, fecha y selecciona directamente Plan 0/1/2/3. La app salta a la propuesta final sin scoring visible, sin alternativas y sin comparador.
+7. Se genera la propuesta final con:
    - plan recomendado;
    - selección manual de plan principal cuando hay alternativas;
    - razones de recomendación;
@@ -56,7 +60,16 @@ No hay framework frontend ni build step obligatorio. La app corre como HTML/CSS/
    - roadmap visual;
    - resumen IA;
    - comparación IA contra alternativas, si existen.
-6. La propuesta puede exportarse a PDF o enviarse como handoff a Power Automate.
+8. La propuesta puede exportarse a PDF o enviarse como handoff a Power Automate.
+
+## 3.1 Modos de trabajo
+
+| Modo | Uso | Comportamiento |
+| --- | --- | --- |
+| Diagnóstico guiado | Cuando no está claro qué plan corresponde | Ejecuta wizard, scoring, confianza, alternativas, validación IA, comparador y selección manual de plan principal |
+| Propuesta directa | Cuando el comercial ya sabe qué plan presentar | Selecciona plan manualmente, crea la Versión 1 sin alternativas ni scoring visible, y permite PDF/handoff inmediato |
+
+En modo directo se guarda `proposalMode: "direct"` y `directPlanKey`. En modo guiado se guarda `proposalMode: "guided"`.
 
 ## 4. Modelo de decisión
 
@@ -102,11 +115,14 @@ La app separa la recomendación algorítmica de la versión final que el comerci
 | Plan original sugerido por algoritmo | `planDecision().recommendedKey` |
 | Plan principal seleccionado | `selectedProposalPlanKey()` |
 | Override manual | `state.overridePlanKey` |
+| Propuesta directa | `state.proposalMode === "direct"` y `state.directPlanKey` |
 | Trazabilidad en handoff | `algorithmRecommendedPlanKey`, `selectedPlanKey`, `planWasChangedByCommercial` |
 
 Si hay alternativas, el comercial puede promover una alternativa con **Usar como principal**. La propuesta final, el PDF y el handoff se recalculan con ese plan seleccionado. En la vista interna queda visible el plan original y el plan final seleccionado; para el cliente se mantiene una propuesta limpia con un único plan principal.
 
 La reversión se hace con **Volver al plan original**.
+
+En propuesta directa, `selectedProposalPlanKey()` devuelve `directPlanKey`; no se muestran controles de alternativas ni confianza algorítmica al cliente.
 
 ## 5. Add-ons y precios
 

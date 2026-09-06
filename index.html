@@ -120,6 +120,104 @@
     }
     .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; }
     .top-actions { display: flex; align-items: center; gap: 10px; }
+    .mode-hero {
+      display: grid;
+      gap: 24px;
+    }
+    .mode-hero-card {
+      padding: 42px;
+      text-align: center;
+    }
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+      margin-top: 28px;
+    }
+    .mode-card {
+      display: grid;
+      gap: 16px;
+      min-height: 360px;
+      border: 1px solid var(--cp-border);
+      border-radius: 28px;
+      padding: 28px;
+      background:
+        radial-gradient(circle at right top, var(--cp-brand-yellow-soft), transparent 14rem),
+        var(--cp-panel-strong);
+      text-align: left;
+      box-shadow: var(--cp-shadow);
+    }
+    .mode-card.direct {
+      background:
+        radial-gradient(circle at right top, var(--cp-cowork-soft), transparent 14rem),
+        var(--cp-panel-strong);
+    }
+    .mode-icon {
+      display: grid;
+      place-items: center;
+      width: 86px;
+      height: 86px;
+      border-radius: 24px;
+      background: var(--cp-brand-yellow);
+      color: var(--cp-brand-dark);
+    }
+    .mode-card.direct .mode-icon {
+      background: var(--cp-cowork);
+      color: #ffffff;
+    }
+    .mode-icon svg {
+      width: 48px;
+      height: 48px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .mode-card h2 { font-size: 30px; }
+    .mode-card ul {
+      margin: 0;
+      padding-left: 20px;
+      color: var(--cp-text-muted);
+      line-height: 1.55;
+    }
+    .mode-card .btn { align-self: end; width: fit-content; }
+    .direct-plan-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 22px;
+    }
+    .direct-plan-card {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 14px;
+      align-items: start;
+      border: 1px solid var(--cp-border);
+      border-radius: 18px;
+      padding: 18px;
+      background: var(--cp-surface);
+      text-align: left;
+      cursor: pointer;
+      transition: border-color .14s ease, transform .14s ease, box-shadow .14s ease;
+    }
+    .direct-plan-card:hover {
+      transform: translateY(-1px);
+      border-color: var(--cp-brand-yellow);
+      box-shadow: 0 14px 30px rgba(46,45,49,.10);
+    }
+    .direct-plan-card.selected {
+      border-color: var(--cp-cowork);
+      background: var(--cp-cowork-soft);
+    }
+    .direct-plan-card h3 { margin-bottom: 6px; }
+    .direct-plan-card p { margin: 0 0 8px; font-size: 14px; }
+    .direct-plan-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
     .version-badge {
       display: inline-flex;
       align-items: center;
@@ -2617,8 +2715,8 @@
     .toast.show { opacity: 1; transform: translateY(0); }
     .hidden { display: none !important; }
     @media (max-width: 860px) {
-      .hero, .layout, .form-row, .review-grid, .roadmap, .links { grid-template-columns: 1fr; }
-      .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option { grid-template-columns: 1fr; }
+      .hero, .layout, .form-row, .review-grid, .roadmap, .links, .mode-grid, .direct-plan-grid { grid-template-columns: 1fr; }
+      .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-selection-panel, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option { grid-template-columns: 1fr; }
       .proposal-price-panel { position: static; }
       .addon-pricing { border-left: 0; border-top: 1px solid var(--cp-border); padding-left: 0; padding-top: 10px; }
       .topbar, .top-actions { align-items: flex-start; flex-direction: column; }
@@ -2663,14 +2761,48 @@
     <div class="top-actions">
       <span class="auth-status hidden" id="authStatus">Login Microsoft deshabilitado para pruebas</span>
       <button class="btn ghost hidden" id="loginBtn">Iniciar sesión</button>
-      <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.9.1 · técnico</a>
+      <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.9.2 · técnico</a>
       <button class="btn ghost icon-only" id="decisionHelpBtn" title="Ayuda · lógica de decisión" aria-label="Ayuda · lógica de decisión"><span class="btn-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.8 9a2.4 2.4 0 0 1 4.4 1.3c0 1.7-1.5 2.2-2.2 3"></path><path d="M12 17h.01"></path></svg></span></button>
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
 
   <div class="shell">
-    <section id="onboarding" class="hero">
+    <section id="modeSelect" class="mode-hero">
+      <div class="hero-card mode-hero-card">
+        <p class="eyebrow">Possumus · Generador de propuestas</p>
+        <h1>¿Cómo querés crear la propuesta?</h1>
+        <p class="lead" style="margin-left:auto;margin-right:auto">Elegí si necesitás que la app te ayude a encontrar el plan correcto o si ya sabés qué plan querés presentar.</p>
+        <div class="mode-grid">
+          <article class="mode-card">
+            <div class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M16 16l4 4"></path><path d="M8 11h6"></path><path d="M11 8v6"></path></svg></div>
+            <span class="ai-badge">Ideal para diagnosticar</span>
+            <h2>Recomendar plan con diagnóstico</h2>
+            <p>La app te guía con preguntas, calcula el plan recomendado, muestra confianza y alternativas para validar.</p>
+            <ul>
+              <li>Completar preguntas clave.</li>
+              <li>Calcular plan recomendado.</li>
+              <li>Validar con IA, add-ons y alternativas.</li>
+            </ul>
+            <button class="btn primary" id="guidedModeBtn">Recomendar plan</button>
+          </article>
+          <article class="mode-card direct">
+            <div class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"></path><path d="M14 3v5h5"></path><path d="M10 13h6"></path><path d="M10 17h4"></path><path d="M5 7v14"></path></svg></div>
+            <span class="ai-badge">Ideal para avanzar rápido</span>
+            <h2>Crear propuesta directa</h2>
+            <p>Ya sabés qué plan presentar. Elegís Plan 0, 1, 2 o 3 y pasás directo a la propuesta final.</p>
+            <ul>
+              <li>Elegir plan manualmente.</li>
+              <li>Revisar alcance, precio y add-ons.</li>
+              <li>Generar PDF o enviar handoff.</li>
+            </ul>
+            <button class="btn action-mail" id="directModeBtn">Crear propuesta directa</button>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="onboarding" class="hero hidden">
       <div class="hero-card">
         <p class="eyebrow">Possumus · Adopción de Microsoft 365 Copilot</p>
         <h1>Elegí la mejor propuesta de adopción para tu cliente.</h1>
@@ -2701,6 +2833,39 @@
           <div class="mini-stat"><strong>Qué te devuelve</strong><p>Una propuesta sugerida, argumentos para la reunión, focos de valor y un plan de próximos pasos.</p></div>
         </div>
       </aside>
+    </section>
+
+    <section id="directPlan" class="layout hidden">
+      <aside class="side side-nav">
+        <h2>Propuesta directa</h2>
+        <p>Elegí un plan ya definido y generá la versión final sin diagnóstico ni alternativas.</p>
+        <div class="mini-stat"><strong>Uso recomendado</strong><p>Cuando el comercial ya validó con el cliente qué plan corresponde.</p></div>
+      </aside>
+      <main class="card content-card">
+        <div class="step-header">
+          <div>
+            <span class="badge">Camino rápido</span>
+            <p class="eyebrow">Plan definido por el comercial</p>
+            <h2>Elegí el plan que querés presentar</h2>
+            <p>La propuesta final se va a generar como Versión 1 sobre el plan seleccionado, sin scoring ni alternativas.</p>
+          </div>
+        </div>
+        <div class="form-row">
+          <div>
+            <label for="directCompany">Nombre de la compañía</label>
+            <input id="directCompany" placeholder="Ej.: Contoso">
+          </div>
+          <div>
+            <label for="directStartDate">Fecha esperada de inicio</label>
+            <input id="directStartDate" type="date">
+          </div>
+        </div>
+        <div id="directPlanGrid" class="direct-plan-grid"></div>
+        <div class="toolbar">
+          <button class="btn" id="directBackBtn">← Volver</button>
+          <button class="btn action-mail" id="directBuildBtn">Generar propuesta directa</button>
+        </div>
+      </main>
     </section>
 
     <section id="wizard" class="layout hidden">
@@ -3286,6 +3451,8 @@
       coworkReviewed: false,
       selectedAddons: [],
       addonsReviewed: false,
+      proposalMode: "guided",
+      directPlanKey: "",
       planId: "",
       userId: "",
       commercialName: "",
@@ -3547,7 +3714,7 @@
       }
     }
     function show(section) {
-      ["onboarding", "wizard", "review", "plan"].forEach((id) => $(id).classList.add("hidden"));
+      ["modeSelect", "onboarding", "directPlan", "wizard", "review", "plan"].forEach((id) => $(id).classList.add("hidden"));
       $(section).classList.remove("hidden");
       window.scrollTo(0, 0);
     }
@@ -3803,10 +3970,11 @@
       state.aiValidation = null;
       state.aiRoadmap = null;
       state.useAiRoadmap = true;
-      state.overridePlanKey = "";
+      if (state.proposalMode !== "direct") state.overridePlanKey = "";
       state.aiPlanComparisons = {};
     }
     function selectedAddonItems(planKey = selectedProposalPlanKey()) {
+      if (state.proposalMode === "direct" && !state.selectedAddons.length) return [];
       const selected = state.selectedAddons && state.selectedAddons.length ? state.selectedAddons : suggestedAddonIds(planKey);
       const included = includedAddonIdsForPlan(planKey);
       return addOnCatalog().filter((item) => selected.includes(item.id) && !included.has(item.id) && isAddonEnabled(item));
@@ -3909,7 +4077,7 @@
     }
     function renderAddonPriceSummary(planKey) {
       const quote = quoteForPlan(planKey);
-      const selected = selectedAddonItems();
+      const selected = selectedAddonItems(planKey);
       const total = proposalTotalEstimate(planKey);
       return `<div class="addon-price-summary">
         <div class="addon-total-box">
@@ -3922,6 +4090,132 @@
           ${selected.length ? selected.map((addon) => `<div class="addon-price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("") : `<div class="addon-price-row"><span>Add-ons seleccionados</span><strong>Sin adicionales</strong></div>`}
         </div>
       </div>`;
+    }
+    function directDefaultsForPlan(planKey) {
+      const defaults = {
+        plan0: {
+          primaryObjective: "explore-ai",
+          copilotLicenses: "chat",
+          copilotUsage: "not-applicable",
+          concreteUseCases: "none",
+          agentNeed: "no",
+          m365Maturity: "high",
+          m365Tools: "collaboration",
+          projectStage: "evaluation",
+          accompaniment: "training",
+          userRange: "small",
+          sponsor: "no",
+          governance: "high",
+          iaGovernanceNeed: "none"
+        },
+        plan1: {
+          primaryObjective: "digital-productivity",
+          copilotLicenses: "none",
+          copilotUsage: "not-applicable",
+          concreteUseCases: "none",
+          agentNeed: "no",
+          m365Maturity: "low",
+          m365Tools: "basic",
+          projectStage: "evaluation",
+          accompaniment: "adoption-program",
+          userRange: "small",
+          sponsor: "partial",
+          governance: "medium",
+          iaGovernanceNeed: "none"
+        },
+        plan2: {
+          primaryObjective: "copilot-roi",
+          copilotLicenses: "licensed",
+          copilotUsage: "under-20",
+          concreteUseCases: "some",
+          agentNeed: "no",
+          m365Maturity: "medium",
+          m365Tools: "collaboration",
+          projectStage: "pilot",
+          accompaniment: "training",
+          userRange: "small",
+          sponsor: "yes",
+          governance: "medium",
+          iaGovernanceNeed: "none"
+        },
+        plan3: {
+          primaryObjective: "integral-transformation",
+          copilotLicenses: "licensed",
+          copilotUsage: "20-60",
+          concreteUseCases: "many",
+          agentNeed: "explore",
+          m365Maturity: "medium",
+          m365Tools: "collaboration",
+          projectStage: "scale",
+          accompaniment: "change-management",
+          userRange: "medium",
+          sponsor: "yes",
+          governance: "medium",
+          iaGovernanceNeed: "governance"
+        }
+      };
+      return defaults[planKey] || defaults.plan1;
+    }
+    function applyDirectPlanDefaults(planKey) {
+      Object.assign(state, {
+        proposalMode: "direct",
+        directPlanKey: planKey,
+        overridePlanKey: planKey,
+        industry: state.industry || "professional",
+        usersMode: state.usersMode || "department",
+        department: selectedDepartments()[0] || "RR. HH.",
+        departments: selectedDepartments().length ? selectedDepartments() : ["RR. HH."],
+        informationLocation: "mostly-cloud",
+        teamsSharepointStructure: "partial",
+        taskManagement: "partial",
+        firstChange: "documents",
+        deliveryMode: "remote",
+        sessionFrequency: "weekly",
+        groupModel: "by-area",
+        successMetric: "satisfaction",
+        inbox: "proposals",
+        meeting: "client-calls",
+        meetingApp: "Teams",
+        create: "reports",
+        automate: "report-packs",
+        cowork: false,
+        coworkReviewed: true,
+        addonsReviewed: true,
+        selectedAddons: [],
+        aiValidation: null,
+        aiSummary: null,
+        aiRoadmap: null,
+        useAiRoadmap: true,
+        aiPlanComparisons: {}
+      }, directDefaultsForPlan(planKey));
+    }
+    function renderDirectPlanSelection() {
+      const plans = planCatalog();
+      $("directCompany").value = state.company || $("company").value || "";
+      $("directStartDate").value = state.startDate || todayIso;
+      $("directPlanGrid").innerHTML = Object.entries(plans).map(([key, plan]) => {
+        const defaults = directDefaultsForPlan(key);
+        const quote = quoteForPlan(key, defaults.userRange);
+        return `<button class="direct-plan-card ${state.directPlanKey === key ? "selected" : ""}" data-direct-plan="${key}" type="button">
+          <div class="stage-icon">${iconSvg(plan.icon)}</div>
+          <div>
+            <span class="badge">${escapeHtml(plan.badge)}</span>
+            <h3>${escapeHtml(plan.name)}</h3>
+            <p>${escapeHtml(plan.bestFor)}</p>
+            <div class="direct-plan-meta">
+              <span class="pill">${escapeHtml(plan.duration)}</span>
+              <span class="pill">${escapeHtml(plan.scope)}</span>
+              <span class="pill">${escapeHtml(quote.main)}</span>
+            </div>
+          </div>
+        </button>`;
+      }).join("");
+      $("directPlanGrid").querySelectorAll("[data-direct-plan]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.directPlanKey = button.dataset.directPlan;
+          $("directPlanGrid").querySelectorAll("[data-direct-plan]").forEach((item) => item.classList.toggle("selected", item === button));
+        });
+      });
     }
     function selectedDepartments() {
       if (Array.isArray(state.departments) && state.departments.length) {
@@ -4479,6 +4773,28 @@
     function generatePlan() {
       closeConfirmProposalModal();
       ensureLogisticsDefaults();
+      state.proposalMode = "guided";
+      state.directPlanKey = "";
+      state.planId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
+      state.userId = crypto.randomUUID ? crypto.randomUUID() : `user-${Date.now()}`;
+      localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
+      localStorage.setItem(`copilot-user-${state.userId}`, state.planId);
+      location.hash = `/admin/${state.planId}`;
+      renderPlan("admin");
+    }
+    function generateDirectPlan() {
+      state.company = $("directCompany").value.trim();
+      state.startDate = $("directStartDate").value;
+      if (!state.company || !state.startDate) {
+        showToast("Completa compañía y fecha de inicio.");
+        return;
+      }
+      if (!state.directPlanKey) {
+        showToast("Seleccioná un plan para generar la propuesta.");
+        return;
+      }
+      applyDirectPlanDefaults(state.directPlanKey);
+      ensureLogisticsDefaults();
       state.planId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
       state.userId = crypto.randomUUID ? crypto.randomUUID() : `user-${Date.now()}`;
       localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
@@ -4582,12 +4898,12 @@
       if (date.getDate() !== day) date.setDate(0);
       return date.toISOString().slice(0, 10);
     }
-    function quoteForPlan(key) {
+    function quoteForPlan(key, userRange = state.userRange) {
       if (key === "plan0") return { main: "USD 3.500", detail: "Precio base del Plan 0. IVA no incluido." };
       if (key === "plan2") return { main: "USD 5.900", detail: "Precio base del Plan 2. IVA no incluido." };
       if (key === "plan1") {
-        if (state.userRange === "small") return { main: "USD 3.300 a 4.200 + IVA", detail: "Ola Express: 1 a 2 grupos, hasta 50 usuarios." };
-        if (state.userRange === "medium") return { main: "USD 4.700 a 7.900 + IVA", detail: "Ola Estándar o Completa según cantidad final de grupos." };
+        if (userRange === "small") return { main: "USD 3.300 a 4.200 + IVA", detail: "Ola Express: 1 a 2 grupos, hasta 50 usuarios." };
+        if (userRange === "medium") return { main: "USD 4.700 a 7.900 + IVA", detail: "Ola Estándar o Completa según cantidad final de grupos." };
         return { main: "USD 30.000 + IVA", detail: "Programa anual de 4 olas, hasta 600 usuarios." };
       }
       return { main: "A cotizar según alcance", detail: "No hay precio base fijo para Plan 3; se cotiza por cantidad de grupos, olas, add-ons y nivel de acompañamiento." };
@@ -4796,10 +5112,12 @@
       };
     }
     function recommendedPlanKey() {
+      if (state.proposalMode === "direct" && state.directPlanKey && planCatalog()[state.directPlanKey]) return state.directPlanKey;
       return planDecision().recommendedKey;
     }
     function selectedProposalPlanKey() {
       const plans = planCatalog();
+      if (state.proposalMode === "direct" && state.directPlanKey && plans[state.directPlanKey]) return state.directPlanKey;
       return state.overridePlanKey && plans[state.overridePlanKey] ? state.overridePlanKey : recommendedPlanKey();
     }
     function clearPlanDependentAiArtifacts() {
@@ -4978,6 +5296,16 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
     }
     function renderPlanSelectionPanel(decision, plans, selectedKey, mode = "admin") {
       if (mode === "user") return "";
+      if (state.proposalMode === "direct") {
+        const selected = plans[selectedKey];
+        return `<div class="plan-selection-panel">
+          <div class="plan-selection-card active" style="grid-column:1 / -1">
+            <span>Propuesta directa · Versión 1</span>
+            <strong>${escapeHtml(selected.name)}</strong>
+            <p>${escapeHtml(quoteForPlan(selectedKey).main)} · Plan seleccionado manualmente por el comercial, sin diagnóstico ni alternativas.</p>
+          </div>
+        </div>`;
+      }
       const original = plans[decision.recommendedKey];
       const selected = plans[selectedKey];
       const changed = selectedKey !== decision.recommendedKey;
@@ -5016,6 +5344,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       </aside>`;
     }
     function decisionAlternativesMarkup(decision, plans, selectedKey = selectedProposalPlanKey(), mode = "admin") {
+      if (state.proposalMode === "direct") return "";
       const alternativeItems = decision.alternatives.filter((item) => item.key !== selectedKey);
       if (!alternativeItems.length) return "";
       return `<div class="alternative-panel">
@@ -5305,6 +5634,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const decision = planDecision();
       const algorithmRecommendedKey = decision.recommendedKey;
       const recommendedKey = selectedProposalPlanKey();
+      const directMode = state.proposalMode === "direct";
       const recommended = plans[recommendedKey];
       const roadmapItems = roadmapForPlan(recommendedKey);
       const roadmapState = roadmapStatus(recommendedKey);
@@ -5332,13 +5662,13 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           <div class="result-top">
             <div>
               <p class="eyebrow">POSSUMUS · PROPUESTA INTEGRAL DE ADOPCIÓN</p>
-              <h2>${mode === "user" ? "Plan recomendado para la iniciativa" : "Propuesta versión final: " + recommended.name}</h2>
+              <h2>${mode === "user" ? "Plan recomendado para la iniciativa" : directMode ? "Propuesta directa: " + recommended.name : "Propuesta versión final: " + recommended.name}</h2>
               <div class="client-highlight">${state.company}</div>
               <p class="lead">${selectedLabel("industry")} · ${selectedLabel("users")}</p>
               <div class="chips">${focus.map((item) => `<span class="pill">${item}</span>`).join("")}<span class="pill license-pill ${hasCopilotLicense() ? "has-copilot" : ""}">${hasCopilotLicense() ? "Tiene M365 Copilot" : "Sin M365 Copilot"}</span><span class="pill">Cowork: ${state.cowork ? "Incluido" : "No incluido"}</span></div>
               <div class="decision-row">
-                <button class="confidence-badge ${decision.level}" id="confidenceBadge" type="button">${confidenceLabel(decision.level)} · ${decision.confidence}%</button>
-                <span class="decision-note">${recommendedKey === algorithmRecommendedKey ? confidenceNote(decision) : `Plan ajustado manualmente. Original: ${plans[algorithmRecommendedKey].name}.`}</span>
+                ${directMode ? `<span class="confidence-badge high">Selección manual</span>` : `<button class="confidence-badge ${decision.level}" id="confidenceBadge" type="button">${confidenceLabel(decision.level)} · ${decision.confidence}%</button>`}
+                <span class="decision-note">${directMode ? "El comercial seleccionó el plan directamente para generar la Versión 1." : recommendedKey === algorithmRecommendedKey ? confidenceNote(decision) : `Plan ajustado manualmente. Original: ${plans[algorithmRecommendedKey].name}.`}</span>
               </div>
             </div>
             <div class="score">${recommended.duration}</div>
@@ -5454,7 +5784,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
             <div class="handoff-status" id="handoffStatus"></div>
           </div>
         </div>
-        <details class="proposal-accordion">
+        ${directMode ? "" : `<details class="proposal-accordion">
           <summary><div class="stage-icon">${iconSvg("diagnostic")}</div><div><h2>Criterios que definieron el plan</h2><p>Variables usadas por el scoring y señales principales.</p></div></summary>
           <div class="proposal-accordion-body">
             <p>La recomendación se calcula con scoring ponderado: objetivo, licenciamiento, uso real de Copilot, madurez M365, casos de uso, agentes, escala, gobierno/COE, sponsor y acompañamiento. Si la confianza baja, se muestran alternativas posibles.</p>
@@ -5489,7 +5819,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
               </article>
             </div>
           </div>
-        </details>
+        </details>`}
         <details class="proposal-accordion">
           <summary><div class="stage-icon">${iconSvg("training")}</div><div><h2>Metodología de adopción</h2><p>Cómo Possumus acompaña diagnóstico, formación, comunicación y medición.</p></div></summary>
           <div class="proposal-accordion-body">
@@ -5541,8 +5871,17 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         </details>
         `;
       show("plan");
-      $("editPlanBtn").addEventListener("click", () => { currentStep = 0; renderStep(); show("wizard"); });
-      $("confidenceBadge").addEventListener("click", () => openConfidenceModal(decision, plans));
+      $("editPlanBtn").addEventListener("click", () => {
+        if (directMode) {
+          renderDirectPlanSelection();
+          show("directPlan");
+          return;
+        }
+        currentStep = 0;
+        renderStep();
+        show("wizard");
+      });
+      if ($("confidenceBadge")) $("confidenceBadge").addEventListener("click", () => openConfidenceModal(decision, plans));
       $("plan").querySelectorAll("[data-compare-plan]").forEach((button) => {
         button.addEventListener("click", () => generatePlanComparison(recommendedKey, button.dataset.comparePlan, mode));
       });
@@ -5579,7 +5918,8 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const totalEstimate = proposalTotalEstimate(recommendedKey);
       const decision = planDecision();
       const original = planCatalog()[decision.recommendedKey];
-      const changed = recommendedKey !== decision.recommendedKey;
+      const directMode = state.proposalMode === "direct";
+      const changed = !directMode && recommendedKey !== decision.recommendedKey;
       const aiSummary = state.aiSummary ? {
         text: state.aiSummary.text || "",
         generatedAt: state.aiSummary.generatedAt || "",
@@ -5601,9 +5941,9 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
 
 Cliente: ${state.company}
 Plan principal seleccionado (Versión 1): ${recommended.name}
-Plan original sugerido por la app: ${original.name}
+${directMode ? "Modo: Propuesta directa seleccionada por el comercial." : `Plan original sugerido por la app: ${original.name}
 ${changed ? "Cambio manual: Sí, el comercial promovió una alternativa como plan principal." : "Cambio manual: No, coincide con el plan original."}
-Confianza: ${confidenceLabel(decision.level)} · ${decision.confidence}%
+Confianza: ${confidenceLabel(decision.level)} · ${decision.confidence}%`}
 Duración: ${recommended.duration}
 Alcance: ${recommended.scope}
 Cotización: ${quote.main}
@@ -5627,13 +5967,16 @@ ${location.href}`
       return "Plan base + validación de alcance";
     }
     function budgetEstimateInput(recommendedKey, quote, decision) {
-      const addons = selectedAddonItems();
+      const addons = selectedAddonItems(recommendedKey);
       const included = addOnCatalog().filter((item) => includedAddonIdsForPlan(recommendedKey).has(item.id));
       const includeBudgetEstimate = state.includeBudgetEstimate !== false;
+      const directMode = state.proposalMode === "direct";
       return {
         includeBudgetEstimate,
-        shouldEstimate: includeBudgetEstimate && decision.level !== "low",
-        instruction: decision.level === "low"
+        shouldEstimate: includeBudgetEstimate && (directMode || decision.level !== "low"),
+        instruction: directMode
+          ? "Propuesta directa: el comercial ya seleccionó el plan. Generar estimación usando el rango base y add-ons seleccionados, sin cuestionar el scoring."
+          : decision.level === "low"
           ? "No cerrar rango de presupuesto. Indicar que requiere validación con preventa/adopción por baja confianza."
           : !includeBudgetEstimate
           ? "No incluir estimación de presupuesto porque el comercial la desactivó para esta propuesta."
@@ -5644,7 +5987,7 @@ ${location.href}`
         selectedAddons: addons.map((item) => ({ title: item.title, price: item.price, priceMinUsd: item.priceMinUsd || null, priceMaxUsd: item.priceMaxUsd || null, notes: item.pricingNotes || "", category: item.category || "Add-on" })),
         includedInPlan: included.map((item) => item.title),
         factors: [
-          `Confianza del algoritmo: ${confidenceLabel(decision.level)} ${decision.confidence}%`,
+          directMode ? "Modo: propuesta directa seleccionada por el comercial" : `Confianza del algoritmo: ${confidenceLabel(decision.level)} ${decision.confidence}%`,
           `Alcance: ${qualificationValue("userRange")}`,
           `Áreas: ${selectedDepartments().join(", ") || "No definido"}`,
           `Madurez M365: ${qualificationValue("m365Maturity")}`,
@@ -5692,7 +6035,8 @@ ${location.href}`
       const focus = [selectedLabel("inbox"), selectedLabel("meeting"), selectedLabel("create"), selectedLabel("automate")].filter(Boolean);
       const decision = planDecision();
       const algorithmRecommendedKey = decision.recommendedKey;
-      const planChangedByCommercial = recommendedKey !== algorithmRecommendedKey;
+      const directMode = state.proposalMode === "direct";
+      const planChangedByCommercial = !directMode && recommendedKey !== algorithmRecommendedKey;
       return {
         source: "GeneradorPropuestaADP",
         createdAt: new Date().toISOString(),
@@ -5718,6 +6062,7 @@ ${location.href}`
         proposal: {
           planId: state.planId || "",
           company: state.company,
+          proposalMode: directMode ? "direct" : "guided",
           startDate: state.startDate,
           startDateFormatted: formatDate(state.startDate),
           endDateFormatted: planEndDate(recommended),
@@ -5725,10 +6070,10 @@ ${location.href}`
           recommendedPlanKey: recommendedKey,
           selectedPlanKey: recommendedKey,
           selectedPlanName: recommended.name,
-          algorithmRecommendedPlanKey: algorithmRecommendedKey,
-          algorithmRecommendedPlanName: plans[algorithmRecommendedKey].name,
+          algorithmRecommendedPlanKey: directMode ? null : algorithmRecommendedKey,
+          algorithmRecommendedPlanName: directMode ? null : plans[algorithmRecommendedKey].name,
           planWasChangedByCommercial: planChangedByCommercial,
-          planSelectionNote: planChangedByCommercial ? "El comercial promovió una alternativa como plan principal para la Versión 1." : "El plan final coincide con el plan original sugerido por la app.",
+          planSelectionNote: directMode ? "Propuesta directa: el comercial seleccionó manualmente el plan para la Versión 1." : planChangedByCommercial ? "El comercial promovió una alternativa como plan principal para la Versión 1." : "El plan final coincide con el plan original sugerido por la app.",
           recommendedPlanName: recommended.name,
           recommendedPlanBadge: recommended.badge,
           recommendedPlanDuration: recommended.duration,
@@ -5747,7 +6092,7 @@ ${location.href}`
             confidenceLevel: decision.level,
             confidenceLabel: confidenceLabel(decision.level),
             reasons: decision.reasons,
-            alternatives: decision.alternatives.map((item) => ({
+            alternatives: directMode ? [] : decision.alternatives.map((item) => ({
               planKey: item.key,
               planName: plans[item.key].name,
               score: item.score,
@@ -6127,7 +6472,8 @@ ${location.href}`
         ? selectedAddons.map((addon) => `<div class="price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("")
         : `<div class="price-row"><span>Add-ons seleccionados</span><strong>Sin add-ons</strong></div>`;
       const decision = planDecision();
-      const activeComparisons = activePlanComparisons(recommendedKey, decision);
+      const directMode = state.proposalMode === "direct";
+      const activeComparisons = directMode ? [] : activePlanComparisons(recommendedKey, decision);
       const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
       const companyResearchMarkup = formatCompanyResearch(state.aiSummary && state.aiSummary.companyResearch);
       const validationSummaryText = state.aiValidation && state.aiValidation.summary ? filterValidationSummaryForProposal(state.aiValidation.summary) : "";
@@ -6254,11 +6600,11 @@ ${location.href}`
           <div class="grid-4">${methodologyPillars().map(([title, desc]) => `<div class="card"><strong>${title}</strong><p>${desc}</p></div>`).join("")}</div>${footer}
         </section>
         <section class="slide">
-          <p class="eyebrow">Recomendación generada</p>
+          <p class="eyebrow">${directMode ? "Propuesta directa" : "Recomendación generada"}</p>
           <h2>Plan recomendado: <span class="accent">${plan.name}</span></h2>
-          <div class="confidence">${confidenceLabel(decision.level)} · ${decision.confidence}%</div>
+          <div class="confidence">${directMode ? "Selección manual" : `${confidenceLabel(decision.level)} · ${decision.confidence}%`}</div>
           <p>${recommendationReason(recommendedKey)}</p>
-          ${decision.reasons.length ? `<ul class="evidence">${decision.reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>` : ""}
+          ${!directMode && decision.reasons.length ? `<ul class="evidence">${decision.reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>` : ""}
           <div class="pdf-recommendation-grid">
             <div>
               <div class="pdf-compact-grid">
@@ -6283,7 +6629,7 @@ ${location.href}`
             </div>
           </div>${footer}
         </section>
-        ${decision.alternatives.length ? `<section class="slide">
+        ${!directMode && decision.alternatives.length ? `<section class="slide">
           <p class="eyebrow">Alternativas posibles</p>
           <h2>Planes a validar si cambia el alcance.</h2>
           <div class="grid-2">${decision.alternatives.map((item) => `<div class="card alternative"><strong>${plans[item.key].name}</strong><p>${item.reasons.slice(0, 3).map(escapeHtml).join(". ") || plans[item.key].bestFor}</p><p><strong>Cotización:</strong> ${quoteForPlan(item.key).main}</p><p><strong>Diferencia:</strong> ${quoteDifference(decision.recommendedKey, item.key)}</p></div>`).join("")}</div>${footer}
@@ -6541,11 +6887,27 @@ ${location.href}`
     $("confidenceModal").addEventListener("click", (event) => {
       if (event.target === $("confidenceModal")) closeConfidenceModal();
     });
+    $("guidedModeBtn").addEventListener("click", () => {
+      state.proposalMode = "guided";
+      state.directPlanKey = "";
+      show("onboarding");
+    });
+    $("directModeBtn").addEventListener("click", () => {
+      state.proposalMode = "direct";
+      state.directPlanKey = "";
+      state.company = $("company").value.trim();
+      state.startDate = $("startDate").value || todayIso;
+      renderDirectPlanSelection();
+      show("directPlan");
+    });
+    $("directBackBtn").addEventListener("click", () => show("modeSelect"));
+    $("directBuildBtn").addEventListener("click", generateDirectPlan);
     $("startBtn").addEventListener("click", async () => {
       if (AUTH_ENABLED && !state.commercialEmail) {
         const signedIn = await signInWithMicrosoft();
         if (!signedIn) return;
       }
+      state.proposalMode = "guided";
       state.company = $("company").value.trim();
       state.startDate = $("startDate").value;
       if (!state.company || !state.startDate) {
@@ -6589,11 +6951,13 @@ ${location.href}`
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, addonPrices: {}, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, overridePlanKey: "", aiPlanComparisons: {} });
+      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: true, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, proposalMode: "guided", directPlanKey: "", planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, addonPrices: {}, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, overridePlanKey: "", aiPlanComparisons: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
-      location.hash = "/onboarding";
-      show("onboarding");
+      $("directCompany").value = "";
+      $("directStartDate").value = todayIso;
+      location.hash = "/mode";
+      show("modeSelect");
     });
     window.addEventListener("hashchange", route);
     function route() {
@@ -6602,7 +6966,7 @@ ${location.href}`
       if (routeName === "admin") { loadPlan(id); renderPlan("admin"); return; }
       if (routeName === "user") { loadUserPlan(id); renderPlan("user"); return; }
       if (routeName === "done") { loadPlan(id); renderPlan("admin"); return; }
-      show("onboarding");
+      show("modeSelect");
     }
     restoreMicrosoftSession();
     loadAddonPrices().finally(route);
