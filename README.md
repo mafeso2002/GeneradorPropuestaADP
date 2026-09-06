@@ -14,7 +14,7 @@ Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_A
 
 ## Precios de add-ons desde Dataverse
 
-La app publica una API `GET /api/addon-prices` que consulta Power Automate y reemplaza los precios fallback de los add-ons por valores administrados en Dataverse. Si el Flow o la variable no están configurados, la app conserva `A cotizar`.
+La app publica una API `GET /api/addon-prices` que consulta Power Automate y reemplaza los precios fallback de los add-ons por valores administrados en Dataverse. Si el Flow o la variable no están configurados, la app conserva los precios fallback hardcodeados en `addOnCatalog()` (no se muestra "A cotizar" salvo que un precio individual no se pueda interpretar como rango USD).
 
 Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_AUTOMATE_ADDON_PRICES_URL` con la URL del trigger HTTP del Flow creado en el entorno **Possumus - Desarrollo** (`474ab5eb-a1ed-4530-b1c4-d47edde7c659`).
 

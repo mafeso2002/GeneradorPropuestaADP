@@ -408,7 +408,9 @@ module.exports = async function (context, req) {
     if (typeof value !== "object") return "";
 
     const preferredKeys = [
+      "markdownSummary",
       "summary",
+      "comparison",
       "text",
       "output",
       "response",

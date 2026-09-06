@@ -4,7 +4,7 @@ function findText(value) {
   if (Array.isArray(value)) return value.map(findText).find(Boolean) || "";
   if (typeof value !== "object") return "";
 
-  const preferredKeys = ["summary", "comparison", "text", "output", "response", "result", "predictionOutput", "generatedText", "answer"];
+  const preferredKeys = ["markdownSummary", "summary", "comparison", "text", "output", "response", "result", "predictionOutput", "generatedText", "answer"];
   for (const key of preferredKeys) {
     const found = findText(value[key]);
     if (found) return found;

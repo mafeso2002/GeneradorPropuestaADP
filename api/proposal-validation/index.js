@@ -7,6 +7,7 @@ function findText(value) {
   const preferredKeys = [
     "markdownSummary",
     "summary",
+    "comparison",
     "text",
     "output",
     "response",
@@ -187,23 +188,29 @@ function fallbackValidation(payload, summary) {
 module.exports = async function (context, req) {
   const flowUrl = process.env.POWER_AUTOMATE_AI_SUMMARY_URL;
 
-  if (!flowUrl) {
-    context.res = {
-      status: 501,
-      headers: { "Content-Type": "application/json" },
-      body: {
-        error: "POWER_AUTOMATE_AI_SUMMARY_URL no esta configurada en Azure Static Web Apps."
-      }
-    };
-    return;
-  }
-
   const payload = req.body;
   if (!payload || typeof payload !== "object" || !payload.proposal || !payload.answers) {
     context.res = {
       status: 400,
       headers: { "Content-Type": "application/json" },
       body: { error: "Payload para validacion IA invalido." }
+    };
+    return;
+  }
+
+  if (!flowUrl) {
+    // Sin Flow configurado usamos el mismo fallback local que aplicamos cuando el Flow
+    // responde pero no devuelve un JSON de validacion utilizable, para no bloquear al
+    // comercial con un error 501 cuando todavia no se conecto Power Automate.
+    const fallback = fallbackValidation(payload, "");
+    context.res = {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+      body: {
+        summary: fallback.markdownSummary || validationToMarkdown(fallback),
+        validation: fallback,
+        source: "Fallback local (sin Flow configurado)"
+      }
     };
     return;
   }
@@ -217,13 +224,31 @@ module.exports = async function (context, req) {
     }
   };
 
-  const flowResponse = await fetch(flowUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(enrichedPayload)
-  });
+  let flowResponse;
+  let responseText;
+  try {
+    flowResponse = await fetch(flowUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(enrichedPayload)
+    });
+    responseText = await flowResponse.text();
+  } catch (error) {
+    // Si la llamada al Flow falla (red, timeout, etc.) igual dejamos al comercial
+    // seguir con una validacion local en vez de bloquearlo con un error duro.
+    const fallback = fallbackValidation(payload, "");
+    context.res = {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+      body: {
+        summary: fallback.markdownSummary || validationToMarkdown(fallback),
+        validation: fallback,
+        source: "Fallback local (el Flow no respondio)"
+      }
+    };
+    return;
+  }
 
-  const responseText = await flowResponse.text();
   let responseBody;
   try {
     responseBody = JSON.parse(responseText);
@@ -241,16 +266,13 @@ module.exports = async function (context, req) {
     : text;
 
   context.res = {
-    status: flowResponse.ok ? 200 : 502,
+    status: 200,
     headers: { "Content-Type": "application/json" },
-    body: flowResponse.ok
-      ? {
-          summary,
-          validation,
-          raw: responseBody
-        }
-      : {
-          error: responseBody.error || responseText || `Power Automate respondio ${flowResponse.status}`
-        }
+    body: {
+      summary,
+      validation,
+      source: flowResponse.ok ? "Power Automate AI" : "Fallback local (el Flow respondio con error)",
+      raw: responseBody
+    }
   };
 };
