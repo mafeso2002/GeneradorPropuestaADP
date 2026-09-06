@@ -135,6 +135,7 @@
       margin-top: 28px;
     }
     .mode-card {
+      position: relative;
       display: grid;
       gap: 16px;
       min-height: 360px;
@@ -146,6 +147,19 @@
         var(--cp-panel-strong);
       text-align: left;
       box-shadow: var(--cp-shadow);
+      cursor: pointer;
+      transition: border-color .14s ease, transform .14s ease, box-shadow .14s ease;
+      outline: none;
+    }
+    .mode-card:hover,
+    .mode-card:focus-visible {
+      transform: translateY(-2px);
+      border-color: var(--cp-brand-yellow);
+      box-shadow: 0 24px 70px rgba(46, 45, 49, 0.16);
+    }
+    .mode-card.direct:hover,
+    .mode-card.direct:focus-visible {
+      border-color: var(--cp-cowork);
     }
     .mode-card.direct {
       background:
@@ -175,13 +189,28 @@
       stroke-linejoin: round;
     }
     .mode-card h2 { font-size: 30px; }
+    .mode-action-label {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      border-radius: 999px;
+      padding: 7px 12px;
+      background: var(--cp-accent);
+      color: var(--cp-accent-fg);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .mode-card.direct .mode-action-label {
+      background: var(--cp-cowork);
+    }
     .mode-card ul {
       margin: 0;
       padding-left: 20px;
       color: var(--cp-text-muted);
       line-height: 1.55;
     }
-    .mode-card .btn { align-self: end; width: fit-content; }
     .direct-plan-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2781,8 +2810,9 @@
         <h1>¿Cómo querés armar la propuesta para este cliente?</h1>
         <p class="lead" style="margin-left:auto;margin-right:auto">Elegí el camino comercial según el momento de la conversación: definir el plan correcto o preparar rápidamente una propuesta ya acordada.</p>
         <div class="mode-grid">
-          <article class="mode-card">
+          <article class="mode-card" id="guidedModeBtn" role="button" tabindex="0" aria-label="Recomendar plan">
             <div class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7l7-4z"></path><path d="M8.5 12l2.2 2.2 4.8-5"></path><path d="M16.5 16.5l3 3"></path></svg></div>
+            <span class="mode-action-label">Recomendar plan</span>
             <span class="ai-badge">Ideal para diagnosticar</span>
             <h2>Necesito definir qué plan conviene</h2>
             <p>Usalo cuando el cliente todavía está en descubrimiento y necesitás ordenar señales comerciales antes de decidir qué propuesta presentar.</p>
@@ -2791,10 +2821,10 @@
               <li>Obtener plan recomendado, confianza y alternativas.</li>
               <li>Validar add-ons, roadmap y riesgos antes de cerrar.</li>
             </ul>
-            <button class="btn primary" id="guidedModeBtn">Recomendar plan</button>
           </article>
-          <article class="mode-card direct">
+          <article class="mode-card direct" id="directModeBtn" role="button" tabindex="0" aria-label="Crear propuesta directa">
             <div class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"></path><path d="M14 3v5h5"></path><path d="M10 12h6"></path><path d="M10 16h4"></path><path d="M5 7v14"></path><path d="M17 13l3 3-3 3"></path><path d="M20 16h-7"></path></svg></div>
+            <span class="mode-action-label">Crear propuesta directa</span>
             <span class="ai-badge">Ideal para avanzar rápido</span>
             <h2>Ya sé qué plan quiero presentar</h2>
             <p>Usalo cuando la conversación ya está clara y solo necesitás armar la versión final para enviar al cliente.</p>
@@ -2803,7 +2833,6 @@
               <li>Revisar alcance, precio y add-ons del plan.</li>
               <li>Generar PDF o handoff sin pasar por diagnóstico.</li>
             </ul>
-            <button class="btn action-mail" id="directModeBtn">Crear propuesta directa</button>
           </article>
         </div>
       </div>
@@ -7094,6 +7123,15 @@ ${location.href}`
     $("confidenceModal").addEventListener("click", (event) => {
       if (event.target === $("confidenceModal")) closeConfidenceModal();
     });
+    function activateCardWithKeyboard(element) {
+      element.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        element.click();
+      });
+    }
+    activateCardWithKeyboard($("guidedModeBtn"));
+    activateCardWithKeyboard($("directModeBtn"));
     $("guidedModeBtn").addEventListener("click", () => {
       state.proposalMode = "guided";
       state.directPlanKey = "";
