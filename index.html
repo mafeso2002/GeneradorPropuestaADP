@@ -2891,8 +2891,8 @@
             </div>
             <p>Usalo cuando la conversación ya está clara y solo necesitás armar la versión final para enviar al cliente.</p>
             <ul>
-              <li>Seleccionar Plan 0, 1, 2 o 3.</li>
-              <li>Revisar alcance, precio y add-ons del plan.</li>
+              <li>Elegir el nivel de madurez y su referencia comercial.</li>
+              <li>Ajustar alcance, precio y add-ons del plan.</li>
               <li>Generar PDF o handoff sin pasar por diagnóstico.</li>
             </ul>
           </article>
@@ -3395,8 +3395,8 @@
         icon: "users-mix",
         group: "Alcance y escala",
         groupHelp: "Tamaño de la oportunidad y etapa de despliegue.",
-        label: "Alcance inicial estimado",
-        help: "No es para cerrar precio, sino para orientar escala del plan.",
+        label: "Tamaño del grupo objetivo",
+        help: "Ayuda a dimensionar la agenda, cantidad de grupos y esfuerzo de acompañamiento.",
         optionHelp: {
           small: "Alcance acotado. Suele encajar con piloto, exploración o adopción rápida en grupos chicos.",
           medium: "Alcance intermedio. Puede requerir una ola o programa más estructurado con varias audiencias.",
@@ -3571,8 +3571,8 @@
     ];
     const directSteps = [
       { key: "direct-start", label: "Paso 1 · Plan", kicker: "Propuesta directa", title: "Elegí el plan que querés presentar", subtitle: "Cargá cliente, fecha y plan. El plan queda definido por el comercial y no se calcula por scoring." },
-      { key: "direct-industry", label: "Paso 2 · Tipo de cliente", kicker: "Contexto comercial", title: "¿Qué tipo de cliente es?", subtitle: "Este dato no cambia el plan, pero ajusta ejemplos, contexto y lenguaje de la propuesta." },
-      { key: "direct-users", label: "Paso 3 · Alcance", kicker: "Audiencia objetivo", title: "¿A qué grupo de usuarios se orienta?", subtitle: "Definí si es un área piloto o varias áreas, según lo conversado con el cliente y el plan elegido." },
+      { key: "direct-industry", label: "Paso 2 · Tipo de cliente", kicker: "Contexto comercial", title: "¿Qué tipo de cliente es?", subtitle: "Usá este contexto para que la propuesta hable el idioma del cliente: ejemplos, dolores típicos y foco ejecutivo." },
+      { key: "direct-users", label: "Paso 3 · Alcance", kicker: "Audiencia objetivo", title: "¿Cuál es el alcance inicial?", subtitle: "Seleccioná el área o perfiles involucrados y el tamaño aproximado del grupo que participará en la adopción." },
       { key: "direct-logistics", label: "Paso 4 · Entrega y medición", kicker: "Cierre de entrega", title: "¿Cómo conviene entregar y medir la adopción?", subtitle: "Definí modalidad, frecuencia, modelo de grupos y métrica para que el PDF y el handoff salgan completos." }
     ];
     let currentStep = 0;
@@ -4269,7 +4269,7 @@
         proposalMode: "direct",
         directPlanKey: planKey,
         overridePlanKey: planKey,
-        industry: state.industry || "professional",
+        industry: state.industry || "",
         usersMode: state.usersMode || "department",
         department: selectedDepartments()[0] || "RR. HH.",
         departments: selectedDepartments().length ? selectedDepartments() : ["RR. HH."],
@@ -4349,11 +4349,18 @@
     function canContinueDirect() {
       return isDirectStepComplete(directSteps[currentDirectStep].key);
     }
+    function directStepTitle(step) {
+      const company = state.company ? state.company : "este cliente";
+      if (step.key === "direct-industry") return `¿Qué tipo de cliente es ${company}?`;
+      if (step.key === "direct-users") return `¿Cuál es el alcance inicial para ${company}?`;
+      if (step.key === "direct-logistics") return `¿Cómo conviene entregar y medir la adopción en ${company}?`;
+      return step.title;
+    }
     function renderDirectStep() {
       const step = directSteps[currentDirectStep];
       $("directStepCount").textContent = `Paso ${currentDirectStep + 1} de ${directSteps.length}`;
       $("directStepKicker").textContent = step.kicker;
-      $("directStepTitle").textContent = step.title;
+      $("directStepTitle").textContent = directStepTitle(step);
       $("directStepSubtitle").textContent = step.subtitle;
       renderDirectNav();
       let body = "";
@@ -4371,21 +4378,14 @@
         <div class="direct-plan-grid">${directPlanCardsMarkup()}</div>`;
       }
       if (step.key === "direct-industry") {
-        body = `<div class="conversation-guide">
-          <div class="stage-icon">${iconSvg("client-context")}</div>
-          <div>
-            <strong>Contexto para ajustar la propuesta</strong>
-            <p>Elegí el tipo de cliente para adaptar ejemplos, lenguaje comercial y resumen ejecutivo.</p>
-          </div>
-        </div>
-        <div class="options">${industries.map((item) => optionButton(item, state.industry, "industry")).join("")}</div>`;
+        body = `<div class="options">${industries.map((item) => optionButton(item, state.industry, "industry")).join("")}</div>`;
       }
       if (step.key === "direct-users") {
         body = `<div class="conversation-guide">
           <div class="stage-icon">${iconSvg("users-mix")}</div>
           <div>
             <strong>${directPlanRecommendation()}</strong>
-            <p>Este dato define cómo se redacta alcance, roadmap, logística y handoff; no cambia el plan elegido.</p>
+            <p>Completá audiencia y tamaño del grupo para que el alcance, roadmap y handoff salgan alineados al plan elegido.</p>
           </div>
         </div>
         <div class="options">
