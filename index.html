@@ -4672,6 +4672,7 @@
       const margin = Math.max(0, top.score - second.score);
       let confidence = Math.min(96, Math.max(45, Math.round(36 + Math.min(18, top.score * 0.08) + Math.min(42, margin * 0.8))));
       const plan3Candidate = ranked.find((item) => item.key === "plan3");
+      const plan1Candidate = ranked.find((item) => item.key === "plan1");
       const plan0WithScaleChangeRisk = top.key === "plan0"
         && Boolean(plan3Candidate && plan3Candidate.score > 0)
         && (scale || state.accompaniment === "change-management" || state.projectStage === "scale")
@@ -4680,14 +4681,22 @@
         && Boolean(plan3Candidate && plan3Candidate.score > 0)
         && (scale || state.accompaniment === "change-management" || state.projectStage === "scale")
         && (state.sponsor === "yes" || deptCount >= 4 || state.accompaniment === "change-management");
+      const plan2WithOperationalRisk = top.key === "plan2"
+        && Boolean(plan1Candidate && plan1Candidate.score > 0)
+        && hasCopilot
+        && (state.m365Maturity === "low" || state.m365Tools === "basic")
+        && operationalDisorder;
       const scaleChangeRisk = plan0WithScaleChangeRisk || plan1WithScaleChangeRisk;
-      if (scaleChangeRisk) confidence = Math.min(confidence, 64);
+      if (scaleChangeRisk || plan2WithOperationalRisk) confidence = Math.min(confidence, 64);
       const level = confidence >= 70 ? "high" : confidence >= 50 ? "medium" : "low";
       const alternatives = confidence >= 70
         ? []
         : ranked.slice(1, 3).filter((item) => item.score > 0 && top.score - item.score <= 28);
       if (scaleChangeRisk && plan3Candidate && !alternatives.some((item) => item.key === "plan3")) {
         alternatives.unshift(plan3Candidate);
+      }
+      if (plan2WithOperationalRisk && plan1Candidate && !alternatives.some((item) => item.key === "plan1")) {
+        alternatives.unshift(plan1Candidate);
       }
 
       return {
