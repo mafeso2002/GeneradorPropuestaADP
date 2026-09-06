@@ -4676,12 +4676,17 @@
         && Boolean(plan3Candidate && plan3Candidate.score > 0)
         && (scale || state.accompaniment === "change-management" || state.projectStage === "scale")
         && (state.sponsor === "yes" || deptCount >= 4 || state.accompaniment === "change-management");
-      if (plan0WithScaleChangeRisk) confidence = Math.min(confidence, 64);
+      const plan1WithScaleChangeRisk = top.key === "plan1"
+        && Boolean(plan3Candidate && plan3Candidate.score > 0)
+        && (scale || state.accompaniment === "change-management" || state.projectStage === "scale")
+        && (state.sponsor === "yes" || deptCount >= 4 || state.accompaniment === "change-management");
+      const scaleChangeRisk = plan0WithScaleChangeRisk || plan1WithScaleChangeRisk;
+      if (scaleChangeRisk) confidence = Math.min(confidence, 64);
       const level = confidence >= 70 ? "high" : confidence >= 50 ? "medium" : "low";
       const alternatives = confidence >= 70
         ? []
         : ranked.slice(1, 3).filter((item) => item.score > 0 && top.score - item.score <= 28);
-      if (plan0WithScaleChangeRisk && plan3Candidate && !alternatives.some((item) => item.key === "plan3")) {
+      if (scaleChangeRisk && plan3Candidate && !alternatives.some((item) => item.key === "plan3")) {
         alternatives.unshift(plan3Candidate);
       }
 
