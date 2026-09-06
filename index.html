@@ -1355,6 +1355,17 @@
     }
     .plan-selection-card strong { display: block; }
     .plan-selection-card p { margin: 5px 0 0; font-size: 13px; }
+    .addon-adjustment-notice {
+      grid-column: 1 / -1;
+      border: 1px solid var(--cp-brand-yellow);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: var(--cp-brand-yellow-soft);
+      color: var(--cp-brand-dark);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .addon-adjustment-notice strong { display: block; margin-bottom: 4px; }
     .manual-plan-actions {
       display: flex;
       flex-wrap: wrap;
@@ -4949,6 +4960,22 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         ${formatAiSummaryText(comparison.summary)}
       </div>`;
     }
+    function addonPlanAdjustmentNotice(originalKey, selectedKey) {
+      if (originalKey === selectedKey) return "";
+      const selectedIds = new Set(state.selectedAddons.length ? state.selectedAddons : suggestedAddonIds(originalKey));
+      const selectedIncluded = includedAddonIdsForPlan(selectedKey);
+      const originalIncluded = includedAddonIdsForPlan(originalKey);
+      const includedNow = addOnCatalog()
+        .filter((addon) => selectedIds.has(addon.id) && selectedIncluded.has(addon.id) && !originalIncluded.has(addon.id))
+        .map((addon) => addon.title);
+      const detail = includedNow.length
+        ? `${includedNow.map(escapeHtml).join(", ")} ${includedNow.length === 1 ? "pasa" : "pasan"} a estar incluido${includedNow.length === 1 ? "" : "s"} en el plan principal y no se cotiza${includedNow.length === 1 ? "" : "n"} aparte.`
+        : "Los add-ons y el total se recalculan según el plan principal seleccionado.";
+      return `<div class="addon-adjustment-notice">
+        <strong>Impacto del cambio de plan en add-ons</strong>
+        ${detail} Revisá el resumen económico antes de generar PDF o handoff.
+      </div>`;
+    }
     function renderPlanSelectionPanel(decision, plans, selectedKey, mode = "admin") {
       if (mode === "user") return "";
       const original = plans[decision.recommendedKey];
@@ -4966,6 +4993,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           <p>${escapeHtml(quoteForPlan(selectedKey).main)} · ${changed ? "Ajustado manualmente por el comercial." : "Coincide con el plan original del algoritmo."}</p>
           ${changed ? `<div class="manual-plan-actions"><button class="btn ghost" id="revertPlanBtn" type="button"><span class="btn-icon">${iconSvg("swap")}</span>Volver al plan original</button></div>` : ""}
         </div>
+        ${changed ? addonPlanAdjustmentNotice(decision.recommendedKey, selectedKey) : ""}
       </div>`;
     }
     function renderProposalPricePanel(recommendedKey) {
