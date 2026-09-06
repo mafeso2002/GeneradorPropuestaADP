@@ -4208,7 +4208,7 @@
     }
     function renderDirectNav() {
       $("directNavList").innerHTML = directSteps.map((step, index) => {
-        const completed = isDirectStepComplete(step.key);
+        const completed = index < currentDirectStep && isDirectStepComplete(step.key);
         return `<button class="nav-step ${index === currentDirectStep ? "active" : ""} ${completed ? "completed" : ""}" data-direct-index="${index}">
           <strong>${step.label}</strong>
         </button>`;
@@ -4426,7 +4426,7 @@
       $(targetId).innerHTML = visibleSteps().map((s) => {
         const i = steps.indexOf(s);
         const label = selectedLabel(s.key);
-        const completed = isStepComplete(s.key);
+        const completed = i < currentStep && isStepComplete(s.key);
         return `<button class="nav-step ${i === currentStep ? "active" : ""} ${completed ? "completed" : ""}" data-index="${i}">
           <strong>${s.label}</strong>${label ? `<small>${label}</small>` : ""}
         </button>`;
