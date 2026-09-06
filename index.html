@@ -120,6 +120,26 @@
     }
     .brand { display: flex; align-items: center; gap: 12px; font-weight: 700; }
     .top-actions { display: flex; align-items: center; gap: 10px; }
+    .version-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--cp-border);
+      border-radius: 999px;
+      padding: 7px 11px;
+      background: var(--cp-surface-soft);
+      color: var(--cp-text-muted);
+      font-size: 12px;
+      font-weight: 900;
+      line-height: 1;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .version-badge:hover {
+      background: var(--cp-brand-yellow-soft);
+      border-color: var(--cp-brand-yellow);
+      color: var(--cp-brand-dark);
+    }
     .auth-status {
       display: inline-flex;
       align-items: center;
@@ -2585,6 +2605,7 @@
     <div class="top-actions">
       <span class="auth-status hidden" id="authStatus">Login Microsoft deshabilitado para pruebas</span>
       <button class="btn ghost hidden" id="loginBtn">Iniciar sesión</button>
+      <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.9.0 · técnico</a>
       <button class="btn ghost icon-only" id="decisionHelpBtn" title="Ayuda · lógica de decisión" aria-label="Ayuda · lógica de decisión"><span class="btn-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.8 9a2.4 2.4 0 0 1 4.4 1.3c0 1.7-1.5 2.2-2.2 3"></path><path d="M12 17h.01"></path></svg></span></button>
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>

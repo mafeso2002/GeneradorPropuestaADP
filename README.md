@@ -2,6 +2,10 @@
 
 Aplicación HTML para que equipos comerciales y preventa de Possumus releven necesidades de adopción con un cliente y generen una propuesta recomendada.
 
+## Resumen técnico
+
+Ver `TECHNICAL_OVERVIEW.md` para una descripción técnica del MVP: arquitectura, flujo comercial, scoring, add-ons, IA, Power Automate, Dataverse, PDF, handoff y preparación para Dynamics.
+
 ## Uso
 
 Abrir `index.html` en el navegador. El flujo guía la selección de contexto, alcance, readiness, dolores, add-ons y genera una propuesta exportable a PDF.
