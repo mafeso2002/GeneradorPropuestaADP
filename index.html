@@ -137,7 +137,7 @@
     .mode-card {
       position: relative;
       display: grid;
-      gap: 16px;
+      gap: 18px;
       min-height: 360px;
       border: 1px solid var(--cp-border);
       border-radius: 28px;
@@ -148,30 +148,48 @@
       text-align: left;
       box-shadow: var(--cp-shadow);
       cursor: pointer;
-      transition: border-color .14s ease, transform .14s ease, box-shadow .14s ease;
+      transition: border-color .14s ease, transform .14s ease, box-shadow .14s ease, background .14s ease;
       outline: none;
     }
     .mode-card:hover,
     .mode-card:focus-visible {
       transform: translateY(-2px);
       border-color: var(--cp-brand-yellow);
-      box-shadow: 0 24px 70px rgba(46, 45, 49, 0.16);
+      background:
+        linear-gradient(90deg, var(--cp-brand-yellow) 0 7px, transparent 7px),
+        radial-gradient(circle at right top, var(--cp-brand-yellow-soft), transparent 14rem),
+        var(--cp-panel-strong);
+      box-shadow: 0 26px 76px rgba(46, 45, 49, 0.2);
+    }
+    .mode-card:active {
+      transform: translateY(0);
+      box-shadow: 0 12px 34px rgba(46, 45, 49, 0.14);
     }
     .mode-card.direct:hover,
     .mode-card.direct:focus-visible {
       border-color: var(--cp-cowork);
+      background:
+        linear-gradient(90deg, var(--cp-cowork) 0 7px, transparent 7px),
+        radial-gradient(circle at right top, var(--cp-cowork-soft), transparent 14rem),
+        var(--cp-panel-strong);
     }
     .mode-card.direct {
       background:
         radial-gradient(circle at right top, var(--cp-cowork-soft), transparent 14rem),
         var(--cp-panel-strong);
     }
+    .mode-card-head {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      gap: 16px;
+      align-items: center;
+    }
     .mode-icon {
       display: grid;
       place-items: center;
-      width: 86px;
-      height: 86px;
-      border-radius: 24px;
+      width: 72px;
+      height: 72px;
+      border-radius: 20px;
       background: var(--cp-brand-yellow);
       color: var(--cp-brand-dark);
     }
@@ -180,8 +198,8 @@
       color: #ffffff;
     }
     .mode-icon svg {
-      width: 48px;
-      height: 48px;
+      width: 38px;
+      height: 38px;
       fill: none;
       stroke: currentColor;
       stroke-width: 1.8;
@@ -189,15 +207,24 @@
       stroke-linejoin: round;
     }
     .mode-card h2 { font-size: 30px; }
+    .mode-card-head h2 {
+      margin-top: 9px;
+    }
+    .mode-labels {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
     .mode-action-label {
       display: inline-flex;
       width: fit-content;
       align-items: center;
       border-radius: 999px;
-      padding: 7px 12px;
+      padding: 6px 11px;
       background: var(--cp-accent);
       color: var(--cp-accent-fg);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 900;
       letter-spacing: .04em;
       text-transform: uppercase;
@@ -2758,6 +2785,9 @@
       .topbar, .top-actions { align-items: flex-start; flex-direction: column; }
       .auth-status { max-width: 100%; }
       .cowork-hero-header { grid-template-columns: 96px 1fr; }
+      .mode-card-head { grid-template-columns: 58px minmax(0, 1fr); gap: 12px; }
+      .mode-icon { width: 58px; height: 58px; border-radius: 17px; }
+      .mode-icon svg { width: 31px; height: 31px; }
       .summary-text, .ai-summary-empty { grid-template-columns: 1fr; }
       .proposal-actions {
         align-items: stretch;
@@ -2811,10 +2841,16 @@
         <p class="lead" style="margin-left:auto;margin-right:auto">Elegí el camino comercial según el momento de la conversación: definir el plan correcto o preparar rápidamente una propuesta ya acordada.</p>
         <div class="mode-grid">
           <article class="mode-card" id="guidedModeBtn" role="button" tabindex="0" aria-label="Recomendar plan">
-            <div class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7l7-4z"></path><path d="M8.5 12l2.2 2.2 4.8-5"></path><path d="M16.5 16.5l3 3"></path></svg></div>
-            <span class="mode-action-label">Recomendar plan</span>
-            <span class="ai-badge">Ideal para diagnosticar</span>
-            <h2>Necesito definir qué plan conviene</h2>
+            <div class="mode-card-head">
+              <div class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 4v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V7l7-4z"></path><path d="M8.5 12l2.2 2.2 4.8-5"></path><path d="M16.5 16.5l3 3"></path></svg></div>
+              <div>
+                <div class="mode-labels">
+                  <span class="mode-action-label">Recomendar plan</span>
+                  <span class="ai-badge">Ideal para diagnosticar</span>
+                </div>
+                <h2>Necesito definir qué plan conviene</h2>
+              </div>
+            </div>
             <p>Usalo cuando el cliente todavía está en descubrimiento y necesitás ordenar señales comerciales antes de decidir qué propuesta presentar.</p>
             <ul>
               <li>Relevar necesidad, madurez y alcance.</li>
@@ -2823,10 +2859,16 @@
             </ul>
           </article>
           <article class="mode-card direct" id="directModeBtn" role="button" tabindex="0" aria-label="Crear propuesta directa">
-            <div class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"></path><path d="M14 3v5h5"></path><path d="M10 12h6"></path><path d="M10 16h4"></path><path d="M5 7v14"></path><path d="M17 13l3 3-3 3"></path><path d="M20 16h-7"></path></svg></div>
-            <span class="mode-action-label">Crear propuesta directa</span>
-            <span class="ai-badge">Ideal para avanzar rápido</span>
-            <h2>Ya sé qué plan quiero presentar</h2>
+            <div class="mode-card-head">
+              <div class="mode-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h7l4 4v14H7z"></path><path d="M14 3v5h5"></path><path d="M10 12h6"></path><path d="M10 16h4"></path><path d="M5 7v14"></path><path d="M17 13l3 3-3 3"></path><path d="M20 16h-7"></path></svg></div>
+              <div>
+                <div class="mode-labels">
+                  <span class="mode-action-label">Crear propuesta directa</span>
+                  <span class="ai-badge">Ideal para avanzar rápido</span>
+                </div>
+                <h2>Ya sé qué plan quiero presentar</h2>
+              </div>
+            </div>
             <p>Usalo cuando la conversación ya está clara y solo necesitás armar la versión final para enviar al cliente.</p>
             <ul>
               <li>Seleccionar Plan 0, 1, 2 o 3.</li>
