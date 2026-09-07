@@ -2897,7 +2897,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.6 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.7 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -3757,6 +3757,13 @@
         .replace(/[^a-z0-9]+/g, " ")
         .trim();
     }
+    function parseUsdAmount(text) {
+      const cleaned = String(text || "").replace(/\./g, "");
+      const match = cleaned.match(/([0-9]+(?:,[0-9]+)?)/);
+      if (!match || !/usd/i.test(cleaned)) return null;
+      const value = Number(match[1].replace(",", "."));
+      return Number.isFinite(value) ? value : null;
+    }
     function normalizeAddonPriceRow(row) {
       if (!row || typeof row !== "object") return null;
       const boolValue = (value) => value === true || value === "true" || value === "True" || value === "sí" || value === "Si" || value === "si" || value === 1 || value === "1";
@@ -3764,13 +3771,13 @@
       if (!id) return null;
       const activeValue = row.active ?? row.activo ?? row.enabled ?? row.pos_activo ?? row.pss_activo ?? true;
       const active = activeValue === true || activeValue === undefined || activeValue === null ? true : boolValue(activeValue);
+      const price = row.precio_texto || row.priceText || row.price || row.pos_precio_texto || row.pss_precio_texto || "A cotizar";
       return {
         id: String(id).trim(),
         title: row.nombre || row.name || row.Name || row.title || row.pos_nombre || row.pss_nombre || row.pss_Name || "",
         category: row.categoria || row.category || row.pos_categoria || row.pss_categoria || "",
-        price: row.precio_texto || row.priceText || row.price || row.pos_precio_texto || row.pss_precio_texto || "A cotizar",
-        priceMinUsd: Number(row.precio_min_usd ?? row.priceMinUsd ?? row.minUsd ?? row.pos_precio_min_usd ?? row.pss_precio_min_usd ?? 0) || null,
-        priceMaxUsd: Number(row.precio_max_usd ?? row.priceMaxUsd ?? row.maxUsd ?? row.pos_precio_max_usd ?? row.pss_precio_max_usd ?? 0) || null,
+        price,
+        priceUsd: Number(row.precio_usd ?? row.priceUsd ?? row.usd ?? row.pos_precio_usd ?? row.pss_precio_usd ?? 0) || parseUsdAmount(price),
         notes: row.notas || row.notes || row.pos_notas || row.pss_notas || "",
         requiresCopilot: boolValue(row.requiere_copilot ?? row.requiresCopilot ?? row.pos_requiere_copilot ?? row.pss_requiere_copilot ?? false),
         active
@@ -3787,8 +3794,7 @@
         title: pricing.title || addon.title,
         category: pricing.category || addon.category,
         price: pricing.price || addon.price,
-        priceMinUsd: pricing.priceMinUsd,
-        priceMaxUsd: pricing.priceMaxUsd,
+        priceUsd: pricing.priceUsd || parseUsdAmount(pricing.price || addon.price),
         pricingNotes: pricing.notes,
         requiresCopilot: addon.requiresCopilot || pricing.requiresCopilot
       };
@@ -4078,29 +4084,29 @@
       const baseAddons = [
         { id: "excel-intermediate", title: "Excel intermedio", category: "Formación focalizada", desc: "Fórmulas, tablas, reportes y adopción práctica de Excel para usuarios de negocio.", icon: "measurement", price: "USD 850 + IVA", requirement: "Disponible para todos" },
         { id: "excel-advanced", title: "Excel avanzado", category: "Formación focalizada", desc: "Modelado, Power Query, tableros y análisis más avanzado sobre información operativa.", icon: "measurement", price: "USD 1.200 + IVA", requirement: "Disponible para todos" },
-        { id: "tool-module", title: "Módulo a medida de herramienta puntual", category: "Formación focalizada", desc: "Adopción específica de una herramienta Microsoft 365 puntual fuera del alcance base.", icon: "training", price: "USD 950 a 1.800 + IVA", requirement: "Disponible para todos" },
+        { id: "tool-module", title: "Módulo a medida de herramienta puntual", category: "Formación focalizada", desc: "Adopción específica de una herramienta Microsoft 365 puntual fuera del alcance base.", icon: "training", price: "USD 1.400 + IVA", requirement: "Disponible para todos" },
         { id: "cowork", title: "Cowork y Copilot", category: "IA aplicada", desc: "3 a 5 sesiones de trabajo asistido para tareas complejas, investigación y entregables de varios pasos. Aplica como add-on sobre clientes con Microsoft 365 Copilot activo o como siguiente paso después de P2.", icon: "cowork", price: "USD 1.500 + IVA", requiresCopilot: true, requiresCoworkReadiness: true, pricingNotes: "3 a 5 sesiones; no reemplaza el plan de adopción base." },
-        { id: "agents-cowork", title: "Agents & Cowork", category: "IA aplicada", desc: "Agentes a medida para procesos del área y automatización asistida con revisión humana.", icon: "cowork", price: "USD 2.500 a 4.500 + IVA", requiresCopilot: true },
+        { id: "agents-cowork", title: "Agents & Cowork", category: "IA aplicada", desc: "Agentes a medida para procesos del área y automatización asistida con revisión humana.", icon: "cowork", price: "USD 3.500 + IVA", requiresCopilot: true },
         { id: "role-cases", title: "Casos de uso por rol", category: "IA aplicada", desc: "Diseño de escenarios específicos por área, rol o audiencia. En planes sin licencia queda acotado a Copilot Chat.", icon: "users-mix", price: "USD 1.200 + IVA", requirement: "Disponible para todos" },
         { id: "prompt-library", title: "Prompt Library propia", category: "IA aplicada", desc: "Biblioteca de prompts adaptada al negocio del cliente. En planes sin licencia queda acotada a Copilot Chat.", icon: "spark", price: "USD 900 + IVA", requirement: "Disponible para todos" },
         { id: "leaders", title: "Casos para líderes", category: "IA aplicada", desc: "Escenarios de Copilot para dirección, seguimiento, decisiones y reporting.", icon: "leadership", price: "USD 750 + IVA", requirement: "Disponible para todos" },
         { id: "copilot-excel", title: "Copilot en Excel y análisis de datos", category: "IA aplicada", desc: "Escenarios de análisis con Copilot sobre datos corporativos.", icon: "measurement", price: "USD 1.200 + IVA", requiresCopilot: true },
-        { id: "copilot-studio", title: "Agentes a medida con Copilot Studio", category: "IA aplicada", desc: "Diseño de agentes y automatizaciones avanzadas sobre procesos específicos.", icon: "automation", price: "USD 3.500 a 7.500 + IVA", requiresCopilot: true },
-        { id: "copilot-intro-webinar", title: "Webinar introductorio: Copilot en 30 minutos", category: "Activación y cambio", desc: "Entrada comercial liviana y masiva para sensibilizar sobre Copilot: ejemplos generales, moderación y Q&A. No requiere licencias Microsoft 365 Copilot.", icon: "communication", price: "USD 450 a 700 + IVA", requirement: "Disponible para todos; ideal para exploración inicial" },
+        { id: "copilot-studio", title: "Agentes a medida con Copilot Studio", category: "IA aplicada", desc: "Diseño de agentes y automatizaciones avanzadas sobre procesos específicos.", icon: "automation", price: "USD 5.500 + IVA", requiresCopilot: true },
+        { id: "copilot-intro-webinar", title: "Webinar introductorio: Copilot en 30 minutos", category: "Activación y cambio", desc: "Entrada comercial liviana y masiva para sensibilizar sobre Copilot: ejemplos generales, moderación y Q&A. No requiere licencias Microsoft 365 Copilot.", icon: "communication", price: "USD 600 + IVA", requirement: "Disponible para todos; ideal para exploración inicial" },
         { id: "webinar", title: "Webinar / kickoff ejecutivo", category: "Activación y cambio", desc: "Evento de lanzamiento, alineación o cierre ejecutivo para un programa de adopción ya definido.", icon: "communication", price: "USD 600 + IVA", requirement: "Disponible para todos" },
-        { id: "webinar-agents", title: "Webinar especializado: agentes", category: "Webinars especializados", desc: "Sesión puntual para explicar qué son los agentes, cuándo aplican y cómo evaluar oportunidades reales sin convertirlo en un programa completo.", icon: "automation", price: "USD 600 a 900 + IVA", requirement: "Disponible para exploración o profundización temática" },
-        { id: "webinar-sharepoint-agents", title: "Webinar especializado: agentes en SharePoint", category: "Webinars especializados", desc: "Profundización sobre agentes conectados a contenido, repositorios y escenarios de conocimiento en SharePoint.", icon: "teams", price: "USD 600 a 900 + IVA", requirement: "Recomendado si hay interés en agentes y contenido documental" },
-        { id: "webinar-notebooks", title: "Webinar especializado: notebooks y funcionalidades Copilot", category: "Webinars especializados", desc: "Recorrido de capacidades puntuales de Copilot, notebooks y casos demostrativos para equipos que piden mayor profundidad sin iniciar un despliegue.", icon: "spark", price: "USD 600 a 900 + IVA", requirement: "Disponible para audiencias interesadas en IA" },
-        { id: "champions", title: "Programa Champions", category: "Activación y cambio", desc: "Activación y acompañamiento de referentes internos.", icon: "training", price: "USD 1.200 a 2.500 + IVA", requirement: "Disponible para todos" },
+        { id: "webinar-agents", title: "Webinar especializado: agentes", category: "Webinars especializados", desc: "Sesión puntual para explicar qué son los agentes, cuándo aplican y cómo evaluar oportunidades reales sin convertirlo en un programa completo.", icon: "automation", price: "USD 750 + IVA", requirement: "Disponible para exploración o profundización temática" },
+        { id: "webinar-sharepoint-agents", title: "Webinar especializado: agentes en SharePoint", category: "Webinars especializados", desc: "Profundización sobre agentes conectados a contenido, repositorios y escenarios de conocimiento en SharePoint.", icon: "teams", price: "USD 750 + IVA", requirement: "Recomendado si hay interés en agentes y contenido documental" },
+        { id: "webinar-notebooks", title: "Webinar especializado: notebooks y funcionalidades Copilot", category: "Webinars especializados", desc: "Recorrido de capacidades puntuales de Copilot, notebooks y casos demostrativos para equipos que piden mayor profundidad sin iniciar un despliegue.", icon: "spark", price: "USD 750 + IVA", requirement: "Disponible para audiencias interesadas en IA" },
+        { id: "champions", title: "Programa Champions", category: "Activación y cambio", desc: "Activación y acompañamiento de referentes internos.", icon: "training", price: "USD 1.800 + IVA", requirement: "Disponible para todos" },
         { id: "office-hours", title: "Office Hours / acompañamiento", category: "Activación y cambio", desc: "Espacios de consulta, acompañamiento en piso y soporte post-sesión.", icon: "support", price: "USD 900 + IVA", requirement: "Disponible para todos" },
-        { id: "change", title: "Gestión del cambio", category: "Activación y cambio", desc: "Comunicación interna, sponsors, adopción, medición y acompañamiento del cambio.", icon: "communication", price: "USD 2.500 a 5.000 + IVA", requirement: "Disponible para todos" },
+        { id: "change", title: "Gestión del cambio", category: "Activación y cambio", desc: "Comunicación interna, sponsors, adopción, medición y acompañamiento del cambio.", icon: "communication", price: "USD 3.500 + IVA", requirement: "Disponible para todos" },
         { id: "support-desk", title: "Mesa de ayuda post-programa", category: "Activación y cambio", desc: "Acompañamiento posterior para consultas, adopción y continuidad.", icon: "support", price: "USD 800 + IVA", requirement: "Disponible para todos" },
-        { id: "teams-sharepoint", title: "Arquitectura Teams + SharePoint", category: "Gobierno y orden digital", desc: "Diseño funcional de equipos, canales, bibliotecas y repositorios para ordenar colaboración.", icon: "teams", price: "USD 1.500 a 3.000 + IVA", requirement: "Disponible para todos" },
-        { id: "document-governance", title: "Orden documental y trazabilidad", category: "Gobierno y orden digital", desc: "Estructura de archivos, criterios de uso, migración desde canales dispersos y buenas prácticas.", icon: "proposal-doc", price: "USD 1.200 a 2.500 + IVA", requirement: "Disponible para todos" },
+        { id: "teams-sharepoint", title: "Arquitectura Teams + SharePoint", category: "Gobierno y orden digital", desc: "Diseño funcional de equipos, canales, bibliotecas y repositorios para ordenar colaboración.", icon: "teams", price: "USD 2.200 + IVA", requirement: "Disponible para todos" },
+        { id: "document-governance", title: "Orden documental y trazabilidad", category: "Gobierno y orden digital", desc: "Estructura de archivos, criterios de uso, migración desde canales dispersos y buenas prácticas.", icon: "proposal-doc", price: "USD 1.800 + IVA", requirement: "Disponible para todos" },
         { id: "readiness", title: "Readiness técnico", category: "Gobierno y orden digital", desc: "Revisión de SharePoint, oversharing, Purview, permisos y preparación para IA.", icon: "shield", price: "USD 1.500 + IVA", requirement: "Disponible para todos" },
         { id: "dashboard", title: "Copilot Dashboard / reporte de adopción", category: "Gobierno y orden digital", desc: "Medición, seguimiento y lectura ejecutiva de adopción con datos de Copilot.", icon: "diagnostic", price: "USD 900 + IVA", requiresCopilot: true },
-        { id: "delivery-onsite", title: "Adicional modalidad presencial", category: "Modalidad de entrega", desc: "Cargo operativo de referencia para dictado presencial: coordinación, traslados locales y logística de facilitación.", icon: "calendar", price: "USD 900 a 1.500 + IVA", automaticCharge: true, requirement: "Se suma automáticamente cuando la modalidad seleccionada es presencial." },
-        { id: "delivery-hybrid", title: "Adicional modalidad mixta", category: "Modalidad de entrega", desc: "Cargo operativo de referencia para combinar sesiones virtuales con instancias presenciales.", icon: "calendar", price: "USD 500 a 900 + IVA", automaticCharge: true, requirement: "Se suma automáticamente cuando la modalidad seleccionada es mixta." }
+        { id: "delivery-onsite", title: "Adicional modalidad presencial", category: "Modalidad de entrega", desc: "Cargo operativo de referencia para dictado presencial: coordinación, traslados locales y logística de facilitación.", icon: "calendar", price: "USD 1.200 + IVA", automaticCharge: true, requirement: "Se suma automáticamente cuando la modalidad seleccionada es presencial." },
+        { id: "delivery-hybrid", title: "Adicional modalidad mixta", category: "Modalidad de entrega", desc: "Cargo operativo de referencia para combinar sesiones virtuales con instancias presenciales.", icon: "calendar", price: "USD 700 + IVA", automaticCharge: true, requirement: "Se suma automáticamente cuando la modalidad seleccionada es mixta." }
       ];
       return baseAddons.map(applyAddonPrice).filter((addon) => addonPriceData(addon.id)?.active !== false);
     }
@@ -4129,8 +4135,7 @@
         title: item.title,
         description: item.desc,
         price: item.price,
-        priceMinUsd: item.priceMinUsd || null,
-        priceMaxUsd: item.priceMaxUsd || null,
+        priceUsd: item.priceUsd || parseUsdAmount(item.price),
         pricingNotes: item.pricingNotes || "",
         category: item.category || "Modalidad de entrega"
       } : null;
@@ -5399,7 +5404,7 @@
           effort: "2 olas de 3 meses",
           shortScope: "Hasta 300",
           scope: "Hasta 300 colaboradores · hasta 20 grupos de 15 personas",
-          price: "A cotizar según alcance",
+          price: "USD 45.000 + IVA",
           icon: "calendar-cycle",
           customerCase: "Quiere herramientas Microsoft 365 y Copilot en un mismo recorrido.",
           aiLevel: "M365 + Microsoft 365 Copilot",
@@ -5575,61 +5580,46 @@
         ...fallback,
         main: pricing.price || fallback.main,
         detail: pricing.notes || fallback.detail,
-        priceMinUsd: pricing.priceMinUsd,
-        priceMaxUsd: pricing.priceMaxUsd,
+        priceUsd: pricing.priceUsd || parseUsdAmount(pricing.price || fallback.main),
         priceId: pricing.id
       };
     }
     function fallbackQuoteForPlan(key, userRange = state.userRange) {
-      if (key === "plan0") return { main: "USD 3.500", detail: "Precio base del Plan 0. IVA no incluido." };
+      if (key === "plan0") return { main: "USD 3.500 + IVA", detail: "Precio base del Plan 0." };
       if (key === "plan2") {
         if (userRange === "medium") return { main: "USD 5.900 + IVA por ola", detail: "Copilot por olas: hasta 7 olas de 45 usuarios para cubrir hasta 300 personas." };
-        if (userRange === "large") return { main: "A cotizar según alcance", detail: "Copilot a escala requiere validar cantidad de olas, referentes, medición y si conviene evolucionar a Nivel 4." };
+        if (userRange === "large") return { main: "USD 5.900 + IVA por ola", detail: "Referencia por ola para despliegues de más de 300 usuarios; total final depende de cantidad de olas." };
         return { main: "USD 5.900 + IVA", detail: "Copilot in 30: hasta 45 usuarios con licencias propias, 2 o 3 grupos de 15." };
       }
       if (key === "plan1") {
-        if (userRange === "small") return { main: "USD 3.300 a 4.200 + IVA", detail: "Ola Express: 2 a 3 grupos, hasta 45 usuarios." };
-        if (userRange === "medium") return { main: "USD 4.700 a 7.900 + IVA", detail: "Ola Estándar o Completa: hasta 5 olas de 60 usuarios para cubrir hasta 300 personas." };
+        if (userRange === "small") return { main: "USD 3.900 + IVA", detail: "Ola Express: 2 a 3 grupos, hasta 45 usuarios." };
+        if (userRange === "medium") return { main: "USD 6.500 + IVA", detail: "Ola Estándar o Completa: hasta 5 olas de 60 usuarios para cubrir hasta 300 personas." };
         return { main: "USD 30.000 + IVA", detail: "Programa anual por olas: hasta 10 olas de 60 usuarios para cubrir hasta 600 colaboradores." };
       }
-      return { main: "A cotizar según alcance", detail: "No hay precio base fijo para Plan 3; se cotiza por cantidad de grupos, olas, add-ons y nivel de acompañamiento." };
+      return { main: "USD 45.000 + IVA", detail: "Referencia inicial para programa integral; ajustar por alcance." };
     }
     function quoteForPlan(key, userRange = state.userRange) {
       return quoteFromPriceData(planPriceData(key, userRange), fallbackQuoteForPlan(key, userRange));
-    }
-    function parseUsdRange(text) {
-      const cleaned = String(text || "").replace(/\./g, "");
-      const numbers = [...cleaned.matchAll(/([0-9]+(?:,[0-9]+)?)/g)]
-        .map((match) => Number(match[1].replace(",", ".")))
-        .filter((value) => Number.isFinite(value));
-      if (!numbers.length || !/usd/i.test(cleaned)) return null;
-      return { min: numbers[0], max: numbers[1] || numbers[0] };
     }
     function formatUsd(value) {
       return `USD ${Math.round(value).toLocaleString("es-AR")} + IVA`;
     }
     function proposalTotalEstimate(recommendedKey = selectedProposalPlanKey()) {
       const quote = quoteForPlan(recommendedKey);
-      const planRange = quote.priceMinUsd && quote.priceMaxUsd
-        ? { min: quote.priceMinUsd, max: quote.priceMaxUsd }
-        : parseUsdRange(quote.main);
+      const planAmount = quote.priceUsd || parseUsdAmount(quote.main);
       const addons = pricingItemsForPlan(recommendedKey);
       const wave = adoptionWaveModel(recommendedKey);
-      let addonMin = 0;
-      let addonMax = 0;
+      let addonTotal = 0;
       let unknownCount = 0;
       addons.forEach((addon) => {
-        const range = addon.priceMinUsd && addon.priceMaxUsd
-          ? { min: addon.priceMinUsd, max: addon.priceMaxUsd }
-          : parseUsdRange(addon.price);
-        if (range) {
-          addonMin += range.min;
-          addonMax += range.max;
+        const amount = addon.priceUsd || parseUsdAmount(addon.price);
+        if (amount) {
+          addonTotal += amount;
         } else {
           unknownCount += 1;
         }
       });
-      if (!planRange) {
+      if (!planAmount) {
         return {
           label: quote.main,
           detail: unknownCount ? `Plan y ${unknownCount} adicional${unknownCount === 1 ? "" : "es"} requieren validación comercial.` : quote.detail,
@@ -5653,10 +5643,9 @@
           addons: pricingItemsSummary(addons)
         };
       }
-      const totalMin = planRange.min + addonMin;
-      const totalMax = planRange.max + addonMax;
+      const total = planAmount + addonTotal;
       return {
-        label: totalMin === totalMax ? formatUsd(totalMin) : `${formatUsd(totalMin).replace(" + IVA", "")} a ${formatUsd(totalMax)}`,
+        label: formatUsd(total),
         detail: `Incluye plan base (${quote.main}) + ${addons.length ? "opcionales cotizables y/o adicionales de modalidad" : "sin opcionales adicionales"}.${unknownCount ? ` ${unknownCount} adicional${unknownCount === 1 ? "" : "es"} queda${unknownCount === 1 ? "" : "n"} a validar.` : ""}`,
         plan: quote.main,
         addons: pricingItemsSummary(addons)
@@ -5923,7 +5912,7 @@
     function quoteDifference(primaryKey, alternativeKey) {
       const primary = quoteForPlan(primaryKey);
       const alternative = quoteForPlan(alternativeKey);
-      if (primary.main === alternative.main) return "Mismo rango base; cambia alcance/metodología.";
+      if (primary.main === alternative.main) return "Mismo importe base; cambia alcance/metodología.";
       const numeric = (value) => {
         const match = String(value || "").replace(/\./g, "").match(/USD\s*([0-9]+)/i);
         return match ? Number(match[1]) : null;
@@ -6578,7 +6567,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                 <div class="switch-row">
                   <div>
                     <strong>Incluir estimación de presupuesto</strong>
-                    <p>Agrega rango sugerido, modalidad comercial, supuestos y alertas para preventa/adopción.</p>
+                    <p>Agrega importe sugerido, modalidad comercial, supuestos y alertas para preventa/adopción.</p>
                   </div>
                   <button class="switch ${state.includeBudgetEstimate ? "on" : ""}" id="budgetEstimateSwitch" aria-label="Incluir estimación de presupuesto"></button>
                 </div>
@@ -6800,7 +6789,7 @@ ${location.href}`
       };
     }
     function budgetCommercialMode(recommendedKey, addons, decision) {
-      if (decision.level === "low") return "Validar con preventa/adopción antes de cerrar rango";
+      if (decision.level === "low") return "Validar con preventa/adopción antes de cerrar importe";
       if (addons.some((item) => item.id === "excel-intermediate" || item.id === "excel-advanced" || item.id === "tool-module")) return "Módulo focalizado o plan base + add-on";
       if (recommendedKey === "plan1" && state.userRange === "small") return "Ola Express";
       if (recommendedKey === "plan1" && state.userRange === "medium") return "Ola Estándar o Completa";
@@ -6818,18 +6807,18 @@ ${location.href}`
         includeBudgetEstimate,
         shouldEstimate: includeBudgetEstimate && (directMode || decision.level !== "low"),
         instruction: directMode
-          ? "Propuesta directa: el comercial ya seleccionó el plan. Generar estimación usando el rango base y opcionales cotizables seleccionados, sin cuestionar el scoring."
+          ? "Propuesta directa: el comercial ya seleccionó el plan. Generar estimación usando el importe base y opcionales cotizables seleccionados, sin cuestionar el scoring."
           : decision.level === "low"
-          ? "No cerrar rango de presupuesto. Indicar que requiere validación con preventa/adopción por baja confianza."
+          ? "No cerrar importe de presupuesto. Indicar que requiere validación con preventa/adopción por baja confianza."
           : !includeBudgetEstimate
           ? "No incluir estimación de presupuesto porque el comercial la desactivó para esta propuesta."
-          : "Generar una estimación asistida usando el rango base y explicar si conviene rango bajo, medio o alto. No inventar precios cerrados para add-ons a cotizar.",
-        baseRange: quote.main,
+          : "Generar una estimación asistida usando el importe base y explicar supuestos de alcance. No inventar precios para add-ons a cotizar.",
+        baseAmount: quote.main,
         baseDetail: quote.detail,
         commercialMode: budgetCommercialMode(recommendedKey, addons, decision),
         adoptionWaveModel: wave,
         wavePricingInstruction: wave ? "Si el modelo de olas indica precio por ola, explicitarlo como referencia por ola y no como total cerrado para todo el universo de usuarios." : "",
-        selectedAddons: addons.map((item) => ({ title: item.title, price: item.price, priceMinUsd: item.priceMinUsd || null, priceMaxUsd: item.priceMaxUsd || null, notes: item.pricingNotes || "", category: item.category || "Add-on" })),
+        selectedAddons: addons.map((item) => ({ title: item.title, price: item.price, priceUsd: item.priceUsd || parseUsdAmount(item.price), notes: item.pricingNotes || "", category: item.category || "Add-on" })),
         deliveryCharge: deliveryChargePayload(),
         includedInPlan: included.map((item) => item.title),
         factors: [
@@ -6901,7 +6890,7 @@ ${location.href}`
             "Plan recomendado, por que aplica, alternativas si la confianza es media/baja y como se relaciona con la realidad del cliente. Respetar progressionGuidance: si hay atajos o prerrequisitos, explicarlos como secuencia comercial sin invalidar la oportunidad. Para P0/Envisioning IA, mantener add-ons acotados a Casos para lideres, Readiness tecnico y Webinar introductorio Copilot en 30 minutos; si el cliente necesita mas, sugerir cambio de plan. Para P1/Productividad Digital, no presentarlo como capacitacion puntual: describirlo como programa de adopcion con diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion. En P1 solo permitir como add-ons Readiness tecnico, Excel intermedio, Excel avanzado y Modulo a medida de herramienta puntual; si hace falta mas, sugerir ampliar alcance o cambiar a P2/P3. En P2/IA aplicada al trabajo, solo permitir add-ons de profundizacion Copilot: Cowork, Agents & Cowork, Copilot Studio y webinars especializados de agentes, agentes en SharePoint o notebooks/funcionalidades Copilot. En P3/Productividad Digital + IA, presentar el plan como programa integral con casi todo incluido; solo Cowork y Agentes a medida con Copilot Studio se cotizan aparte. Si aparece Cowork, tratarlo como add-on con prerrequisito de Microsoft 365 Copilot activo/trial y 3 a 5 sesiones; si aparecen webinars especializados, presentarlos como consumo puntual por tecnologia, no como programa de adopcion.",
             ...(state.includeBudgetEstimate !== false ? [
               "## Estimacion asistida de presupuesto",
-              "Rango recomendado, modalidad comercial sugerida, supuestos y alertas. Si la confianza es baja, no cerrar rango y pedir validacion con preventa/adopcion."
+              "Importe recomendado, modalidad comercial sugerida, supuestos y alertas. Si la confianza es baja, no cerrar presupuesto y pedir validacion con preventa/adopcion."
             ] : []),
             "## Argumentos para la reunion",
             "- 3 bullets comerciales concretos para presentar al cliente."
@@ -6989,8 +6978,7 @@ ${location.href}`
             title: item.title,
             description: item.desc,
             price: item.price,
-            priceMinUsd: item.priceMinUsd || null,
-            priceMaxUsd: item.priceMaxUsd || null,
+            priceUsd: item.priceUsd || parseUsdAmount(item.price),
             pricingNotes: item.pricingNotes || "",
             requiresCopilot: Boolean(item.requiresCopilot),
             requirement: addonRequirement(item, addonState(item, recommendedKey), recommendedKey)
@@ -7718,7 +7706,7 @@ ${location.href}`
           <div class="decision-help-grid">
             <div class="decision-plan-card"><strong>Confianza alta</strong><span>Se muestra un único plan porque la mayoría de señales coinciden.</span></div>
             <div class="decision-plan-card"><strong>Confianza media</strong><span>Se muestra plan principal + “También podría aplicar” para validar alcance.</span></div>
-            <div class="decision-plan-card"><strong>Confianza baja</strong><span>No conviene cerrar rango ni propuesta sin revisión de preventa/adopción.</span></div>
+            <div class="decision-plan-card"><strong>Confianza baja</strong><span>No conviene cerrar presupuesto ni propuesta sin revisión de preventa/adopción.</span></div>
             <div class="decision-plan-card"><strong>Estimación IA</strong><span>Si está activada, usa plan, confianza, usuarios, modalidad, madurez, licencias y add-ons. Si la confianza es baja, pide validación.</span></div>
             <div class="decision-plan-card"><strong>Cómo se calcula el porcentaje</strong><span>Cada respuesta suma puntos a uno o más planes. El porcentaje sube cuando el plan ganador tiene muchas señales propias y se distancia del segundo. Baja cuando dos caminos quedan cerca o faltan señales críticas.</span></div>
             <div class="decision-plan-card"><strong>Qué señales pesan más</strong><span>Objetivo principal, licencias y uso de Copilot, madurez M365, casos de uso, agentes, gobierno/COE, escala, sponsor y acompañamiento.</span></div>

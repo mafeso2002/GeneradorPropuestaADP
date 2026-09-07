@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.6**
+Versión documentada: **MVP 0.10.7**
 Última actualización funcional: **2026-09-07**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -173,7 +173,7 @@ También existe la categoría **Webinars especializados** para consumos puntuale
 
 En escenarios de Productividad Digital o baja madurez Microsoft 365, los add-ons se priorizan para mostrar primero ordenamiento y adopción base: Arquitectura Teams + SharePoint, Orden documental y trazabilidad, Office Hours, Readiness y Champions. Los webinars quedan disponibles, pero no desplazan los módulos core de adopción.
 
-Los precios pueden venir de Dataverse mediante Power Automate o usar fallback local.
+Los precios pueden venir de Dataverse mediante Power Automate o usar fallback local. El modelo comercial usa **precio único**: cada plan, add-on o adicional tiene un `precio_texto` visible y un `precio_usd` numérico para sumar el total.
 
 Los planes usan `quoteForPlan()`, que primero busca un precio externo con `planPriceId()` y luego cae a `fallbackQuoteForPlan()` si Dataverse no trae ese ID activo.
 

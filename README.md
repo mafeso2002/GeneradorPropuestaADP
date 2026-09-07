@@ -18,7 +18,7 @@ Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_A
 
 ## Precios comerciales desde Dataverse
 
-La app publica una API `GET /api/addon-prices` que consulta Power Automate y reemplaza los precios fallback de add-ons, cargos de modalidad y planes base por valores administrados en Dataverse. Si el Flow o la variable no están configurados, la app conserva los precios fallback hardcodeados en `addOnCatalog()` y `fallbackQuoteForPlan()` (no se muestra "A cotizar" salvo que un precio individual no se pueda interpretar como rango USD).
+La app publica una API `GET /api/addon-prices` que consulta Power Automate y reemplaza los precios fallback de add-ons, cargos de modalidad y planes base por valores administrados en Dataverse. Si el Flow o la variable no están configurados, la app conserva los precios fallback hardcodeados en `addOnCatalog()` y `fallbackQuoteForPlan()`.
 
 Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_AUTOMATE_ADDON_PRICES_URL` con la URL del trigger HTTP del Flow creado en el entorno **Possumus - Desarrollo** (`474ab5eb-a1ed-4530-b1c4-d47edde7c659`).
 
@@ -29,9 +29,8 @@ Tabla Dataverse en **Possumus - Desarrollo**: `PreciosAddonsAdopcion` (`pss_Prec
 | `addon_id` | ID técnico usado por la app, por ejemplo `excel-intermediate`, `delivery-onsite`, `delivery-hybrid` o `plan1-small` |
 | `nombre` | Nombre visible del add-on |
 | `categoria` | Categoría comercial |
-| `precio_texto` | Texto comercial, por ejemplo `USD 850 + IVA` |
-| `precio_min_usd` | Valor mínimo numérico opcional |
-| `precio_max_usd` | Valor máximo numérico opcional |
+| `precio_texto` | Texto comercial único, por ejemplo `USD 850 + IVA` |
+| `precio_usd` | Valor numérico único para sumar en el total |
 | `requiere_copilot` | Si requiere Microsoft 365 Copilot |
 | `activo` | Permite ocultar/desactivar un add-on |
 | `notas` | Condición comercial, por ejemplo `por grupo` |
@@ -106,7 +105,7 @@ La búsqueda pública prioriza Argentina por defecto: intenta dominios `.com.ar`
 
 Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_AUTOMATE_AI_SUMMARY_URL` con la URL del trigger HTTP del Flow de IA. El Flow debe devolver JSON con la forma `{ "summary": "..." }`. Para que el frontend lo muestre mejor, conviene que el resumen venga en Markdown con secciones `## Contexto de la empresa`, `## Lectura comercial`, `## Recomendacion Possumus`, `## Estimacion asistida de presupuesto` y `## Argumentos para la reunion`.
 
-La estimación asistida puede activarse o desactivarse desde el bloque "Resumen con IA". Usa el rango base del plan, confianza del algoritmo, alcance, modalidad, madurez, licencias y add-ons. Si la confianza es baja, la IA no debe cerrar rango y debe pedir validación con preventa/adopción.
+La estimación asistida puede activarse o desactivarse desde el bloque "Resumen con IA". Usa el importe base del plan, confianza del algoritmo, alcance, modalidad, madurez, licencias y add-ons. Si la confianza es baja, la IA no debe cerrar presupuesto y debe pedir validación con preventa/adopción.
 
 ## Roadmap personalizado con IA
 
