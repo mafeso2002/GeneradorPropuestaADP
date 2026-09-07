@@ -1,4 +1,4 @@
-const { fetchWithTimeout } = require("../shared/flow-utils");
+const { fetchWithTimeout, isPayloadTooLarge } = require("../shared/flow-utils");
 
 module.exports = async function (context, req) {
   const flowUrl = process.env.POWER_AUTOMATE_HANDOFF_URL;
@@ -20,6 +20,15 @@ module.exports = async function (context, req) {
       status: 400,
       headers: { "Content-Type": "application/json" },
       body: { error: "Payload de handoff invalido." }
+    };
+    return;
+  }
+
+  if (isPayloadTooLarge(payload)) {
+    context.res = {
+      status: 413,
+      headers: { "Content-Type": "application/json" },
+      body: { error: "El contenido de la propuesta es demasiado grande." }
     };
     return;
   }

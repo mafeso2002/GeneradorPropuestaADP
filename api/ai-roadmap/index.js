@@ -1,4 +1,4 @@
-const { fetchWithTimeout, findText, extractJsonObject } = require("../shared/flow-utils");
+const { fetchWithTimeout, findText, extractJsonObject, isPayloadTooLarge } = require("../shared/flow-utils");
 
 function findRoadmap(value) {
   if (!value || typeof value !== "object") return null;
@@ -35,6 +35,15 @@ module.exports = async function (context, req) {
       status: 400,
       headers: { "Content-Type": "application/json" },
       body: { error: "Payload para roadmap IA invalido." }
+    };
+    return;
+  }
+
+  if (isPayloadTooLarge(payload)) {
+    context.res = {
+      status: 413,
+      headers: { "Content-Type": "application/json" },
+      body: { fallbackRequired: true, items: [], error: "El contenido de la propuesta es demasiado grande." }
     };
     return;
   }

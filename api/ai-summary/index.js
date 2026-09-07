@@ -1,4 +1,4 @@
-const { fetchWithTimeout: postFlow, findText } = require("../shared/flow-utils");
+const { fetchWithTimeout: postFlow, findText, isPayloadTooLarge } = require("../shared/flow-utils");
 
 function cleanText(value, maxLength = 900) {
   return String(value || "")
@@ -394,6 +394,15 @@ module.exports = async function (context, req) {
       status: 400,
       headers: { "Content-Type": "application/json" },
       body: { error: "Payload para resumen IA invalido." }
+    };
+    return;
+  }
+
+  if (isPayloadTooLarge(payload)) {
+    context.res = {
+      status: 413,
+      headers: { "Content-Type": "application/json" },
+      body: { fallbackRequired: true, summary: "", error: "El contenido de la propuesta es demasiado grande." }
     };
     return;
   }

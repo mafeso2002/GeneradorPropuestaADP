@@ -67,4 +67,14 @@ function extractJsonObject(text) {
   return null;
 }
 
-module.exports = { fetchWithTimeout, findText, extractJsonObject };
+// Límite defensivo de tamaño de payload: evita reenviar cuerpos enormes a Power Automate
+// (endpoints anónimos same-origin; esto acota abuso/DoS y costos de los Flows de IA).
+function isPayloadTooLarge(payload, maxBytes = 524288) {
+  try {
+    return Buffer.byteLength(JSON.stringify(payload || {}), "utf8") > maxBytes;
+  } catch (error) {
+    return false;
+  }
+}
+
+module.exports = { fetchWithTimeout, findText, extractJsonObject, isPayloadTooLarge };

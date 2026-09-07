@@ -1,7 +1,7 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.10**
-Última actualización funcional: **2026-09-07**
+Versión documentada: **MVP 0.10.11**
+Última actualización funcional: **2026-09-08**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
 ## 1. Objetivo de la aplicación
@@ -135,6 +135,8 @@ El algoritmo devuelve:
 - nivel de confianza;
 - razones principales;
 - alternativas cercanas cuando la decisión no es obvia.
+
+Ante **empate exacto de score**, el desempate es determinístico y prioriza el escalón comercial más conservador con el orden `plan1 (Etapa 0) → plan0 (Etapa 1) → plan2 (Etapa 2) → plan3 (Etapa 3)`, para no sobre-recomendar. El plan empatado queda siempre visible como alternativa cercana con confianza media. Este criterio solo altera la decisión en empates exactos (≈0,6 % del espacio de combinaciones, verificado por barrido diferencial); los diagnósticos con margen claro no se ven afectados.
 
 ## 4.1 Selección comercial de plan principal
 
@@ -306,7 +308,9 @@ Endpoints implementados:
 | `/api/ai-roadmap` | `POWER_AUTOMATE_AI_ROADMAP_URL` | Generar roadmap personalizado |
 | `/api/plan-comparison` | `POWER_AUTOMATE_PLAN_COMPARISON_URL` | Comparar planes |
 
-Las utilidades comunes de las Functions (`fetchWithTimeout`, `findText`, `extractJsonObject`) viven centralizadas en `api/shared/flow-utils.js` y se importan con `require("../shared/flow-utils")` para evitar copias divergentes. Todas las llamadas a Power Automate usan timeout (AbortController) y manejo de error. Las respuestas ya no exponen el objeto `raw` crudo del Flow al frontend.
+Las utilidades comunes de las Functions (`fetchWithTimeout`, `findText`, `extractJsonObject`, `isPayloadTooLarge`) viven centralizadas en `api/shared/flow-utils.js` y se importan con `require("../shared/flow-utils")` para evitar copias divergentes. Todas las llamadas a Power Automate usan timeout (AbortController) y manejo de error. Las respuestas ya no exponen el objeto `raw` crudo del Flow al frontend.
+
+Endurecimiento de los endpoints POST (`handoff`, `ai-summary`, `ai-roadmap`, `plan-comparison`, `proposal-validation`): cada uno valida la forma del cuerpo (`proposal` + `answers`) devolviendo `400` ante payload inválido y `413` cuando el cuerpo supera el límite defensivo de tamaño (`isPayloadTooLarge`, 512 KB), evitando reenviar cuerpos enormes a Power Automate. `authLevel` es `anonymous` de forma intencional (app pública client-side); la protección real es same-origin en Static Web Apps + límites de tamaño + validación del lado del Flow. Cada `function.json` restringe los métodos HTTP admitidos (POST salvo `addon-prices`, que admite GET/POST).
 
 ## 8. PDF y envío de propuesta
 

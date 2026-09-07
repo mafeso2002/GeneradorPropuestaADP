@@ -1,4 +1,4 @@
-const { fetchWithTimeout, findText, extractJsonObject } = require("../shared/flow-utils");
+const { fetchWithTimeout, findText, extractJsonObject, isPayloadTooLarge } = require("../shared/flow-utils");
 
 function validationToMarkdown(validation) {
   if (!validation || typeof validation !== "object") return "";
@@ -154,6 +154,15 @@ module.exports = async function (context, req) {
       status: 400,
       headers: { "Content-Type": "application/json" },
       body: { error: "Payload para validacion IA invalido." }
+    };
+    return;
+  }
+
+  if (isPayloadTooLarge(payload)) {
+    context.res = {
+      status: 413,
+      headers: { "Content-Type": "application/json" },
+      body: { error: "El contenido de la propuesta es demasiado grande." }
     };
     return;
   }

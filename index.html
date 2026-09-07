@@ -429,6 +429,16 @@
       transition: transform .12s ease, background .12s ease;
     }
     .btn:hover { transform: translateY(-1px); background: var(--cp-surface-soft); }
+    .btn:focus-visible,
+    .switch:focus-visible,
+    .option:focus-visible,
+    .addon-option:focus-visible,
+    .nav-step:focus-visible,
+    .dept-chip:focus-visible,
+    [role="button"]:focus-visible {
+      outline: 2px solid var(--cp-accent);
+      outline-offset: 2px;
+    }
     .btn.primary {
       background: var(--cp-accent);
       border-color: var(--cp-accent);
@@ -2875,6 +2885,13 @@
       .result-top { flex-direction: column; }
       .decision-help-list { columns: 1; }
     }
+    @media (max-width: 480px) {
+      .shell { padding: 20px 12px; }
+      .modal-card { width: 100%; max-height: 94vh; }
+      h1 { font-size: 26px; }
+      .btn { padding: 11px 14px; }
+      .hero-card { padding: 24px 16px; }
+    }
     @media print {
       .topbar, .side-nav, .toolbar, .btn, .toast, .version-badge { display: none !important; }
       body { background: var(--cp-surface); }
@@ -2897,7 +2914,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.10 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.11 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -5769,7 +5786,11 @@
       if (state.sponsor === "no") add(noCopilot ? "plan0" : "plan2", 6, "sin sponsor claro conviene validar valor antes de escalar");
       if (state.sponsor === "yes" && scale) add("plan3", 8, "hay sponsor y escala para sostener un programa mayor");
 
-      const ranked = Object.values(scores).sort((a, b) => b.score - a.score);
+      // Desempate explícito y determinístico (antes dependía del orden de inserción del objeto):
+      // ante igualdad de score, se prioriza el escalón comercial más bajo/conservador para no
+      // sobre-recomendar. El plan empatado igual queda visible como alternativa (confianza media).
+      const tieOrder = { plan1: 0, plan0: 1, plan2: 2, plan3: 3 };
+      const ranked = Object.values(scores).sort((a, b) => (b.score - a.score) || (tieOrder[a.key] - tieOrder[b.key]));
       const top = ranked[0];
       const second = ranked[1] || { score: 0 };
       const margin = Math.max(0, top.score - second.score);
@@ -6828,7 +6849,7 @@ ${location.href}`
       if (recommendedKey === "plan1" && state.userRange === "small") return "Ola Express";
       if (recommendedKey === "plan1" && state.userRange === "medium") return "Ola Estándar o Completa";
       if (recommendedKey === "plan2") return "Plan base Copilot in 30 + add-ons si aplica";
-      if (recommendedKey === "plan3") return "Programa integral a cotizar por alcance";
+      if (recommendedKey === "plan3") return "Programa integral · precio de referencia inicial, se ajusta por alcance";
       return "Plan base + validación de alcance";
     }
     function budgetEstimateInput(recommendedKey, quote, decision) {
@@ -7820,6 +7841,48 @@ ${location.href}`
     }
     activateCardWithKeyboard($("guidedModeBtn"));
     activateCardWithKeyboard($("directModeBtn"));
+    // Accesibilidad de modales: cierre con Escape, foco atrapado dentro del diálogo y
+    // restauración del foco al elemento que lo abrió.
+    function closeTopModal() {
+      if (!$("confirmProposalModal").classList.contains("hidden")) { closeConfirmProposalModal(); return true; }
+      if (!$("handoffModal").classList.contains("hidden")) { closeHandoffModal(); return true; }
+      if (!$("confidenceModal").classList.contains("hidden")) { closeConfidenceModal(); return true; }
+      if (!$("decisionHelpModal").classList.contains("hidden")) { closeDecisionHelpModal(); return true; }
+      return false;
+    }
+    function setupModalA11y() {
+      const focusablesIn = (modal) => Array.from(modal.querySelectorAll(
+        'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )).filter((el) => el.offsetParent !== null);
+      let lastFocused = null;
+      document.querySelectorAll(".modal-backdrop").forEach((modal) => {
+        modal.setAttribute("tabindex", "-1");
+        modal.addEventListener("keydown", (event) => {
+          if (event.key !== "Tab") return;
+          const f = focusablesIn(modal);
+          if (!f.length) { event.preventDefault(); modal.focus(); return; }
+          const first = f[0];
+          const last = f[f.length - 1];
+          if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+          else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        });
+        new MutationObserver(() => {
+          const open = !modal.classList.contains("hidden");
+          if (open) {
+            lastFocused = document.activeElement;
+            const f = focusablesIn(modal);
+            (f[0] || modal).focus();
+          } else if (lastFocused && document.contains(lastFocused)) {
+            lastFocused.focus();
+            lastFocused = null;
+          }
+        }).observe(modal, { attributes: true, attributeFilter: ["class"] });
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeTopModal();
+      });
+    }
+    setupModalA11y();
     $("topDynamicsBtn").addEventListener("click", showDynamicsPlaceholder);
     $("guidedModeBtn").addEventListener("click", () => {
       state.proposalMode = "guided";

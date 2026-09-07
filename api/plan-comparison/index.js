@@ -1,4 +1,4 @@
-const { fetchWithTimeout, findText } = require("../shared/flow-utils");
+const { fetchWithTimeout, findText, isPayloadTooLarge } = require("../shared/flow-utils");
 
 module.exports = async function (context, req) {
   const flowUrl = process.env.POWER_AUTOMATE_PLAN_COMPARISON_URL || process.env.POWER_AUTOMATE_AI_SUMMARY_URL;
@@ -23,6 +23,15 @@ module.exports = async function (context, req) {
       status: 400,
       headers: { "Content-Type": "application/json" },
       body: { error: "Payload para comparacion de planes invalido." }
+    };
+    return;
+  }
+
+  if (isPayloadTooLarge(payload)) {
+    context.res = {
+      status: 413,
+      headers: { "Content-Type": "application/json" },
+      body: { fallbackRequired: true, summary: "", error: "El contenido de la propuesta es demasiado grande." }
     };
     return;
   }
