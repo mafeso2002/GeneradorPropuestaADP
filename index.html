@@ -5221,10 +5221,43 @@
       return `Referencia comercial: ${plan.shortName || plan.name}`;
     }
     function adoptionWaveModel(planKey = selectedProposalPlanKey()) {
-      if (planKey !== "plan1") return null;
+      if (planKey !== "plan1" && planKey !== "plan2") return null;
       const range = state.userRange || "small";
       const groupModel = discoveryValue(logisticsFields, "groupModel") || "Por área";
       const departments = selectedDepartments();
+      if (planKey === "plan2") {
+        if (range === "small") {
+          return {
+            label: "Copilot in 30",
+            title: "1 ola Copilot",
+            users: "Hasta 45 usuarios",
+            groups: "2 a 3 grupos de 15",
+            duration: "30 días",
+            cadence: `${groupModel} · sesiones semanales`,
+            note: "Alcance base del Plan 2 para activar Microsoft 365 Copilot con un grupo inicial medible."
+          };
+        }
+        if (range === "medium") {
+          return {
+            label: "Copilot por olas",
+            title: "Hasta 7 olas Copilot",
+            users: "46 a 300 usuarios",
+            groups: "Olas de hasta 45 usuarios",
+            duration: "90 a 120 días",
+            cadence: `${groupModel} · despliegue progresivo`,
+            note: `Para 300 usuarios, la adopción de Copilot se divide en hasta 7 olas de 45 usuarios para sostener práctica, casos por rol y medición${departments.length > 1 ? ` (${departments.join(", ")})` : ""}.`
+          };
+        }
+        return {
+          label: "Copilot a escala",
+          title: "Programa extendido por olas",
+          users: "Más de 300 usuarios",
+          groups: "Olas de hasta 45 usuarios",
+          duration: "A definir por alcance",
+          cadence: `${groupModel} · despliegue por audiencias`,
+          note: "Para más de 300 usuarios conviene validar alcance con preventa/adopción: puede requerir un programa extendido o evolucionar a Nivel 4."
+        };
+      }
       if (range === "small") {
         return {
           label: "Ola Express",
@@ -5289,13 +5322,14 @@
     function proposalDurationDays(planKey = selectedProposalPlanKey()) {
       const wave = adoptionWaveModel(planKey);
       if (wave && state.userRange === "small") return 30;
-      if (wave && state.userRange === "medium") return 90;
+      if (wave && state.userRange === "medium") return planKey === "plan2" ? 120 : 90;
       if (wave && state.userRange === "large") return 365;
       return planCatalog()[planKey].durationDays || 30;
     }
     function proposalEndDate(planKey = selectedProposalPlanKey()) {
       const start = state.startDate || todayIso;
       const plan = planCatalog()[planKey];
+      if (adoptionWaveModel(planKey)) return formatDate(addDays(start, proposalDurationDays(planKey)));
       if (plan.durationMonths && planKey !== "plan1") return formatDate(addMonths(start, plan.durationMonths));
       return formatDate(addDays(start, proposalDurationDays(planKey)));
     }
@@ -5311,7 +5345,11 @@
     }
     function quoteForPlan(key, userRange = state.userRange) {
       if (key === "plan0") return { main: "USD 3.500", detail: "Precio base del Plan 0. IVA no incluido." };
-      if (key === "plan2") return { main: "USD 5.900", detail: "Precio base del Plan 2. IVA no incluido." };
+      if (key === "plan2") {
+        if (userRange === "medium") return { main: "USD 5.900 + IVA por ola", detail: "Copilot por olas: hasta 7 olas de 45 usuarios para cubrir hasta 300 personas." };
+        if (userRange === "large") return { main: "A cotizar según alcance", detail: "Copilot a escala requiere validar cantidad de olas, referentes, medición y si conviene evolucionar a Nivel 4." };
+        return { main: "USD 5.900 + IVA", detail: "Copilot in 30: hasta 45 usuarios con licencias propias, 2 o 3 grupos de 15." };
+      }
       if (key === "plan1") {
         if (userRange === "small") return { main: "USD 3.300 a 4.200 + IVA", detail: "Ola Express: 2 a 3 grupos, hasta 45 usuarios." };
         if (userRange === "medium") return { main: "USD 4.700 a 7.900 + IVA", detail: "Ola Estándar o Completa: hasta 5 olas de 60 usuarios para cubrir hasta 300 personas." };
@@ -5353,6 +5391,14 @@
         return {
           label: quote.main,
           detail: unknownCount ? `Plan y ${unknownCount} add-on${unknownCount === 1 ? "" : "s"} requieren validación comercial.` : quote.detail,
+          plan: quote.main,
+          addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin add-ons adicionales"
+        };
+      }
+      if (/por ola/i.test(quote.main) && wave) {
+        return {
+          label: quote.main,
+          detail: `Referencia por ola. ${wave.note}${addons.length ? " Los add-ons se suman según alcance final." : ""}${unknownCount ? ` ${unknownCount} add-on${unknownCount === 1 ? "" : "s"} queda${unknownCount === 1 ? "" : "n"} a validar.` : ""}`,
           plan: quote.main,
           addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin add-ons adicionales"
         };
@@ -5870,6 +5916,22 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         ];
       }
       if (planKey === "plan2") {
+        if (state.userRange === "medium") {
+          return [
+            { tag: "Mes 1 · Ola 1", title: "Preparación y primera ola Copilot", date: formatDate(start), icon: "diagnostic", desc: "Preparar entorno, comunicación y primeros grupos de Microsoft 365 Copilot.", tasks: ["Confirmar licencias, usuarios y fechas", "Revisar datos, permisos y seguridad", "Activar primera ola con casos por rol"] },
+            { tag: "Mes 2 · Olas 2 y 3", title: "Adopción Copilot por roles", date: formatDate(addMonths(start, 1)), icon: "training", desc: "Escalar formación práctica con nuevas audiencias, manteniendo medición por ola.", tasks: [`Reuniones: ${meeting.toLowerCase()} en ${state.meetingApp}`, `Creación/análisis: ${create.toLowerCase()}`, "Biblioteca de prompts y prácticas guiadas"] },
+            { tag: "Mes 3 · Olas 4 y 5", title: "Medición y expansión controlada", date: formatDate(addMonths(start, 2)), icon: "measurement", desc: "Medir uso, satisfacción y valor percibido antes de seguir ampliando grupos.", tasks: ["Revisión de Copilot Dashboard", "Encuestas por ola", "Ajuste de casos y blockers"] },
+            { tag: "Mes 4 · Olas 6 y 7", title: "Cierre de alcance y continuidad", date: formatDate(addMonths(start, 3)), icon: "spark", desc: "Cerrar despliegue de hasta 300 usuarios y definir continuidad o evolución.", tasks: [`Automatización: ${automate.toLowerCase()}`, "Reporte ejecutivo consolidado", "Recomendación de continuidad o evolución a Nivel 4"] }
+          ];
+        }
+        if (state.userRange === "large") {
+          return [
+            { tag: "Fase 1", title: "Diseño del programa Copilot a escala", date: formatDate(start), icon: "diagnostic", desc: "Validar alcance, audiencias, licencias y gobierno antes de comprometer calendario.", tasks: ["Segmentación de audiencias", "Revisión de gobierno y datos", "Definición de olas y responsables"] },
+            { tag: "Fase 2", title: "Piloto ampliado y primeros casos por rol", date: formatDate(addMonths(start, 1)), icon: "training", desc: "Activar grupos iniciales y ajustar el modelo antes de escalar masivamente.", tasks: [`Casos de comunicación: ${inbox.toLowerCase()}`, `Casos de reuniones: ${meeting.toLowerCase()}`, "Feedback de usuarios y champions"] },
+            { tag: "Fase 3", title: "Escalamiento progresivo", date: formatDate(addMonths(start, 3)), icon: "spark", desc: "Extender Copilot por audiencias, con medición y acompañamiento sostenido.", tasks: ["Olas por rol o área", "Dashboard y reporte ejecutivo", "Backlog de agentes o automatizaciones"] },
+            { tag: "Fase 4", title: "Decisión de continuidad", date: formatDate(addMonths(start, 6)), icon: "measurement", desc: "Cerrar aprendizajes y decidir continuidad como programa extendido o Nivel 4.", tasks: ["Reporte consolidado", "Riesgos y oportunidades", "Recomendación ejecutiva"] }
+          ];
+        }
         return [
           { tag: "Semana 0", title: "Preparación técnica y funcional", date: formatDate(addDays(start, -7)), icon: "diagnostic", desc: "Preparar el entorno y los casos de uso para Microsoft 365 Copilot.", tasks: ["Confirmar licencias, usuarios y fechas", "Revisar datos, permisos, SharePoint y seguridad", "Preparar comunicación y canal de adopción"] },
           { tag: "Semana 1", title: "Comunicación y lanzamiento", date: formatDate(start), icon: "communication", desc: "Activar a los usuarios con mensajes claros y primeros escenarios.", tasks: ["Mensaje de bienvenida", "Biblioteca inicial de prompts", `Primer caso: ${inbox.toLowerCase()}`] },
