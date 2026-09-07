@@ -16,9 +16,9 @@ La app publica una API `POST /api/handoff` para reenviar el payload de la propue
 
 Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_AUTOMATE_HANDOFF_URL` con la URL del trigger HTTP del Flow.
 
-## Precios de add-ons desde Dataverse
+## Precios comerciales desde Dataverse
 
-La app publica una API `GET /api/addon-prices` que consulta Power Automate y reemplaza los precios fallback de los add-ons por valores administrados en Dataverse. Si el Flow o la variable no están configurados, la app conserva los precios fallback hardcodeados en `addOnCatalog()` (no se muestra "A cotizar" salvo que un precio individual no se pueda interpretar como rango USD).
+La app publica una API `GET /api/addon-prices` que consulta Power Automate y reemplaza los precios fallback de add-ons, cargos de modalidad y planes base por valores administrados en Dataverse. Si el Flow o la variable no están configurados, la app conserva los precios fallback hardcodeados en `addOnCatalog()` y `fallbackQuoteForPlan()` (no se muestra "A cotizar" salvo que un precio individual no se pueda interpretar como rango USD).
 
 Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_AUTOMATE_ADDON_PRICES_URL` con la URL del trigger HTTP del Flow creado en el entorno **Possumus - Desarrollo** (`474ab5eb-a1ed-4530-b1c4-d47edde7c659`).
 
@@ -26,7 +26,7 @@ Tabla Dataverse en **Possumus - Desarrollo**: `PreciosAddonsAdopcion` (`pss_Prec
 
 | Campo | Uso |
 | --- | --- |
-| `addon_id` | ID técnico usado por la app, por ejemplo `excel-intermediate`, `delivery-onsite` o `delivery-hybrid` |
+| `addon_id` | ID técnico usado por la app, por ejemplo `excel-intermediate`, `delivery-onsite`, `delivery-hybrid` o `plan1-small` |
 | `nombre` | Nombre visible del add-on |
 | `categoria` | Categoría comercial |
 | `precio_texto` | Texto comercial, por ejemplo `USD 850 + IVA` |
@@ -70,6 +70,19 @@ La app incluye una industria específica para **Energía, servicios eléctricos 
 La pantalla de opcionales separa tres conceptos: **componentes incluidos en el plan base**, **opcionales cotizables** y **no aplica para este plan**. Lo incluido no es un add-on por defecto: no se selecciona, no se suma al precio y se muestra solo para aclarar el alcance base.
 
 La modalidad **virtual** queda incluida en el precio base. Si se selecciona **presencial** o **mixta**, la app suma automáticamente un cargo de modalidad desde el mismo catálogo de add-ons (`delivery-onsite` o `delivery-hybrid`). Estos cargos no aparecen como módulos funcionales para seleccionar: se muestran en el resumen económico y pueden administrarse desde Dataverse como cualquier otro precio de referencia.
+
+Los precios base de los planes también pueden administrarse desde la misma tabla usando estos IDs:
+
+| ID | Uso |
+| --- | --- |
+| `plan0` | P0 / Envisioning IA |
+| `plan1-small` | P1 hasta 45 usuarios |
+| `plan1-medium` | P1 de 46 a 300 usuarios |
+| `plan1-large` | P1 más de 300 usuarios |
+| `plan2-small` | P2 hasta 45 usuarios |
+| `plan2-medium` | P2 de 46 a 300 usuarios |
+| `plan2-large` | P2 más de 300 usuarios |
+| `plan3` | P3 / Productividad Digital + IA |
 
 Cowork se trata como add-on con prerrequisito: solo puede activarse si el cliente tiene Microsoft 365 Copilot activo/trial y un caso concreto para profundizar, o como continuidad posterior a P2. No se ofrece como servicio suelto; se comunica como 3 a 5 sesiones de trabajo guiado. Para escenarios sin licencias o de exploración inicial, la app puede sugerir el **Webinar introductorio: Copilot en 30 minutos**, una entrada liviana de sensibilización con ejemplos generales, moderación y Q&A.
 

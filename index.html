@@ -2897,7 +2897,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.5 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.6 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -5555,7 +5555,32 @@
       if (date.getDate() !== day) date.setDate(0);
       return date.toISOString().slice(0, 10);
     }
-    function quoteForPlan(key, userRange = state.userRange) {
+    function planPriceId(key, userRange = state.userRange) {
+      if (key === "plan0" || key === "plan3") return key;
+      if (key === "plan1" || key === "plan2") {
+        if (userRange === "medium") return `${key}-medium`;
+        if (userRange === "large") return `${key}-large`;
+        return `${key}-small`;
+      }
+      return key;
+    }
+    function planPriceData(key, userRange = state.userRange) {
+      const id = planPriceId(key, userRange);
+      const pricing = addonPriceData(id);
+      return pricing && pricing.active ? pricing : null;
+    }
+    function quoteFromPriceData(pricing, fallback) {
+      if (!pricing) return fallback;
+      return {
+        ...fallback,
+        main: pricing.price || fallback.main,
+        detail: pricing.notes || fallback.detail,
+        priceMinUsd: pricing.priceMinUsd,
+        priceMaxUsd: pricing.priceMaxUsd,
+        priceId: pricing.id
+      };
+    }
+    function fallbackQuoteForPlan(key, userRange = state.userRange) {
       if (key === "plan0") return { main: "USD 3.500", detail: "Precio base del Plan 0. IVA no incluido." };
       if (key === "plan2") {
         if (userRange === "medium") return { main: "USD 5.900 + IVA por ola", detail: "Copilot por olas: hasta 7 olas de 45 usuarios para cubrir hasta 300 personas." };
@@ -5568,6 +5593,9 @@
         return { main: "USD 30.000 + IVA", detail: "Programa anual por olas: hasta 10 olas de 60 usuarios para cubrir hasta 600 colaboradores." };
       }
       return { main: "A cotizar según alcance", detail: "No hay precio base fijo para Plan 3; se cotiza por cantidad de grupos, olas, add-ons y nivel de acompañamiento." };
+    }
+    function quoteForPlan(key, userRange = state.userRange) {
+      return quoteFromPriceData(planPriceData(key, userRange), fallbackQuoteForPlan(key, userRange));
     }
     function parseUsdRange(text) {
       const cleaned = String(text || "").replace(/\./g, "");
@@ -5582,7 +5610,9 @@
     }
     function proposalTotalEstimate(recommendedKey = selectedProposalPlanKey()) {
       const quote = quoteForPlan(recommendedKey);
-      const planRange = parseUsdRange(quote.main);
+      const planRange = quote.priceMinUsd && quote.priceMaxUsd
+        ? { min: quote.priceMinUsd, max: quote.priceMaxUsd }
+        : parseUsdRange(quote.main);
       const addons = pricingItemsForPlan(recommendedKey);
       const wave = adoptionWaveModel(recommendedKey);
       let addonMin = 0;

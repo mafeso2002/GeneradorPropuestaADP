@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.5**
+Versión documentada: **MVP 0.10.6**
 Última actualización funcional: **2026-09-07**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -156,7 +156,7 @@ En propuesta directa, `selectedProposalPlanKey()` devuelve `directPlanKey`; no s
 
 ## 5. Add-ons y precios
 
-Los add-ons se definen en `addOnCatalog()`. Los cargos de modalidad presencial/mixta también usan este catálogo para tomar precio desde Dataverse, pero se filtran con `selectableAddonCatalog()` para no aparecer como add-ons manuales.
+Los add-ons se definen en `addOnCatalog()`. Los cargos de modalidad presencial/mixta y los precios base de planes también usan la misma fuente de precios de Dataverse. Los cargos de modalidad se filtran con `selectableAddonCatalog()` para no aparecer como add-ons manuales.
 
 Estados posibles:
 
@@ -174,6 +174,21 @@ También existe la categoría **Webinars especializados** para consumos puntuale
 En escenarios de Productividad Digital o baja madurez Microsoft 365, los add-ons se priorizan para mostrar primero ordenamiento y adopción base: Arquitectura Teams + SharePoint, Orden documental y trazabilidad, Office Hours, Readiness y Champions. Los webinars quedan disponibles, pero no desplazan los módulos core de adopción.
 
 Los precios pueden venir de Dataverse mediante Power Automate o usar fallback local.
+
+Los planes usan `quoteForPlan()`, que primero busca un precio externo con `planPriceId()` y luego cae a `fallbackQuoteForPlan()` si Dataverse no trae ese ID activo.
+
+IDs de planes base:
+
+| ID | Uso |
+| --- | --- |
+| `plan0` | P0 / Envisioning IA |
+| `plan1-small` | P1 hasta 45 usuarios |
+| `plan1-medium` | P1 de 46 a 300 usuarios |
+| `plan1-large` | P1 más de 300 usuarios |
+| `plan2-small` | P2 hasta 45 usuarios |
+| `plan2-medium` | P2 de 46 a 300 usuarios |
+| `plan2-large` | P2 más de 300 usuarios |
+| `plan3` | P3 / Productividad Digital + IA |
 
 IDs especiales para cargos automáticos de modalidad:
 
