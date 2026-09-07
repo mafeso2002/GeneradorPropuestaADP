@@ -48,7 +48,8 @@ module.exports = async function (context, req) {
     aiInstructions: {
       ...(payload.aiInstructions || {}),
       task: "Comparar comercialmente el plan recomendado contra el plan alternativo. No generar roadmap ni resumen ejecutivo general.",
-      responseFormat: "Responder Markdown con secciones: ## Comparacion comercial, ## Que gana el cliente, ## Riesgos de elegir el menor o mayor, ## Cuando conviene cambiar, ## Recomendacion para el comercial. No inventar precios ni informacion externa."
+      scopeRules: "Comparar usando primaryPlan.scope, primaryPlan.duration, primaryPlan.adoptionWaveModel, alternativePlan.scope, alternativePlan.duration y alternativePlan.adoptionWaveModel. Si alguno usa olas, explicar impacto en calendario, cantidad de usuarios, esfuerzo y precio por ola; no comparar solo por nombre de plan.",
+      responseFormat: "Responder Markdown con secciones: ## Comparacion comercial, ## Que gana el cliente, ## Riesgos de elegir el menor o mayor, ## Cuando conviene cambiar, ## Recomendacion para el comercial. No inventar precios ni informacion externa. Mantener duracion, alcance y modelo de olas exactamente como fueron enviados."
     }
   };
 
@@ -84,4 +85,3 @@ module.exports = async function (context, req) {
         }
   };
 };
-

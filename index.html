@@ -6003,6 +6003,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
     function buildAiRoadmapPayload(recommendedKey = selectedProposalPlanKey()) {
       const plans = planCatalog();
       const decision = planDecision();
+      const wave = adoptionWaveModel(recommendedKey);
       return {
         source: "GeneradorPropuestaADP",
         createdAt: new Date().toISOString(),
@@ -6014,7 +6015,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           recommendedPlanName: plans[recommendedKey].name,
           recommendedPlanDuration: proposalDurationLabel(recommendedKey),
           recommendedPlanScope: proposalScopeDetail(recommendedKey),
-          adoptionWaveModel: adoptionWaveModel(recommendedKey),
+          adoptionWaveModel: wave,
           confidence: decision.confidence,
           confidenceLabel: confidenceLabel(decision.level),
           reasons: decision.reasons,
@@ -6036,7 +6037,10 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         },
         aiInstructions: {
           task: "Personalizar la hoja de ruta comercial y de adopcion para este cliente.",
-          responseFormat: "Responder JSON valido con { summary, items }. items debe tener 4 a 6 etapas con tag, title, date, desc, tasks (3 a 5 bullets), owner, deliverable, risk e icon. Usar los datos del relevamiento; no inventar informacion externa. Mantener fechas y duracion razonables para el plan recomendado."
+          timelineRules: wave
+            ? `Este plan usa modelo de olas: ${wave.title}, ${wave.groups}, duracion ${wave.duration}. La hoja de ruta debe respetar ese calendario, sus olas y el templateRoadmap enviado; no volver a un roadmap generico.`
+            : "La hoja de ruta debe respetar la duracion, alcance y templateRoadmap enviados para el plan seleccionado.",
+          responseFormat: "Responder JSON valido con { summary, items }. items debe tener 4 a 6 etapas con tag, title, date, desc, tasks (3 a 5 bullets), owner, deliverable, risk e icon. Usar los datos del relevamiento; no inventar informacion externa. Mantener fechas, olas, duracion y alcance exactamente consistentes con proposal.recommendedPlanDuration, proposal.recommendedPlanScope, proposal.adoptionWaveModel y proposal.templateRoadmap."
         }
       };
     }
@@ -6395,6 +6399,7 @@ ${location.href}`
       const included = addOnCatalog().filter((item) => includedAddonIdsForPlan(recommendedKey).has(item.id));
       const includeBudgetEstimate = state.includeBudgetEstimate !== false;
       const directMode = state.proposalMode === "direct";
+      const wave = adoptionWaveModel(recommendedKey);
       return {
         includeBudgetEstimate,
         shouldEstimate: includeBudgetEstimate && (directMode || decision.level !== "low"),
@@ -6408,6 +6413,8 @@ ${location.href}`
         baseRange: quote.main,
         baseDetail: quote.detail,
         commercialMode: budgetCommercialMode(recommendedKey, addons, decision),
+        adoptionWaveModel: wave,
+        wavePricingInstruction: wave ? "Si el modelo de olas indica precio por ola, explicitarlo como referencia por ola y no como total cerrado para todo el universo de usuarios." : "",
         selectedAddons: addons.map((item) => ({ title: item.title, price: item.price, priceMinUsd: item.priceMinUsd || null, priceMaxUsd: item.priceMaxUsd || null, notes: item.pricingNotes || "", category: item.category || "Add-on" })),
         includedInPlan: included.map((item) => item.title),
         factors: [

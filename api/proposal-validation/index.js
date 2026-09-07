@@ -220,6 +220,7 @@ module.exports = async function (context, req) {
     aiInstructions: {
       ...(payload.aiInstructions || {}),
       task: "Validar el diagnostico comercial y la consistencia de la propuesta. No generar resumen ejecutivo ni texto para cliente.",
+      scopeRules: "Revisar consistencia entre recommendedPlanDuration, recommendedPlanScope, adoptionWaveModel, quoteDetail, roadmap y presupuesto. Si hay modelo de olas, validar que no se presente precio por ola como total cerrado ni roadmap generico incompatible con las olas.",
       responseFormat: "Responder en JSON valido con: status ('consistent', 'review' o 'risky'), statusLabel, planDecision ('mantener', 'cambiar' o 'validar alternativa'), planComment, missingQuestions (maximo 3), addonReview { keep, remove, add }, risks y commercialRecommendation. Tambien incluir markdownSummary con el mismo contenido en Markdown. No modificar automaticamente nada; solo recomendar."
     }
   };

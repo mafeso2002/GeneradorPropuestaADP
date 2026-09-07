@@ -84,7 +84,8 @@ module.exports = async function (context, req) {
     aiInstructions: {
       ...(payload.aiInstructions || {}),
       task: "Personalizar la hoja de ruta comercial y de adopcion para este cliente. No generar resumen ejecutivo ni comparar planes.",
-      responseFormat: "Responder un JSON valido con { summary, items }. items debe ser un array de 4 a 6 etapas. Cada etapa debe incluir tag, title, date, desc, tasks (3 a 5 bullets), owner, deliverable, risk e icon. Usar solamente los datos del relevamiento y el roadmap base; no inventar informacion externa."
+      timelineRules: "Respetar estrictamente proposal.recommendedPlanDuration, proposal.recommendedPlanScope, proposal.adoptionWaveModel y proposal.templateRoadmap. Si existe adoptionWaveModel, el roadmap debe mantener ese esquema de olas, cantidad de olas, duracion y segmentacion; no reemplazarlo por un calendario generico.",
+      responseFormat: "Responder un JSON valido con { summary, items }. items debe ser un array de 4 a 6 etapas. Cada etapa debe incluir tag, title, date, desc, tasks (3 a 5 bullets), owner, deliverable, risk e icon. Usar solamente los datos del relevamiento y el roadmap base; no inventar informacion externa. Las fechas, tags y descripciones deben quedar alineadas con las olas y el alcance enviados."
     }
   };
 

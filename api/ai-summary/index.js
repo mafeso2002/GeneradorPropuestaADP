@@ -371,9 +371,10 @@ module.exports = async function (context, req) {
   const includeBudgetEstimate = payload.proposal && payload.proposal.budgetEstimateInput
     ? payload.proposal.budgetEstimateInput.includeBudgetEstimate !== false
     : true;
+  const waveInstruction = "Si proposal.adoptionWaveModel o proposal.budgetEstimateInput.adoptionWaveModel existe, explicar el alcance con ese modelo de olas. Para P1 con precio por ola, no presentar el rango como total cerrado para todos los usuarios; decir explicitamente que es referencia por ola y que el total final depende de cantidad de olas/add-ons.";
   const responseFormat = includeBudgetEstimate
-    ? "Devolver texto en Markdown con secciones: ## Contexto de la empresa, ## Lectura comercial, ## Recomendacion Possumus, ## Estimacion asistida de presupuesto, ## Argumentos para la reunion. En Contexto de la empresa incluir rubro, productos/servicios, escala si esta sustentada y canales/contactos publicos si existen. En Estimacion asistida de presupuesto usar proposal.budgetEstimateInput: si shouldEstimate es false, no cerrar rango y pedir validacion con preventa/adopcion; si es true, indicar rango sugerido, modalidad comercial, supuestos y alertas. No inventar precios cerrados para add-ons a cotizar. La ultima seccion debe usar bullets."
-    : "Devolver texto en Markdown con secciones: ## Contexto de la empresa, ## Lectura comercial, ## Recomendacion Possumus, ## Argumentos para la reunion. En Contexto de la empresa incluir rubro, productos/servicios, escala si esta sustentada y canales/contactos publicos si existen. No incluir estimacion de presupuesto porque el comercial la desactivo. La ultima seccion debe usar bullets.";
+    ? `Devolver texto en Markdown con secciones: ## Contexto de la empresa, ## Lectura comercial, ## Recomendacion Possumus, ## Estimacion asistida de presupuesto, ## Argumentos para la reunion. En Contexto de la empresa incluir rubro, productos/servicios, escala si esta sustentada y canales/contactos publicos si existen. En Recomendacion Possumus respetar proposal.recommendedPlanDuration, proposal.recommendedPlanScope y adoptionWaveModel. En Estimacion asistida de presupuesto usar proposal.budgetEstimateInput: si shouldEstimate es false, no cerrar rango y pedir validacion con preventa/adopcion; si es true, indicar rango sugerido, modalidad comercial, supuestos y alertas. ${waveInstruction} No inventar precios cerrados para add-ons a cotizar. La ultima seccion debe usar bullets.`
+    : `Devolver texto en Markdown con secciones: ## Contexto de la empresa, ## Lectura comercial, ## Recomendacion Possumus, ## Argumentos para la reunion. En Contexto de la empresa incluir rubro, productos/servicios, escala si esta sustentada y canales/contactos publicos si existen. En Recomendacion Possumus respetar proposal.recommendedPlanDuration, proposal.recommendedPlanScope y adoptionWaveModel. ${waveInstruction} No incluir estimacion de presupuesto porque el comercial la desactivo. La ultima seccion debe usar bullets.`;
   const enrichedPayload = {
     ...payload,
     companyResearch,
@@ -381,6 +382,7 @@ module.exports = async function (context, req) {
       ...(payload.aiInstructions || {}),
       useCompanyResearch: companyResearch.status === "found",
       strictGrounding: "Usar companyResearch solo si status es found y tiene sources del sitio oficial probable. No usar Wikipedia, redes sociales ni fuentes que no coincidan claramente con la empresa. Si no hay datos sobre tamano, empleados, facturacion o contactos comerciales, decir 'no detectado en fuentes publicas' en vez de inventar.",
+      adoptionScopeRules: "No recalcular ni simplificar el alcance. Usar proposal.recommendedPlanDuration, proposal.recommendedPlanScope, proposal.adoptionWaveModel y proposal.budgetEstimateInput exactamente como contexto comercial principal.",
       responseFormat
     }
   };
