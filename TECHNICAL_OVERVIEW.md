@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.9.9**
+Versión documentada: **MVP 0.10.0**
 Última actualización funcional: **2026-09-07**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -99,6 +99,8 @@ La lógica interna conserva las claves `plan0`, `plan1`, `plan2`, `plan3` para n
 P1 se trata como iniciativa de adopción, no como training aislado. El catálogo, la propuesta final, el PDF, el roadmap y las instrucciones de IA deben presentarlo por pilares: diagnóstico de madurez, comunicación y convocatoria, formación aplicada al trabajo real, acompañamiento/refuerzos y medición ejecutiva por ola.
 
 La app incluye guardrails de progresión: si el cliente intenta saltar etapas (por ejemplo, pedir Cowork/agentes sin adopción Copilot, o pedir Copilot sin base Microsoft 365), la propuesta no bloquea la oportunidad pero muestra una lectura comercial con el prerrequisito y el escalón recomendado.
+
+P0 / Envisioning IA queda deliberadamente acotado para preservar su función exploratoria. Sus únicos add-ons seleccionables son **Casos para líderes**, **Readiness técnico** y **Webinar introductorio: Copilot en 30 minutos**. Todo otro módulo aparece como no disponible por alcance; si el cliente lo necesita, corresponde evaluar P1, P2 o P3.
 
 La industria incluye una opción específica para **Energía, servicios eléctricos y construcción**, útil para clientes con obras, servicios técnicos, compras, documentación operativa, depósito y oficina técnica.
 

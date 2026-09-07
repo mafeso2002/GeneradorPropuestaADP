@@ -2897,7 +2897,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.9.9 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.0 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -4112,6 +4112,14 @@
       }
       return included;
     }
+    function allowedAddonIdsForPlan(planKey = selectedProposalPlanKey()) {
+      if (planKey === "plan0") return new Set(["leaders", "readiness", "copilot-intro-webinar"]);
+      return null;
+    }
+    function isAddonAllowedForPlan(addon, planKey = selectedProposalPlanKey()) {
+      const allowed = allowedAddonIdsForPlan(planKey);
+      return !allowed || allowed.has(addon.id);
+    }
     function suggestedAddonIds(planKey = selectedProposalPlanKey()) {
       const ids = new Set();
       const included = includedAddonIdsForPlan(planKey);
@@ -4200,6 +4208,7 @@
     }
     function isAddonEnabled(addon, planKey = selectedProposalPlanKey()) {
       if (!addon) return false;
+      if (!isAddonAllowedForPlan(addon, planKey)) return false;
       if (addon.id === "cowork") return coworkEligibility(planKey).canSelect;
       return !addon.requiresCopilot || hasCopilotLicense();
     }
@@ -4276,6 +4285,7 @@
     }
     function addonRequirement(addon, stateName, planKey = selectedProposalPlanKey()) {
       if (stateName === "included") return "Ya cubierto por el plan base";
+      if (!isAddonAllowedForPlan(addon, planKey)) return "P0 se mantiene acotado. Si necesitás este módulo, conviene cambiar a P1, P2 o P3.";
       if (addon.id === "cowork") return coworkEligibility(planKey).reason;
       if (stateName === "unavailable") return "Requiere licencia/trial de Microsoft 365 Copilot";
       return addon.requiresCopilot ? "Requiere licencia Copilot" : addon.requirement;
@@ -4331,6 +4341,13 @@
           <div class="addon-price-row"><span>Plan base</span><strong>${quote.main}</strong></div>
           ${selected.length ? selected.map((addon) => `<div class="addon-price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("") : `<div class="addon-price-row"><span>Add-ons seleccionados</span><strong>Sin adicionales</strong></div>`}
         </div>
+      </div>`;
+    }
+    function renderAddonPolicyNotice(planKey) {
+      if (planKey !== "plan0") return "";
+      return `<div class="addon-adjustment-notice">
+        <strong>P0 mantiene add-ons acotados</strong>
+        En Envisioning IA solo se pueden sumar Casos para líderes, Readiness técnico y Webinar introductorio: Copilot en 30 minutos. Si el cliente pide adopción Microsoft 365, casos aplicados, agentes, Cowork o acompañamiento extendido, conviene cambiar a P1, P2 o P3.
       </div>`;
     }
     function directDefaultsForPlan(planKey) {
@@ -4939,6 +4956,7 @@
             </div>
           </div>
           ${renderAddonPriceSummary(planKey)}
+          ${renderAddonPolicyNotice(planKey)}
           ${renderAddonSection("Add-ons sugeridos para este caso", "Se marcan por las respuestas del relevamiento y el árbol de decisión.", suggested, selected, planKey, true)}
           ${availableByCategory.map(([category, addons]) => renderAddonSection(category, "Disponibles para sumar si el comercial quiere ampliar alcance.", addons, selected, planKey)).join("")}
           ${renderAddonSection("Ya incluido en el plan probable", "No lo cotices como adicional salvo que el alcance sea mayor al previsto.", includedAddons, selected, planKey)}
@@ -6784,7 +6802,7 @@ ${location.href}`
             "## Lectura comercial",
             "Madurez, dolores principales, confianza del algoritmo y oportunidad detectada.",
             "## Recomendacion Possumus",
-            "Plan recomendado, por que aplica, alternativas si la confianza es media/baja y como se relaciona con la realidad del cliente. Respetar progressionGuidance: si hay atajos o prerrequisitos, explicarlos como secuencia comercial sin invalidar la oportunidad. Para P1/Productividad Digital, no presentarlo como capacitacion puntual: describirlo como programa de adopcion con diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion. Si aparece Cowork, tratarlo como add-on con prerrequisito de Microsoft 365 Copilot activo/trial y 3 a 5 sesiones; si aparecen webinars especializados, presentarlos como consumo puntual por tecnologia, no como programa de adopcion.",
+            "Plan recomendado, por que aplica, alternativas si la confianza es media/baja y como se relaciona con la realidad del cliente. Respetar progressionGuidance: si hay atajos o prerrequisitos, explicarlos como secuencia comercial sin invalidar la oportunidad. Para P0/Envisioning IA, mantener add-ons acotados a Casos para lideres, Readiness tecnico y Webinar introductorio Copilot en 30 minutos; si el cliente necesita mas, sugerir cambio de plan. Para P1/Productividad Digital, no presentarlo como capacitacion puntual: describirlo como programa de adopcion con diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion. Si aparece Cowork, tratarlo como add-on con prerrequisito de Microsoft 365 Copilot activo/trial y 3 a 5 sesiones; si aparecen webinars especializados, presentarlos como consumo puntual por tecnologia, no como programa de adopcion.",
             ...(state.includeBudgetEstimate !== false ? [
               "## Estimacion asistida de presupuesto",
               "Rango recomendado, modalidad comercial sugerida, supuestos y alertas. Si la confianza es baja, no cerrar rango y pedir validacion con preventa/adopcion."
