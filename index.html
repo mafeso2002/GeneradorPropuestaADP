@@ -5817,11 +5817,28 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         ];
       }
       if (planKey === "plan1") {
+        const wave = adoptionWaveModel(planKey);
+        if (state.userRange === "small") {
+          return [
+            { tag: "Semana 1", title: "Diagnóstico y segmentación express", date: formatDate(start), icon: "diagnostic", desc: "Relevar madurez digital, validar área prioritaria y preparar grupos de trabajo.", tasks: ["Encuesta breve de madurez digital", "Validación de audiencia y responsables", "Definición de 2 a 3 grupos de trabajo"] },
+            { tag: "Semana 2", title: "Formación aplicada Microsoft 365", date: formatDate(addDays(start, 7)), icon: "training", desc: "Trabajar hábitos clave de productividad digital con ejercicios prácticos.", tasks: [`Comunicación y correo: ${inbox.toLowerCase()}`, `Colaboración y reuniones: ${meeting.toLowerCase()}`, "Archivos, tareas y Copilot Chat introductorio"] },
+            { tag: "Semana 3", title: "Activación y acompañamiento", date: formatDate(addDays(start, 14)), icon: "communication", desc: "Acompañar la adopción inicial con materiales, recordatorios y buenas prácticas.", tasks: ["Materiales de aprendizaje y quick wins", "Office hours o espacio de consultas", "Refuerzo de hábitos por área"] },
+            { tag: "Semana 4", title: "Medición y cierre de ola", date: formatDate(addDays(start, 21)), icon: "measurement", desc: "Medir participación, satisfacción y próximos pasos de adopción.", tasks: ["Encuesta de satisfacción", "Reporte ejecutivo de resultados", "Recomendación de siguiente ola o evolución a IA"] }
+          ];
+        }
+        if (state.userRange === "medium") {
+          return [
+            { tag: "Mes 1 · Ola 1", title: "Diagnóstico, diseño y primera ola", date: formatDate(start), icon: "diagnostic", desc: `Preparar el modelo de olas para ${wave ? wave.users.toLowerCase() : "el alcance definido"} y activar los primeros grupos.`, tasks: ["Diagnóstico de madurez y segmentación de audiencias", "Priorización de áreas, perfiles y calendario", "Primera ola de formación y quick wins"] },
+            { tag: "Mes 2 · Olas 2 y 3", title: "Escalamiento por áreas o perfiles", date: formatDate(addMonths(start, 1)), icon: "training", desc: "Replicar la adopción con nuevas audiencias, manteniendo grupos manejables y seguimiento por ola.", tasks: [`Escenarios de comunicación: ${inbox.toLowerCase()}`, `Escenarios de reuniones: ${meeting.toLowerCase()}`, "Ajuste de contenidos según feedback de la ola anterior"] },
+            { tag: "Mes 3 · Olas 4 y 5", title: "Consolidación y medición transversal", date: formatDate(addMonths(start, 2)), icon: "measurement", desc: "Cerrar el despliegue de hasta 300 usuarios con medición y recomendaciones de continuidad.", tasks: ["Medición de participación y satisfacción por ola", "Reporte ejecutivo consolidado", "Recomendación de continuidad, champions o evolución a IA"] },
+            { tag: "Cierre · 90 días", title: "Roadmap de continuidad", date: formatDate(addDays(start, 85)), icon: "spark", desc: "Ordenar oportunidades detectadas para sostener hábitos digitales o avanzar a Copilot.", tasks: [`Oportunidades de creación/análisis: ${create.toLowerCase()}`, `Procesos repetitivos detectados: ${automate.toLowerCase()}`, "Plan de siguiente etapa y backlog de mejoras"] }
+          ];
+        }
         return [
-          { tag: "Etapa 1", title: "Diagnóstico de madurez digital", date: formatDate(start), icon: "diagnostic", desc: "Relevar uso actual de Microsoft 365, brechas y audiencias prioritarias.", tasks: ["Encuestas de madurez y entrevistas", "Revisión de uso de Outlook, Teams, OneDrive y SharePoint", "Segmentación de grupos y KPIs de adopción"] },
-          { tag: "Etapa 2", title: "Formación Microsoft 365", date: formatDate(addDays(start, 21)), icon: "training", desc: "Consolidar hábitos digitales con sesiones prácticas por grupo.", tasks: [`Comunicación y correo: ${inbox.toLowerCase()}`, `Colaboración y reuniones: ${meeting.toLowerCase()}`, "Archivos, tareas, formularios y Copilot Chat introductorio"] },
-          { tag: "Etapa 3", title: "Comunicación y activación", date: formatDate(addDays(start, 45)), icon: "communication", desc: "Acompañar el cambio con campañas, recursos y quick wins.", tasks: ["Campaña de lanzamiento y recordatorios", "Materiales de aprendizaje y buenas prácticas", "Historias de éxito y champions"] },
-          { tag: "Etapa 4", title: "Medición de adopción", date: formatDate(addDays(start, 75)), icon: "measurement", desc: "Medir participación, satisfacción y avance por ola.", tasks: ["Reporte ejecutivo de adopción", "Encuesta de satisfacción", "Recomendación de siguiente ola o evolución a IA"] }
+          { tag: "Trimestre 1 · Olas 1-2", title: "Diagnóstico y primeras olas", date: formatDate(start), icon: "diagnostic", desc: "Diseñar el calendario anual, segmentar audiencias y activar los primeros grupos.", tasks: ["Diagnóstico de madurez digital", "Priorización de áreas y referentes", "Primeras olas de formación Microsoft 365"] },
+          { tag: "Trimestre 2 · Olas 3-5", title: "Escalamiento de hábitos digitales", date: formatDate(addMonths(start, 3)), icon: "training", desc: "Extender la adopción por áreas o perfiles, incorporando aprendizajes de las olas iniciales.", tasks: [`Comunicación y correo: ${inbox.toLowerCase()}`, `Colaboración y reuniones: ${meeting.toLowerCase()}`, "Ajuste de contenidos y materiales por audiencia"] },
+          { tag: "Trimestre 3 · Olas 6-8", title: "Consolidación y champions", date: formatDate(addMonths(start, 6)), icon: "communication", desc: "Sostener la adopción con referentes, comunicación y seguimiento de buenas prácticas.", tasks: ["Activación de champions o referentes", "Campañas de refuerzo y quick wins", "Office hours o espacios de consulta"] },
+          { tag: "Trimestre 4 · Olas 9-10", title: "Medición anual y evolución", date: formatDate(addMonths(start, 9)), icon: "measurement", desc: "Cerrar el programa anual con medición ejecutiva y recomendación de evolución.", tasks: ["Reporte anual de adopción", "Encuesta de satisfacción y aprendizajes", "Roadmap de continuidad o evolución a IA/Copilot"] }
         ];
       }
       if (planKey === "plan2") {
