@@ -306,6 +306,8 @@ Endpoints implementados:
 | `/api/ai-roadmap` | `POWER_AUTOMATE_AI_ROADMAP_URL` | Generar roadmap personalizado |
 | `/api/plan-comparison` | `POWER_AUTOMATE_PLAN_COMPARISON_URL` | Comparar planes |
 
+Las utilidades comunes de las Functions (`fetchWithTimeout`, `findText`, `extractJsonObject`) viven centralizadas en `api/shared/flow-utils.js` y se importan con `require("../shared/flow-utils")` para evitar copias divergentes. Todas las llamadas a Power Automate usan timeout (AbortController) y manejo de error. Las respuestas ya no exponen el objeto `raw` crudo del Flow al frontend.
+
 ## 8. PDF y envío de propuesta
 
 El PDF se genera desde `buildPrintableProposal()` abriendo una ventana imprimible.

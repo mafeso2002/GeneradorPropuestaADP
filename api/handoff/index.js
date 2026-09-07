@@ -1,12 +1,4 @@
-async function fetchWithTimeout(url, options, timeoutMs = 15000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, { ...options, signal: controller.signal });
-  } finally {
-    clearTimeout(timer);
-  }
-}
+const { fetchWithTimeout } = require("../shared/flow-utils");
 
 module.exports = async function (context, req) {
   const flowUrl = process.env.POWER_AUTOMATE_HANDOFF_URL;

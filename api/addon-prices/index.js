@@ -1,3 +1,5 @@
+const { fetchWithTimeout } = require("../shared/flow-utils");
+
 function normalizeRow(row) {
   if (!row || typeof row !== "object") return null;
   const boolValue = (value) => value === true || value === "true" || value === "True" || value === "sí" || value === "Si" || value === "si" || value === 1 || value === "1";
@@ -45,16 +47,6 @@ function findRows(value, depth = 0) {
     if (rows.length) return rows;
   }
   return [];
-}
-
-async function fetchWithTimeout(url, options, timeoutMs = 15000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, { ...options, signal: controller.signal });
-  } finally {
-    clearTimeout(timer);
-  }
 }
 
 module.exports = async function (context, req) {

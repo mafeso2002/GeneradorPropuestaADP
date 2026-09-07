@@ -1,54 +1,4 @@
-async function fetchWithTimeout(url, options, timeoutMs = 60000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, { ...options, signal: controller.signal });
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-function findText(value) {
-  if (!value) return "";
-  if (typeof value === "string") return value;
-  if (Array.isArray(value)) return value.map(findText).find(Boolean) || "";
-  if (typeof value !== "object") return "";
-
-  const preferredKeys = ["markdownSummary", "summary", "comparison", "text", "output", "response", "result", "predictionOutput", "generatedText", "answer"];
-  for (const key of preferredKeys) {
-    const found = findText(value[key]);
-    if (found) return found;
-  }
-
-  return Object.values(value)
-    .map(findText)
-    .filter((item) => item && item.length > 30)
-    .sort((a, b) => b.length - a.length)[0] || "";
-}
-
-function extractJsonObject(text) {
-  const value = String(text || "").trim();
-  if (!value) return null;
-
-  const fenced = value.match(/```(?:json)?\s*([\s\S]*?)```/i);
-  const candidates = fenced ? [fenced[1], value] : [value];
-  for (const candidate of candidates) {
-    try {
-      return JSON.parse(candidate);
-    } catch (error) {
-      const start = candidate.indexOf("{");
-      const end = candidate.lastIndexOf("}");
-      if (start !== -1 && end > start) {
-        try {
-          return JSON.parse(candidate.slice(start, end + 1));
-        } catch (innerError) {
-          // Continue trying other candidates.
-        }
-      }
-    }
-  }
-  return null;
-}
+const { fetchWithTimeout, findText, extractJsonObject } = require("../shared/flow-utils");
 
 function findRoadmap(value) {
   if (!value || typeof value !== "object") return null;
@@ -127,8 +77,7 @@ module.exports = async function (context, req) {
             items: hasItems ? parsed.items : [],
             fallbackRequired: !hasItems,
             message: hasItems ? "" : "El Flow respondió, pero no devolvió etapas de roadmap en JSON.",
-            source: process.env.POWER_AUTOMATE_AI_ROADMAP_URL ? "Power Automate AI Roadmap" : "Power Automate AI",
-            raw: responseBody
+            source: process.env.POWER_AUTOMATE_AI_ROADMAP_URL ? "Power Automate AI Roadmap" : "Power Automate AI"
           }
         : {
             error: (responseBody && responseBody.error) || `Power Automate respondio ${flowResponse.status}`

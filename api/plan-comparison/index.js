@@ -1,30 +1,4 @@
-function findText(value) {
-  if (!value) return "";
-  if (typeof value === "string") return value;
-  if (Array.isArray(value)) return value.map(findText).find(Boolean) || "";
-  if (typeof value !== "object") return "";
-
-  const preferredKeys = ["markdownSummary", "summary", "comparison", "text", "output", "response", "result", "predictionOutput", "generatedText", "answer"];
-  for (const key of preferredKeys) {
-    const found = findText(value[key]);
-    if (found) return found;
-  }
-
-  return Object.values(value)
-    .map(findText)
-    .filter((item) => item && item.length > 30)
-    .sort((a, b) => b.length - a.length)[0] || "";
-}
-
-async function fetchWithTimeout(url, options, timeoutMs = 60000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, { ...options, signal: controller.signal });
-  } finally {
-    clearTimeout(timer);
-  }
-}
+const { fetchWithTimeout, findText } = require("../shared/flow-utils");
 
 module.exports = async function (context, req) {
   const flowUrl = process.env.POWER_AUTOMATE_PLAN_COMPARISON_URL || process.env.POWER_AUTOMATE_AI_SUMMARY_URL;
@@ -68,7 +42,7 @@ module.exports = async function (context, req) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(enrichedPayload)
-    });
+    }, 60000);
 
     const responseText = await flowResponse.text();
     let responseBody;
@@ -88,8 +62,7 @@ module.exports = async function (context, req) {
             summary,
             fallbackRequired: !summary,
             message: summary ? "" : "El Flow respondió, pero no devolvió una comparación utilizable.",
-            source: process.env.POWER_AUTOMATE_PLAN_COMPARISON_URL ? "Power Automate Plan Comparison" : "Power Automate AI",
-            raw: responseBody
+            source: process.env.POWER_AUTOMATE_PLAN_COMPARISON_URL ? "Power Automate Plan Comparison" : "Power Automate AI"
           }
         : {
             error: (responseBody && responseBody.error) || `Power Automate respondio ${flowResponse.status}`

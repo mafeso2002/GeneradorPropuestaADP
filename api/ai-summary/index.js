@@ -1,3 +1,5 @@
+const { fetchWithTimeout: postFlow, findText } = require("../shared/flow-utils");
+
 function cleanText(value, maxLength = 900) {
   return String(value || "")
     .replace(/<[^>]+>/g, " ")
@@ -426,7 +428,7 @@ module.exports = async function (context, req) {
   let flowResponse;
   let responseText;
   try {
-    flowResponse = await fetchWithTimeout(flowUrl, {
+    flowResponse = await postFlow(flowUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(enrichedPayload)
@@ -454,38 +456,7 @@ module.exports = async function (context, req) {
     responseBody = { summary: responseText };
   }
 
-  function findSummary(value) {
-    if (!value) return "";
-    if (typeof value === "string") return value;
-    if (Array.isArray(value)) {
-      return value.map(findSummary).find(Boolean) || "";
-    }
-    if (typeof value !== "object") return "";
-
-    const preferredKeys = [
-      "markdownSummary",
-      "summary",
-      "comparison",
-      "text",
-      "output",
-      "response",
-      "result",
-      "predictionOutput",
-      "generatedText",
-      "answer"
-    ];
-    for (const key of preferredKeys) {
-      const found = findSummary(value[key]);
-      if (found) return found;
-    }
-
-    return Object.values(value)
-      .map(findSummary)
-      .filter((item) => item && item.length > 30)
-      .sort((a, b) => b.length - a.length)[0] || "";
-  }
-
-  const summary = findSummary(responseBody);
+  const summary = findText(responseBody);
 
   context.res = {
     status: flowResponse.ok ? 200 : 502,
@@ -493,8 +464,7 @@ module.exports = async function (context, req) {
     body: flowResponse.ok
       ? {
           summary: typeof summary === "string" ? summary : JSON.stringify(summary),
-          companyResearch,
-          raw: responseBody
+          companyResearch
         }
       : {
           error: responseBody.error || responseText || `Power Automate respondio ${flowResponse.status}`
