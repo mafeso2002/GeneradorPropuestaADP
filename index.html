@@ -5038,8 +5038,7 @@
           ${formatAiSummaryText(summary)}
         </div>` : ""}
         <div class="validation-actions">
-          ${consistent ? `<button class="btn action-mail" id="validationGenerateBtn"><span class="btn-icon">${iconSvg("proposal-doc")}</span>Generar propuesta</button>
-          <button class="btn ghost" id="validateDiagnosisBtn"><span class="btn-icon">${iconSvg("spark")}</span>Revalidar diagnóstico</button>` : `<button class="btn action-ai" id="validateDiagnosisBtn"><span class="btn-icon">${iconSvg("spark")}</span>${summary ? "Revalidar diagnóstico" : "Validar diagnóstico con IA"}</button>
+          ${consistent ? `<button class="btn ghost" id="validateDiagnosisBtn"><span class="btn-icon">${iconSvg("spark")}</span>Revalidar diagnóstico</button>` : `<button class="btn action-ai" id="validateDiagnosisBtn"><span class="btn-icon">${iconSvg("spark")}</span>${summary ? "Revalidar diagnóstico" : "Validar diagnóstico con IA"}</button>
           ${summary ? `<button class="btn" id="editFromValidationBtn">Editar respuestas</button>
           ${changes.add.length || changes.remove.length ? `<button class="btn action-mail" id="applyValidationAddonsBtn">Aplicar cambios de add-ons</button>` : ""}` : ""}`}
         </div>
@@ -5047,7 +5046,6 @@
       </div>`;
       $("validationNotes").addEventListener("input", (event) => { state.validationNotes = event.target.value; });
       if ($("validateDiagnosisBtn")) $("validateDiagnosisBtn").addEventListener("click", validateDiagnosisWithAi);
-      if ($("validationGenerateBtn")) $("validationGenerateBtn").addEventListener("click", openConfirmProposalModal);
       if ($("editFromValidationBtn")) $("editFromValidationBtn").addEventListener("click", () => {
         currentStep = stepIndexByKey("qualification");
         renderStep();
