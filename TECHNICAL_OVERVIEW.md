@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.1**
+Versión documentada: **MVP 0.10.2**
 Última actualización funcional: **2026-09-07**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -103,6 +103,8 @@ La app incluye guardrails de progresión: si el cliente intenta saltar etapas (p
 P0 / Envisioning IA queda deliberadamente acotado para preservar su función exploratoria. Sus únicos add-ons seleccionables son **Casos para líderes**, **Readiness técnico** y **Webinar introductorio: Copilot en 30 minutos**. Todo otro módulo aparece como no disponible por alcance; si el cliente lo necesita, corresponde evaluar P1, P2 o P3.
 
 P1 / Productividad Digital también usa add-ons acotados para no duplicar lo que ya cubre el programa base. Solo quedan seleccionables **Readiness técnico**, **Excel intermedio**, **Excel avanzado** y **Módulo a medida de herramienta puntual**. El resto queda no disponible por alcance o como señal para ampliar el programa/cambiar a P2 o P3.
+
+P2 / IA aplicada al trabajo permite solo add-ons de profundización Copilot: **Cowork y Copilot**, **Agents & Cowork**, **Agentes a medida con Copilot Studio**, **Webinar especializado: agentes**, **Webinar especializado: agentes en SharePoint** y **Webinar especializado: notebooks y funcionalidades Copilot**. Casos por rol, Prompt Library, Copilot en Excel y Dashboard se consideran incluidos en el plan base.
 
 La industria incluye una opción específica para **Energía, servicios eléctricos y construcción**, útil para clientes con obras, servicios técnicos, compras, documentación operativa, depósito y oficina técnica.
 

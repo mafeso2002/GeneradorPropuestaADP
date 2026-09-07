@@ -61,6 +61,8 @@ En **P0 / Envisioning IA** los add-ons quedan intencionalmente acotados para no 
 
 En **P1 / Productividad Digital** los add-ons también quedan simplificados: solo **Readiness técnico**, **Excel intermedio**, **Excel avanzado** y **Módulo a medida de herramienta puntual**. El resto se considera incluido en el programa base, innecesario para este nivel, o señal de que conviene ampliar alcance/cambiar a P2 o P3.
 
+En **P2 / IA aplicada al trabajo** los add-ons se limitan a profundizaciones de Copilot: **Cowork y Copilot**, **Agents & Cowork**, **Agentes a medida con Copilot Studio**, **Webinar especializado: agentes**, **Webinar especializado: agentes en SharePoint** y **Webinar especializado: notebooks y funcionalidades Copilot**. Casos por rol, Prompt Library, Copilot en Excel y Dashboard ya quedan incluidos en el plan base.
+
 La app incluye una industria específica para **Energía, servicios eléctricos y construcción**, pensada para casos con obras, servicios técnicos, oficina técnica, compras, depósito y documentación operativa.
 
 La pantalla de add-ons muestra el plan probable y separa los módulos entre sugeridos para el caso, disponibles para ampliar alcance, ya incluidos en el plan y no disponibles por prerrequisito. Esto evita cotizar como adicional una actividad que ya forma parte del plan base.
