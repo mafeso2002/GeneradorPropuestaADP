@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.9.7**
+Versión documentada: **MVP 0.9.8**
 Última actualización funcional: **2026-09-07**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -40,6 +40,7 @@ No hay framework frontend ni build step obligatorio. La app corre como HTML/CSS/
 2. En modo diagnóstico, carga compañía y fecha estimada.
 3. Completa un wizard de diagnóstico:
    - contexto del cliente;
+   - referente del cliente, opcional, capturado en el inicio;
    - alcance de usuarios;
    - readiness y oportunidad;
    - diagnóstico operativo Microsoft 365;
@@ -99,6 +100,8 @@ P1 se trata como iniciativa de adopción, no como training aislado. El catálogo
 
 La app incluye guardrails de progresión: si el cliente intenta saltar etapas (por ejemplo, pedir Cowork/agentes sin adopción Copilot, o pedir Copilot sin base Microsoft 365), la propuesta no bloquea la oportunidad pero muestra una lectura comercial con el prerrequisito y el escalón recomendado.
 
+La industria incluye una opción específica para **Energía, servicios eléctricos y construcción**, útil para clientes con obras, servicios técnicos, compras, documentación operativa, depósito y oficina técnica.
+
 Variables principales del scoring:
 
 - objetivo comercial;
@@ -155,6 +158,8 @@ Estados posibles:
 Cowork tiene una regla especial: no se ofrece suelto ni reemplaza el plan base. Solo queda seleccionable cuando hay Microsoft 365 Copilot activo/trial y señales mínimas de adopción o casos concretos; se comunica como add-on de 3 a 5 sesiones o como siguiente paso posterior a P2. Para clientes sin licencias o en exploración inicial, se incorporó el **Webinar introductorio: Copilot en 30 minutos** como entrada liviana de sensibilización masiva con ejemplos generales, moderación y Q&A.
 
 También existe la categoría **Webinars especializados** para consumos puntuales por tecnología: agentes, agentes en SharePoint, notebooks y funcionalidades específicas de Copilot. Estos webinars no reemplazan un plan de adopción; ayudan a profundizar un tema cuando el cliente pide mayor detalle sin iniciar un programa completo.
+
+En escenarios de Productividad Digital o baja madurez Microsoft 365, los add-ons se priorizan para mostrar primero ordenamiento y adopción base: Arquitectura Teams + SharePoint, Orden documental y trazabilidad, Office Hours, Readiness y Champions. Los webinars quedan disponibles, pero no desplazan los módulos core de adopción.
 
 Los precios pueden venir de Dataverse mediante Power Automate o usar fallback local.
 

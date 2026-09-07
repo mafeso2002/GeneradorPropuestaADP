@@ -2897,7 +2897,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.9.5 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.9.8 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -2959,6 +2959,10 @@
           <div>
             <label for="startDate">Fecha esperada de inicio</label>
             <input id="startDate" type="date">
+          </div>
+          <div>
+            <label for="clientContact">Referente del cliente <span style="font-weight:500;color:var(--cp-text-muted)">(opcional)</span></label>
+            <input id="clientContact" placeholder="Ej.: Sergio · Operaciones">
           </div>
         </div>
         <div class="toolbar">
@@ -3163,6 +3167,7 @@
     const industries = [
       ["healthcare", "Salud y clínicas", "El cliente atiende pacientes y necesita reducir carga administrativa, agenda, documentación y seguimiento.", "health"],
       ["professional", "Servicios profesionales", "El cliente vende conocimiento o servicios por proyecto y busca acelerar entregables, reuniones y comunicaciones.", "services"],
+      ["energy", "Energía, servicios eléctricos y construcción", "El cliente coordina obras, servicios técnicos, compras, documentación operativa, depósitos y equipos de campo.", "manufacturing"],
       ["retail", "Retail y e-commerce", "El cliente gestiona tiendas, operación comercial, inventario, campañas, atención y coordinación de equipos.", "retail"],
       ["manufacturing", "Manufactura y mayorista", "El cliente coordina producción, compras, logística, proveedores, stock y reportes operativos.", "manufacturing"],
       ["financial", "Servicios financieros y seguros", "El cliente trabaja con clientes, pólizas, cotizaciones, riesgos, cumplimiento y documentación sensible.", "financial"],
@@ -3176,6 +3181,12 @@
       ["RR. HH.", "hr"],
       ["Marketing", "marketing"],
       ["Atención al cliente", "support"],
+      ["Administración", "proposal-doc"],
+      ["Compras", "financial"],
+      ["Oficina Técnica", "services"],
+      ["Depósito", "manufacturing"],
+      ["Tesorería", "financial"],
+      ["Cuentas Corrientes", "financial"],
       ["Gestión de proyectos", "projects"],
       ["Diseño o creatividad", "creative"]
     ];
@@ -3259,7 +3270,7 @@
         help: "Ayuda a orientar el caso de valor y el primer entregable.",
         options: [
           ["communication", "Comunicación interna"],
-          ["documents", "Archivos y documentación"],
+          ["documents", "Archivos y documentación operativa"],
           ["tasks", "Tareas y seguimiento"],
           ["processes", "Procesos administrativos"],
           ["reports", "Reportes y trazabilidad"]
@@ -3552,6 +3563,7 @@
     const state = {
       company: "",
       startDate: "",
+      clientContact: "",
       industry: "",
       usersMode: "department",
       department: "RR. HH.",
@@ -3948,6 +3960,7 @@
       if (key === "users") {
         const selected = selectedDepartments();
         if (!state.usersMode || !selected.length) return "";
+        if (state.usersMode === "mix" && state.userRange === "small") return `Piloto multiárea · hasta 45 usuarios · ${selected.join(", ")}`;
         return state.usersMode === "mix" ? `Perfiles de distintas áreas · ${selected.join(", ")}` : `Área prioritaria · ${selected[0]}`;
       }
       if (key === "qualification") return qualificationSummary();
@@ -3974,6 +3987,12 @@
           ["client-followup", "Seguimientos después de reuniones", "Elegila si el dolor es convertir llamadas, demos o reuniones en próximos pasos claros para cada parte.", null, "Seguimiento"],
           ["status-reports", "Reportes de estado", "Elegila si invierten tiempo redactando avances, minutas o actualizaciones para clientes y equipos.", null, "Reporting"],
           ["document-attachments", "Documentación y adjuntos", "Elegila si necesitan resumir, revisar o responder correos con documentos y adjuntos.", null, "Documentación"]
+        ],
+        energy: [
+          ["field-operations", "Coordinación de obras, servicios y equipos de campo", "Elegila si necesitan ordenar pedidos, avances, responsables y novedades entre oficina, depósito y equipos técnicos.", null, "Operación"],
+          ["purchase-documents", "Compras, remitos, facturas y órdenes", "Elegila si el dolor está en ubicar documentación operativa o administrativa que hoy circula por WhatsApp, correo o carpetas.", null, "Documentación"],
+          ["technical-office", "Oficina técnica y presupuestos", "Elegila si preparan presupuestos, documentación técnica, comparativas o licitaciones que requieren trazabilidad.", null, "Oficina técnica"],
+          ["whatsapp-teams", "Migrar conversaciones de WhatsApp a Teams", "Elegila si la prioridad es centralizar comunicación interna y evitar información en teléfonos personales.", null, "Comunicación"]
         ],
         retail: [
           ["store-requests", "Pedidos de tiendas, clientes o sucursales", "Elegila si hay mucho intercambio operativo y necesitan ordenar mensajes urgentes, pedidos o reclamos.", null, "Operación diaria"],
@@ -4015,6 +4034,12 @@
           ["proposals", "Propuestas y materiales para clientes", "Elegila si preparan propuestas comerciales, presentaciones o respuestas a oportunidades.", null, "Propuestas"],
           ["research", "Investigación y análisis de contexto", "Elegila si necesitan investigar temas, clientes, mercado, regulaciones o antecedentes.", null, "Investigación"],
           ["reports", "Informes y reportes ejecutivos", "Elegila si invierten tiempo armando informes de avance, resultados o recomendaciones.", null, "Reporting"]
+        ],
+        energy: [
+          ["operational-docs", "Documentación operativa", "Elegila si trabajan órdenes de compra, remitos, facturas, presupuestos, licitaciones o documentación técnica.", null, "Documentación"],
+          ["technical-procedures", "Procedimientos e instructivos técnicos", "Elegila si necesitan ordenar guías, procesos, checklists o documentación para oficina técnica/equipos de campo.", null, "Procesos"],
+          ["supplier-comparison", "Comparación de proveedores o cotizaciones", "Elegila si analizan alternativas, presupuestos, riesgos o condiciones comerciales.", null, "Comparación"],
+          ["operations-reporting", "Reportes de obra, servicio u operación", "Elegila si generan informes de avance, estado, compras, depósito o cumplimiento.", null, "Reporting"]
         ],
         retail: [
           ["campaign-materials", "Campañas y materiales comerciales", "Elegila si crean promociones, comunicaciones, piezas comerciales o mensajes para tiendas.", null, "Marketing"],
@@ -4086,7 +4111,7 @@
       const included = includedAddonIdsForPlan(planKey);
       const addIfExtra = (id) => { if (!included.has(id)) ids.add(id); };
       if (state.cowork) addIfExtra("cowork");
-      if (state.primaryObjective === "explore-ai" || state.copilotLicenses === "none" || state.copilotLicenses === "chat") addIfExtra("copilot-intro-webinar");
+      if (state.primaryObjective === "explore-ai") addIfExtra("copilot-intro-webinar");
       if (state.agentNeed === "explore" || state.agentNeed === "active" || state.primaryObjective === "agent-automation") {
         addIfExtra("webinar-agents");
         addIfExtra("agents-cowork");
@@ -4108,7 +4133,42 @@
       if (state.governance === "low" || state.iaGovernanceNeed === "governance" || state.iaGovernanceNeed === "coe" || state.iaGovernanceNeed === "corporate") addIfExtra("readiness");
       if (state.accompaniment === "change-management" && planKey !== "plan3") addIfExtra("change");
       if ((state.copilotLicenses === "licensed" || state.copilotLicenses === "trial") && state.successMetric === "satisfaction") addIfExtra("dashboard");
-      return Array.from(ids).filter((id) => isAddonEnabled(addOnCatalog().find((item) => item.id === id), planKey));
+      return sortAddonsForProposal(Array.from(ids)
+        .map((id) => addOnCatalog().find((item) => item.id === id))
+        .filter((addon) => isAddonEnabled(addon, planKey)), planKey)
+        .map((addon) => addon.id);
+    }
+    function addonPriorityScore(addon, planKey = selectedProposalPlanKey()) {
+      if (!addon) return 999;
+      const productivityBase = planKey === "plan1" || state.primaryObjective === "digital-productivity" || state.m365Maturity === "low";
+      const priorities = productivityBase
+        ? {
+          "teams-sharepoint": 10,
+          "document-governance": 20,
+          "office-hours": 30,
+          readiness: 40,
+          champions: 50,
+          "tool-module": 60,
+          "excel-intermediate": 70,
+          "excel-advanced": 75,
+          webinar: 85,
+          "copilot-intro-webinar": 90
+        }
+        : {
+          "role-cases": 10,
+          "prompt-library": 20,
+          dashboard: 30,
+          "webinar-agents": 40,
+          "webinar-sharepoint-agents": 45,
+          "webinar-notebooks": 50,
+          cowork: 60,
+          "agents-cowork": 70,
+          "copilot-studio": 80
+        };
+      return priorities[addon.id] || 100;
+    }
+    function sortAddonsForProposal(addons, planKey = selectedProposalPlanKey()) {
+      return addons.slice().sort((a, b) => addonPriorityScore(a, planKey) - addonPriorityScore(b, planKey));
     }
     function hasCopilotLicense() {
       return state.copilotLicenses === "licensed" || state.copilotLicenses === "trial";
@@ -4152,7 +4212,7 @@
       if (state.proposalMode === "direct" && !state.selectedAddons.length) return [];
       const selected = state.selectedAddons && state.selectedAddons.length ? state.selectedAddons : suggestedAddonIds(planKey);
       const included = includedAddonIdsForPlan(planKey);
-      return addOnCatalog().filter((item) => selected.includes(item.id) && !included.has(item.id) && isAddonEnabled(item, planKey));
+      return sortAddonsForProposal(addOnCatalog().filter((item) => selected.includes(item.id) && !included.has(item.id) && isAddonEnabled(item, planKey)), planKey);
     }
     function addonIdFromAiValue(value) {
       const normalized = normalizeText(value);
@@ -4464,6 +4524,10 @@
             <label for="directStartDate">Fecha esperada de inicio</label>
             <input id="directStartDate" type="date" value="${escapeHtml(state.startDate || todayIso)}">
           </div>
+          <div>
+            <label for="directClientContact">Referente del cliente <span style="font-weight:500;color:var(--cp-text-muted)">(opcional)</span></label>
+            <input id="directClientContact" placeholder="Ej.: Sergio · Operaciones" value="${escapeHtml(state.clientContact || "")}">
+          </div>
         </div>
         <div class="direct-plan-grid">${directPlanCardsMarkup()}</div>`;
       }
@@ -4501,6 +4565,7 @@
       if (step.key === "direct-start") {
         $("directCompany").addEventListener("input", (event) => { state.company = event.target.value.trim(); renderDirectNav(); });
         $("directStartDate").addEventListener("input", (event) => { state.startDate = event.target.value; renderDirectNav(); });
+        $("directClientContact").addEventListener("input", (event) => { state.clientContact = event.target.value.trim(); });
         $("directStepBody").querySelectorAll("[data-direct-plan]").forEach((button) => {
           button.addEventListener("click", () => {
             const nextPlan = button.dataset.directPlan;
@@ -4839,10 +4904,10 @@
         state.selectedAddons = state.selectedAddons.filter((id) => !included.has(id));
         const selected = new Set(state.selectedAddons);
         const catalog = addOnCatalog();
-        const suggested = catalog.filter((addon) => addonState(addon, planKey) === "suggested");
-        const available = catalog.filter((addon) => addonState(addon, planKey) === "available");
-        const includedAddons = catalog.filter((addon) => addonState(addon, planKey) === "included");
-        const unavailable = catalog.filter((addon) => addonState(addon, planKey) === "unavailable");
+        const suggested = sortAddonsForProposal(catalog.filter((addon) => addonState(addon, planKey) === "suggested"), planKey);
+        const available = sortAddonsForProposal(catalog.filter((addon) => addonState(addon, planKey) === "available"), planKey);
+        const includedAddons = sortAddonsForProposal(catalog.filter((addon) => addonState(addon, planKey) === "included"), planKey);
+        const unavailable = sortAddonsForProposal(catalog.filter((addon) => addonState(addon, planKey) === "unavailable"), planKey);
         const availableByCategory = Object.entries(available.reduce((groups, addon) => {
           groups[addon.category] = groups[addon.category] || [];
           groups[addon.category].push(addon);
@@ -4992,7 +5057,7 @@
       currentStep = Math.min(currentStep, steps.length - 1);
       renderNav("reviewNav");
       const items = [
-        { label: "Contexto del cliente", title: selectedLabel("industry"), desc: find(industries, state.industry)[2], edit: stepIndexByKey("industry"), icon: "client-context" },
+        { label: "Contexto del cliente", title: selectedLabel("industry"), desc: `${find(industries, state.industry)[2]}${state.clientContact ? ` Referente relevado: ${state.clientContact}.` : ""}`, edit: stepIndexByKey("industry"), icon: "client-context" },
         { label: "Alcance de usuarios", title: selectedLabel("users"), desc: state.usersMode === "mix" ? "Adopción transversal con referentes de varias áreas" : "Foco inicial en un equipo o función con mayor oportunidad de impacto", edit: stepIndexByKey("users"), icon: state.usersMode === "mix" ? "users-mix" : "users-dept" },
         { label: "Calificación comercial", title: qualificationSummary(), desc: `Inicio: ${formatDate(state.startDate)} · ${qualificationValue("m365Maturity")} · Uso Copilot: ${qualificationValue("copilotUsage")} · Agentes: ${qualificationValue("agentNeed")} · IA/COE: ${qualificationValue("iaGovernanceNeed")}`, edit: stepIndexByKey("qualification"), icon: "diagnostic" },
         {
@@ -5300,14 +5365,17 @@
         };
       }
       if (range === "small") {
+        const isMultiArea = state.usersMode === "mix" || departments.length > 1;
         return {
           label: "Ola Express",
-          title: "1 ola de adopción",
+          title: isMultiArea ? "1 piloto multiárea de adopción" : "1 ola de adopción",
           users: "Hasta 45 usuarios",
           groups: "2 a 3 grupos",
           duration: "30 días",
           cadence: `${groupModel} · sesiones semanales`,
-          note: "Alcance pensado para un piloto o área prioritaria, con grupos chicos y cierre rápido de hábitos base."
+          note: isMultiArea
+            ? `Alcance pensado para un piloto multiárea de hasta 45 usuarios, con grupos chicos y cierre rápido de hábitos base${departments.length ? ` (${departments.join(", ")})` : ""}.`
+            : "Alcance pensado para un piloto o área prioritaria, con grupos chicos y cierre rápido de hábitos base."
         };
       }
       if (range === "medium") {
@@ -5803,6 +5871,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         createdAt: new Date().toISOString(),
         proposal: {
           company: state.company,
+          clientContact: state.clientContact || "",
           primaryPlanKey: primaryKey,
           primaryPlan: {
             name: plans[primaryKey].name,
@@ -5831,7 +5900,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           totalEstimate: proposalTotalEstimate(primaryKey)
         },
         answers: {
-          customerContext: { industry: selectedLabel("industry"), users: selectedLabel("users"), departments: selectedDepartments() },
+          customerContext: { industry: selectedLabel("industry"), users: selectedLabel("users"), departments: selectedDepartments(), clientContact: state.clientContact || "" },
           qualification: qualificationFields.reduce((acc, field) => ({ ...acc, [field.key]: qualificationValue(field.key) }), {}),
           operational: operationalFields.reduce((acc, field) => ({ ...acc, [field.key]: discoveryValue(operationalFields, field.key) }), {}),
           productivity: {
@@ -6217,6 +6286,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         createdAt: new Date().toISOString(),
         proposal: {
           company: state.company,
+          clientContact: state.clientContact || "",
           startDate: state.startDate,
           startDateFormatted: formatDate(state.startDate),
           recommendedPlanKey: recommendedKey,
@@ -6234,7 +6304,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           addons: selectedAddonItems(recommendedKey).map((item) => ({ title: item.title, description: item.desc, price: item.price, requirement: addonRequirement(item, addonState(item, recommendedKey), recommendedKey) }))
         },
         answers: {
-          customerContext: { industry: selectedLabel("industry"), users: selectedLabel("users"), departments: selectedDepartments() },
+          customerContext: { industry: selectedLabel("industry"), users: selectedLabel("users"), departments: selectedDepartments(), clientContact: state.clientContact || "" },
           qualification: qualificationFields.reduce((acc, field) => ({ ...acc, [field.key]: qualificationValue(field.key) }), {}),
           operational: operationalFields.reduce((acc, field) => ({ ...acc, [field.key]: discoveryValue(operationalFields, field.key) }), {}),
           productivity: {
@@ -6298,6 +6368,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
               <p class="eyebrow">POSSUMUS · PROPUESTA INTEGRAL DE ADOPCIÓN</p>
               <h2>${mode === "user" ? "Plan recomendado para la iniciativa" : directMode ? "Propuesta directa: " + planMaturityTitle(recommended) : "Propuesta versión final: " + planMaturityTitle(recommended)}</h2>
               <div class="client-highlight">${state.company}</div>
+              ${state.clientContact ? `<p class="lead">Referente relevado: ${escapeHtml(state.clientContact)}</p>` : ""}
               <p class="lead">${selectedLabel("industry")} · ${selectedLabel("users")}</p>
               <div class="chips">${focus.map((item) => `<span class="pill">${item}</span>`).join("")}<span class="pill license-pill ${hasCopilotLicense() ? "has-copilot" : ""}">${hasCopilotLicense() ? "Tiene M365 Copilot" : "Sin M365 Copilot"}</span><span class="pill">Cowork: ${state.cowork ? "Incluido" : "No incluido"}</span></div>
               <div class="decision-row">
@@ -6581,6 +6652,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         body: `Nueva propuesta de adopción
 
 Cliente: ${state.company}
+${state.clientContact ? `Referente del cliente: ${state.clientContact}` : ""}
 Plan principal seleccionado (Versión 1): ${planMaturityTitle(recommended)}
 Referencia comercial: ${recommended.shortName || recommended.name}
 ${directMode ? "Modo: Propuesta directa seleccionada por el comercial." : `Plan original sugerido por la app: ${original.name}
@@ -6710,6 +6782,7 @@ ${location.href}`
         proposal: {
           planId: state.planId || "",
           company: state.company,
+          clientContact: state.clientContact || "",
           proposalMode: directMode ? "direct" : "guided",
           startDate: state.startDate,
           startDateFormatted: formatDate(state.startDate),
@@ -6812,7 +6885,8 @@ ${location.href}`
           customerContext: {
             industry: selectedLabel("industry"),
             users: selectedLabel("users"),
-            departments: selectedDepartments()
+            departments: selectedDepartments(),
+            clientContact: state.clientContact || ""
           },
           qualification: {
             primaryObjective: qualificationValue("primaryObjective"),
@@ -7241,6 +7315,7 @@ ${location.href}`
           <div class="hero-bottom">
             <div>
               <p style="font-size:24pt;color:#ffffff;font-weight:900">${state.company}</p>
+              ${state.clientContact ? `<p>Referente relevado: ${escapeHtml(state.clientContact)}</p>` : ""}
               <p>Inicio estimado: ${formatDate(state.startDate)} · Fin estimado: ${endDate}</p>
               <p>Documento generado a partir del relevamiento cargado en el diseñador.</p>
             </div>
@@ -7596,6 +7671,7 @@ ${location.href}`
       state.directPlanKey = "";
       state.company = $("company").value.trim();
       state.startDate = $("startDate").value || todayIso;
+      state.clientContact = $("clientContact").value.trim();
       currentDirectStep = 0;
       renderDirectStep();
       show("directPlan");
@@ -7630,6 +7706,7 @@ ${location.href}`
       state.proposalMode = "guided";
       state.company = $("company").value.trim();
       state.startDate = $("startDate").value;
+      state.clientContact = $("clientContact").value.trim();
       if (!state.company || !state.startDate) {
         showToast("Completa compañía y fecha de inicio.");
         return;
@@ -7671,9 +7748,10 @@ ${location.href}`
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: false, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, proposalMode: "guided", directPlanKey: "", planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, addonPrices: {}, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, overridePlanKey: "", aiPlanComparisons: {} });
+      Object.assign(state, { company: "", startDate: todayIso, clientContact: "", industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: false, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, proposalMode: "guided", directPlanKey: "", planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, addonPrices: {}, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, overridePlanKey: "", aiPlanComparisons: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
+      $("clientContact").value = "";
       if ($("directCompany")) $("directCompany").value = "";
       if ($("directStartDate")) $("directStartDate").value = todayIso;
       location.hash = "/mode";

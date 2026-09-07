@@ -44,6 +44,8 @@ Variables decisoras principales: objetivo comercial, licenciamiento Copilot, uso
 
 Productividad Digital (P1) se posiciona como **programa de adopción Microsoft 365**, no como capacitación puntual. Debe incluir diagnóstico de madurez, comunicación interna, formación aplicada, acompañamiento y medición por ola. Las sesiones de training son un componente del recorrido, pero la propuesta debe vender adopción medible y continuidad.
 
+El inicio del flujo permite cargar un **referente del cliente** opcional (por ejemplo, `Sergio · Operaciones`) para que quede trazable en propuesta, PDF, payloads e IA sin agregar pasos al wizard.
+
 La UI muestra una escalera comercial de progresión, manteniendo las claves técnicas internas existentes:
 
 | Etapa | Referencia comercial |
@@ -55,11 +57,15 @@ La UI muestra una escalera comercial de progresión, manteniendo las claves téc
 
 La propuesta incluye guardrails cuando el cliente intenta saltar escalones, por ejemplo pedir Cowork/agentes sin adopción Copilot o pedir Copilot con baja madurez Microsoft 365. La app no bloquea la oportunidad, pero muestra el prerrequisito y el siguiente paso recomendado.
 
+La app incluye una industria específica para **Energía, servicios eléctricos y construcción**, pensada para casos con obras, servicios técnicos, oficina técnica, compras, depósito y documentación operativa.
+
 La pantalla de add-ons muestra el plan probable y separa los módulos entre sugeridos para el caso, disponibles para ampliar alcance, ya incluidos en el plan y no disponibles por prerrequisito. Esto evita cotizar como adicional una actividad que ya forma parte del plan base.
 
 Cowork se trata como add-on con prerrequisito: solo puede activarse si el cliente tiene Microsoft 365 Copilot activo/trial y un caso concreto para profundizar, o como continuidad posterior a P2. No se ofrece como servicio suelto; se comunica como 3 a 5 sesiones de trabajo guiado. Para escenarios sin licencias o de exploración inicial, la app puede sugerir el **Webinar introductorio: Copilot en 30 minutos**, una entrada liviana de sensibilización con ejemplos generales, moderación y Q&A.
 
 Además, se agregan **Webinars especializados** como add-ons puntuales por tecnología: agentes, agentes en SharePoint, notebooks y funcionalidades específicas de Copilot.
+
+En escenarios de Productividad Digital o baja madurez, la app prioriza primero los add-ons core de ordenamiento/adopción (Teams + SharePoint, documentación, office hours, readiness y champions) y deja webinars como complemento puntual.
 
 El botón global "Ayuda · lógica de decisión" abre una explicación transparente del árbol/scoring, los planes, la confianza, las alternativas y el tratamiento de add-ons.
 
