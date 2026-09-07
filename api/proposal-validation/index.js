@@ -1,4 +1,4 @@
-const { fetchWithTimeout, findText, extractJsonObject, isPayloadTooLarge } = require("../shared/flow-utils");
+const { fetchWithTimeout, findText, extractJsonObject, isPayloadTooLarge, hasProposalShape } = require("../shared/flow-utils");
 
 function validationToMarkdown(validation) {
   if (!validation || typeof validation !== "object") return "";
@@ -149,7 +149,7 @@ module.exports = async function (context, req) {
   const flowUrl = process.env.POWER_AUTOMATE_AI_SUMMARY_URL;
 
   const payload = req.body;
-  if (!payload || typeof payload !== "object" || !payload.proposal || !payload.answers) {
+  if (!hasProposalShape(payload)) {
     context.res = {
       status: 400,
       headers: { "Content-Type": "application/json" },

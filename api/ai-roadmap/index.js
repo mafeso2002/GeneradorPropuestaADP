@@ -1,4 +1,4 @@
-const { fetchWithTimeout, findText, extractJsonObject, isPayloadTooLarge } = require("../shared/flow-utils");
+const { fetchWithTimeout, findText, extractJsonObject, isPayloadTooLarge, hasProposalShape } = require("../shared/flow-utils");
 
 function findRoadmap(value) {
   if (!value || typeof value !== "object") return null;
@@ -30,7 +30,7 @@ module.exports = async function (context, req) {
   }
 
   const payload = req.body;
-  if (!payload || typeof payload !== "object" || !payload.proposal || !payload.answers) {
+  if (!hasProposalShape(payload)) {
     context.res = {
       status: 400,
       headers: { "Content-Type": "application/json" },

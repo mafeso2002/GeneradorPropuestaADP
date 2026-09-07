@@ -1,4 +1,4 @@
-const { fetchWithTimeout: postFlow, findText, isPayloadTooLarge } = require("../shared/flow-utils");
+const { fetchWithTimeout: postFlow, findText, isPayloadTooLarge, hasProposalShape } = require("../shared/flow-utils");
 
 function cleanText(value, maxLength = 900) {
   return String(value || "")
@@ -389,7 +389,7 @@ module.exports = async function (context, req) {
   }
 
   const payload = req.body;
-  if (!payload || typeof payload !== "object" || !payload.proposal || !payload.answers) {
+  if (!hasProposalShape(payload)) {
     context.res = {
       status: 400,
       headers: { "Content-Type": "application/json" },

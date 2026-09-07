@@ -1,4 +1,4 @@
-const { fetchWithTimeout, isPayloadTooLarge } = require("../shared/flow-utils");
+const { fetchWithTimeout, isPayloadTooLarge, hasProposalShape } = require("../shared/flow-utils");
 
 module.exports = async function (context, req) {
   const flowUrl = process.env.POWER_AUTOMATE_HANDOFF_URL;
@@ -15,7 +15,7 @@ module.exports = async function (context, req) {
   }
 
   const payload = req.body;
-  if (!payload || typeof payload !== "object" || !payload.proposal || !payload.answers) {
+  if (!hasProposalShape(payload)) {
     context.res = {
       status: 400,
       headers: { "Content-Type": "application/json" },

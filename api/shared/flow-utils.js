@@ -77,4 +77,13 @@ function isPayloadTooLarge(payload, maxBytes = 524288) {
   }
 }
 
-module.exports = { fetchWithTimeout, findText, extractJsonObject, isPayloadTooLarge };
+// Verifica que proposal y answers sean objetos con contenido real (no {} vacío ni arrays),
+// evitando invocar los Flows con estructuras vacías que luego fallan por campos nulos.
+function hasProposalShape(payload) {
+  const isFilledObject = (value) =>
+    Boolean(value) && typeof value === "object" && !Array.isArray(value) && Object.keys(value).length > 0;
+  return Boolean(payload) && typeof payload === "object" &&
+    isFilledObject(payload.proposal) && isFilledObject(payload.answers);
+}
+
+module.exports = { fetchWithTimeout, findText, extractJsonObject, isPayloadTooLarge, hasProposalShape };
