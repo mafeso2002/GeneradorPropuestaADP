@@ -4391,12 +4391,12 @@
       return true;
     }
     function normalizeUserRangeForAudience() {
-      if (state.usersMode === "department" && state.userRange === "large") state.userRange = "";
+      if (state.usersMode === "department") state.userRange = "small";
     }
     function optionsForField(field) {
       if (!field) return [];
       if (field.key === "userRange" && state.usersMode === "department") {
-        return field.options.filter(([value]) => value !== "large");
+        return field.options.filter(([value]) => value === "small");
       }
       return field.options;
     }
