@@ -4390,6 +4390,16 @@
       if (key === "direct-logistics") return Boolean(state.userRange) && logisticsFields.every((field) => Boolean(state[field.key]));
       return true;
     }
+    function normalizeUserRangeForAudience() {
+      if (state.usersMode === "department" && state.userRange === "large") state.userRange = "";
+    }
+    function optionsForField(field) {
+      if (!field) return [];
+      if (field.key === "userRange" && state.usersMode === "department") {
+        return field.options.filter(([value]) => value !== "large");
+      }
+      return field.options;
+    }
     function canContinueDirect() {
       return isDirectStepComplete(directSteps[currentDirectStep].key);
     }
@@ -4448,6 +4458,7 @@
       }
       if (step.key === "direct-logistics") {
         ensureLogisticsDefaults();
+        normalizeUserRangeForAudience();
         body = `${renderDiscoveryFields([qualificationFields.find((field) => field.key === "userRange"), ...logisticsFields])}`;
       }
       $("directStepBody").innerHTML = body;
@@ -4475,6 +4486,7 @@
           const selected = selectedDepartments()[0] || state.department || "RR. HH.";
           state.department = selected;
           state.departments = [selected];
+          normalizeUserRangeForAudience();
         }
         renderDirectStep();
       }));
@@ -4490,6 +4502,7 @@
           state.usersMode = "department";
           state.department = dept;
           state.departments = [dept];
+          normalizeUserRangeForAudience();
         }
         renderDirectStep();
       }));
@@ -4536,6 +4549,7 @@
       return values.slice(0, 2).join(" · ");
     }
     function renderDiscoveryFields(fields) {
+      normalizeUserRangeForAudience();
       return `<div class="qualification-grid">${fields.map((field, index) => `<div class="qualification-field ${state[field.key] ? "answered" : ""}">
         <div class="qualification-number">${String(index + 1).padStart(2, "0")}</div>
         <div class="qualification-icon">${iconSvg(field.icon)}</div>
@@ -4544,7 +4558,7 @@
           <p>${field.help}</p>
           <select id="${field.key}" data-discovery="${field.key}">
             <option value="">Seleccionar...</option>
-            ${field.options.map(([value, label]) => `<option value="${value}" ${state[field.key] === value ? "selected" : ""}>${label}</option>`).join("")}
+            ${optionsForField(field).map(([value, label]) => `<option value="${value}" ${state[field.key] === value ? "selected" : ""}>${label}</option>`).join("")}
           </select>
         </div>
       </div>`).join("")}</div>`;
@@ -4665,7 +4679,8 @@
           </div>
           <div class="qualification-grid">${fields.map((field) => {
             questionIndex += 1;
-            const helpItems = field.options.map(([value, label]) => `<li><strong>${label}:</strong> ${field.optionHelp[value]}</li>`).join("");
+            const fieldOptions = optionsForField(field);
+            const helpItems = fieldOptions.map(([value, label]) => `<li><strong>${label}:</strong> ${field.optionHelp[value]}</li>`).join("");
             return `<div class="qualification-field ${state[field.key] ? "answered" : ""}">
               <div class="qualification-number">${String(questionIndex).padStart(2, "0")}</div>
               <button class="help-trigger" type="button" aria-label="Ayuda sobre ${field.label}">?</button>
@@ -4679,7 +4694,7 @@
                 <p>${field.help}</p>
                 <select id="${field.key}" data-qualification="${field.key}">
                   <option value="">Seleccionar...</option>
-                  ${field.options.map(([value, label]) => `<option value="${value}" ${state[field.key] === value ? "selected" : ""}>${label}</option>`).join("")}
+                  ${fieldOptions.map(([value, label]) => `<option value="${value}" ${state[field.key] === value ? "selected" : ""}>${label}</option>`).join("")}
                 </select>
               </div>
             </div>`;
@@ -4841,6 +4856,7 @@
           const selected = selectedDepartments()[0] || state.department || "";
           state.department = selected;
           state.departments = selected ? [selected] : [];
+          normalizeUserRangeForAudience();
         }
         invalidateAiArtifacts();
         renderStep();
@@ -4857,6 +4873,7 @@
           if (!state.usersMode) state.usersMode = "department";
           state.department = dept;
           state.departments = [dept];
+          normalizeUserRangeForAudience();
         }
         invalidateAiArtifacts();
         renderStep();
