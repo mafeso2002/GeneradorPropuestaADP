@@ -323,13 +323,17 @@ async function getCompanyResearch(company, payload, context) {
     pages.push({ url: home.url, ...homeMeta });
 
     const internalLinks = extractInternalLinks(home.html, home.url);
-    for (const link of internalLinks) {
-      try {
-        const page = await fetchHtml(link, 5000);
+    const linkResults = await Promise.allSettled(
+      internalLinks.map((link) => fetchHtml(link, 5000).then((page) => ({ link, page })))
+    );
+    for (const result of linkResults) {
+      if (result.status === "fulfilled") {
+        const { page } = result.value;
         pages.push({ url: page.url, ...extractMeta(page.html, name) });
-      } catch (error) {
-        errors.push(`${link}: ${error.message}`);
-        warn(`Company page research failed for "${name}" at ${link}: ${error.message}`);
+      } else {
+        const reason = result.reason && result.reason.message ? result.reason.message : String(result.reason);
+        errors.push(reason);
+        warn(`Company page research failed for "${name}": ${reason}`);
       }
     }
   } catch (error) {

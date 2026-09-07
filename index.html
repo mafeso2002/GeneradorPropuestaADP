@@ -2897,7 +2897,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.8 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.9 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -4283,6 +4283,10 @@
       state.useAiRoadmap = true;
       if (state.proposalMode !== "direct") state.overridePlanKey = "";
       state.aiPlanComparisons = {};
+      // Si el cambio de respuestas movió el plan recomendado, descartamos add-ons que dejaron
+      // de ser válidos para no arrastrar selecciones inconsistentes aunque el comercial no
+      // vuelva a pasar por el paso de add-ons.
+      if (state.proposalMode !== "direct") sanitizeSelectedAddons(recommendedPlanKey());
     }
     function selectedAddonItems(planKey = selectedProposalPlanKey()) {
       if (state.proposalMode === "direct" && !state.selectedAddons.length) return [];
@@ -4426,7 +4430,7 @@
       if (planKey === "plan3") {
         return `<div class="addon-adjustment-notice">
           <strong>P3 ya incluye el programa integral</strong>
-          Productividad Digital + IA contempla adopción Microsoft 365, Copilot, casos por rol, prompts, medición, comunicación, champions, cambio y webinars. Solo se pueden cotizar aparte Cowork y Agentes a medida con Copilot Studio.
+          Productividad Digital + IA contempla adopción Microsoft 365, Copilot, casos por rol, prompts, medición, comunicación, champions, cambio y webinars. Los módulos marcados como incluidos forman parte del recorrido integral (incluye la activación de Microsoft 365 Copilot), aunque el cliente todavía no tenga licencias hoy. Solo se pueden cotizar aparte Cowork y Agentes a medida con Copilot Studio.
         </div>`;
       }
       if (planKey !== "plan0") return "";
@@ -5352,7 +5356,7 @@
           effort: "Piloto controlado",
           shortScope: "Hasta 15",
           scope: "1 grupo piloto · Art of the Possible · business case",
-          price: "USD 3.500",
+          price: "USD 3.500 + IVA",
           icon: "rocket",
           customerCase: "Ya usa Microsoft 365 y tiene Copilot Chat sin licencia; quiere probar la IA.",
           aiLevel: "Copilot Chat",
@@ -5402,7 +5406,7 @@
           effort: "Copilot in 30",
           shortScope: "Hasta 45",
           scope: "Hasta 45 usuarios con licencias propias · 2 o 3 grupos de 15",
-          price: "USD 5.900",
+          price: "USD 5.900 + IVA",
           icon: "spark",
           customerCase: "Ya tiene licencias de Microsoft 365 Copilot.",
           aiLevel: "Microsoft 365 Copilot",
