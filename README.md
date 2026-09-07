@@ -44,7 +44,7 @@ Variables decisoras principales: objetivo comercial, licenciamiento Copilot, uso
 
 Productividad Digital (P1) se posiciona como **programa de adopción Microsoft 365**, no como capacitación puntual. Debe incluir diagnóstico de madurez, comunicación interna, formación aplicada, acompañamiento y medición por ola. Las sesiones de training son un componente del recorrido, pero la propuesta debe vender adopción medible y continuidad.
 
-El inicio del flujo permite cargar un **referente del cliente** opcional (por ejemplo, `Sergio · Operaciones`) para que quede trazable en propuesta, PDF, payloads e IA sin agregar pasos al wizard.
+El inicio del flujo permite cargar un **referente del cliente** opcional (por ejemplo, `Sergio · Operaciones`) y una **ubicación del cliente** opcional. La ubicación parte de `Argentina` por defecto y puede afinarse con provincia/localidad (`San Rafael, Mendoza, Argentina`) para acotar la búsqueda pública usada por la IA.
 
 La UI muestra una escalera comercial de progresión, manteniendo las claves técnicas internas existentes:
 
@@ -78,6 +78,8 @@ La validación recibe plan recomendado, confianza, alternativas, respuestas, add
 ## Resumen ejecutivo con IA
 
 La app publica una API `POST /api/ai-summary` para pedir a Power Automate un resumen ejecutivo comercial generado con IA. Antes de invocar el Flow, la API intenta detectar el sitio oficial probable de la empresa, leer paginas publicas relevantes y enriquecer el payload con actividad, productos/servicios y canales publicos. Si no encuentra datos confiables, informa esa situacion en el payload para que la IA no invente informacion externa.
+
+La búsqueda pública prioriza Argentina por defecto: intenta dominios `.com.ar`/`.ar`, suma términos geográficos del campo `clientLocation` y los pasa al Flow como `companyResearch.searchScope`. Esto ayuda a evitar confundir clientes argentinos con empresas homónimas de otros países.
 
 Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_AUTOMATE_AI_SUMMARY_URL` con la URL del trigger HTTP del Flow de IA. El Flow debe devolver JSON con la forma `{ "summary": "..." }`. Para que el frontend lo muestre mejor, conviene que el resumen venga en Markdown con secciones `## Contexto de la empresa`, `## Lectura comercial`, `## Recomendacion Possumus`, `## Estimacion asistida de presupuesto` y `## Argumentos para la reunion`.
 

@@ -2897,7 +2897,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.9.8 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.9.9 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -2963,6 +2963,10 @@
           <div>
             <label for="clientContact">Referente del cliente <span style="font-weight:500;color:var(--cp-text-muted)">(opcional)</span></label>
             <input id="clientContact" placeholder="Ej.: Sergio · Operaciones">
+          </div>
+          <div>
+            <label for="clientLocation">Ubicación del cliente <span style="font-weight:500;color:var(--cp-text-muted)">(opcional)</span></label>
+            <input id="clientLocation" placeholder="Ej.: San Rafael, Mendoza, Argentina">
           </div>
         </div>
         <div class="toolbar">
@@ -3564,6 +3568,7 @@
       company: "",
       startDate: "",
       clientContact: "",
+      clientLocation: "Argentina",
       industry: "",
       usersMode: "department",
       department: "RR. HH.",
@@ -3640,6 +3645,7 @@
     const find = (collection, key) => collection.find((item) => item[0] === key) || ["", "", ""];
     const todayIso = new Date().toISOString().slice(0, 10);
     $("startDate").value = todayIso;
+    $("clientLocation").value = "Argentina";
     function escapeHtml(value) {
       return String(value || "")
         .replace(/&/g, "&amp;")
@@ -4528,6 +4534,10 @@
             <label for="directClientContact">Referente del cliente <span style="font-weight:500;color:var(--cp-text-muted)">(opcional)</span></label>
             <input id="directClientContact" placeholder="Ej.: Sergio · Operaciones" value="${escapeHtml(state.clientContact || "")}">
           </div>
+          <div>
+            <label for="directClientLocation">Ubicación del cliente <span style="font-weight:500;color:var(--cp-text-muted)">(opcional)</span></label>
+            <input id="directClientLocation" placeholder="Ej.: San Rafael, Mendoza, Argentina" value="${escapeHtml(state.clientLocation || "Argentina")}">
+          </div>
         </div>
         <div class="direct-plan-grid">${directPlanCardsMarkup()}</div>`;
       }
@@ -4566,6 +4576,7 @@
         $("directCompany").addEventListener("input", (event) => { state.company = event.target.value.trim(); renderDirectNav(); });
         $("directStartDate").addEventListener("input", (event) => { state.startDate = event.target.value; renderDirectNav(); });
         $("directClientContact").addEventListener("input", (event) => { state.clientContact = event.target.value.trim(); });
+        $("directClientLocation").addEventListener("input", (event) => { state.clientLocation = event.target.value.trim() || "Argentina"; });
         $("directStepBody").querySelectorAll("[data-direct-plan]").forEach((button) => {
           button.addEventListener("click", () => {
             const nextPlan = button.dataset.directPlan;
@@ -5057,7 +5068,7 @@
       currentStep = Math.min(currentStep, steps.length - 1);
       renderNav("reviewNav");
       const items = [
-        { label: "Contexto del cliente", title: selectedLabel("industry"), desc: `${find(industries, state.industry)[2]}${state.clientContact ? ` Referente relevado: ${state.clientContact}.` : ""}`, edit: stepIndexByKey("industry"), icon: "client-context" },
+        { label: "Contexto del cliente", title: selectedLabel("industry"), desc: `${find(industries, state.industry)[2]}${state.clientContact ? ` Referente relevado: ${state.clientContact}.` : ""}${state.clientLocation ? ` Ubicación: ${state.clientLocation}.` : ""}`, edit: stepIndexByKey("industry"), icon: "client-context" },
         { label: "Alcance de usuarios", title: selectedLabel("users"), desc: state.usersMode === "mix" ? "Adopción transversal con referentes de varias áreas" : "Foco inicial en un equipo o función con mayor oportunidad de impacto", edit: stepIndexByKey("users"), icon: state.usersMode === "mix" ? "users-mix" : "users-dept" },
         { label: "Calificación comercial", title: qualificationSummary(), desc: `Inicio: ${formatDate(state.startDate)} · ${qualificationValue("m365Maturity")} · Uso Copilot: ${qualificationValue("copilotUsage")} · Agentes: ${qualificationValue("agentNeed")} · IA/COE: ${qualificationValue("iaGovernanceNeed")}`, edit: stepIndexByKey("qualification"), icon: "diagnostic" },
         {
@@ -5872,6 +5883,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         proposal: {
           company: state.company,
           clientContact: state.clientContact || "",
+          clientLocation: state.clientLocation || "Argentina",
           primaryPlanKey: primaryKey,
           primaryPlan: {
             name: plans[primaryKey].name,
@@ -5900,7 +5912,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           totalEstimate: proposalTotalEstimate(primaryKey)
         },
         answers: {
-          customerContext: { industry: selectedLabel("industry"), users: selectedLabel("users"), departments: selectedDepartments(), clientContact: state.clientContact || "" },
+          customerContext: { industry: selectedLabel("industry"), users: selectedLabel("users"), departments: selectedDepartments(), clientContact: state.clientContact || "", clientLocation: state.clientLocation || "Argentina", country: "Argentina" },
           qualification: qualificationFields.reduce((acc, field) => ({ ...acc, [field.key]: qualificationValue(field.key) }), {}),
           operational: operationalFields.reduce((acc, field) => ({ ...acc, [field.key]: discoveryValue(operationalFields, field.key) }), {}),
           productivity: {
@@ -6287,6 +6299,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         proposal: {
           company: state.company,
           clientContact: state.clientContact || "",
+          clientLocation: state.clientLocation || "Argentina",
           startDate: state.startDate,
           startDateFormatted: formatDate(state.startDate),
           recommendedPlanKey: recommendedKey,
@@ -6304,7 +6317,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           addons: selectedAddonItems(recommendedKey).map((item) => ({ title: item.title, description: item.desc, price: item.price, requirement: addonRequirement(item, addonState(item, recommendedKey), recommendedKey) }))
         },
         answers: {
-          customerContext: { industry: selectedLabel("industry"), users: selectedLabel("users"), departments: selectedDepartments(), clientContact: state.clientContact || "" },
+          customerContext: { industry: selectedLabel("industry"), users: selectedLabel("users"), departments: selectedDepartments(), clientContact: state.clientContact || "", clientLocation: state.clientLocation || "Argentina", country: "Argentina" },
           qualification: qualificationFields.reduce((acc, field) => ({ ...acc, [field.key]: qualificationValue(field.key) }), {}),
           operational: operationalFields.reduce((acc, field) => ({ ...acc, [field.key]: discoveryValue(operationalFields, field.key) }), {}),
           productivity: {
@@ -6369,6 +6382,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
               <h2>${mode === "user" ? "Plan recomendado para la iniciativa" : directMode ? "Propuesta directa: " + planMaturityTitle(recommended) : "Propuesta versión final: " + planMaturityTitle(recommended)}</h2>
               <div class="client-highlight">${state.company}</div>
               ${state.clientContact ? `<p class="lead">Referente relevado: ${escapeHtml(state.clientContact)}</p>` : ""}
+              ${state.clientLocation ? `<p class="lead">Ubicación: ${escapeHtml(state.clientLocation)}</p>` : ""}
               <p class="lead">${selectedLabel("industry")} · ${selectedLabel("users")}</p>
               <div class="chips">${focus.map((item) => `<span class="pill">${item}</span>`).join("")}<span class="pill license-pill ${hasCopilotLicense() ? "has-copilot" : ""}">${hasCopilotLicense() ? "Tiene M365 Copilot" : "Sin M365 Copilot"}</span><span class="pill">Cowork: ${state.cowork ? "Incluido" : "No incluido"}</span></div>
               <div class="decision-row">
@@ -6653,6 +6667,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
 
 Cliente: ${state.company}
 ${state.clientContact ? `Referente del cliente: ${state.clientContact}` : ""}
+Ubicación priorizada para búsqueda IA: ${state.clientLocation || "Argentina"}
 Plan principal seleccionado (Versión 1): ${planMaturityTitle(recommended)}
 Referencia comercial: ${recommended.shortName || recommended.name}
 ${directMode ? "Modo: Propuesta directa seleccionada por el comercial." : `Plan original sugerido por la app: ${original.name}
@@ -6762,7 +6777,7 @@ ${location.href}`
         createdAt: new Date().toISOString(),
         aiInstructions: {
           usePublicCompanyResearch: true,
-          researchGuidance: `Antes de redactar, si el backend devuelve companyResearch con fuentes publicas, usalo para contextualizar a ${state.company}. No inventes datos: si no hay fuentes confiables, aclaralo de forma breve y basa la recomendacion en el relevamiento.`,
+          researchGuidance: `Antes de redactar, si el backend devuelve companyResearch con fuentes publicas, usalo para contextualizar a ${state.company}. Priorizar empresas y fuentes de Argentina${state.clientLocation ? `, especialmente ${state.clientLocation}` : ""}. No inventes datos: si no hay fuentes confiables, aclaralo de forma breve y basa la recomendacion en el relevamiento.`,
           outputFormat: [
             "## Contexto de la empresa",
             "Definicion breve de la empresa/sector usando datos publicos disponibles y el contexto relevado.",
@@ -6783,6 +6798,8 @@ ${location.href}`
           planId: state.planId || "",
           company: state.company,
           clientContact: state.clientContact || "",
+          clientLocation: state.clientLocation || "Argentina",
+          country: "Argentina",
           proposalMode: directMode ? "direct" : "guided",
           startDate: state.startDate,
           startDateFormatted: formatDate(state.startDate),
@@ -6886,7 +6903,9 @@ ${location.href}`
             industry: selectedLabel("industry"),
             users: selectedLabel("users"),
             departments: selectedDepartments(),
-            clientContact: state.clientContact || ""
+            clientContact: state.clientContact || "",
+            clientLocation: state.clientLocation || "Argentina",
+            country: "Argentina"
           },
           qualification: {
             primaryObjective: qualificationValue("primaryObjective"),
@@ -7316,6 +7335,7 @@ ${location.href}`
             <div>
               <p style="font-size:24pt;color:#ffffff;font-weight:900">${state.company}</p>
               ${state.clientContact ? `<p>Referente relevado: ${escapeHtml(state.clientContact)}</p>` : ""}
+              ${state.clientLocation ? `<p>Ubicación: ${escapeHtml(state.clientLocation)}</p>` : ""}
               <p>Inicio estimado: ${formatDate(state.startDate)} · Fin estimado: ${endDate}</p>
               <p>Documento generado a partir del relevamiento cargado en el diseñador.</p>
             </div>
@@ -7672,6 +7692,7 @@ ${location.href}`
       state.company = $("company").value.trim();
       state.startDate = $("startDate").value || todayIso;
       state.clientContact = $("clientContact").value.trim();
+      state.clientLocation = $("clientLocation").value.trim() || "Argentina";
       currentDirectStep = 0;
       renderDirectStep();
       show("directPlan");
@@ -7707,6 +7728,7 @@ ${location.href}`
       state.company = $("company").value.trim();
       state.startDate = $("startDate").value;
       state.clientContact = $("clientContact").value.trim();
+      state.clientLocation = $("clientLocation").value.trim() || "Argentina";
       if (!state.company || !state.startDate) {
         showToast("Completa compañía y fecha de inicio.");
         return;
@@ -7748,10 +7770,11 @@ ${location.href}`
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, clientContact: "", industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: false, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, proposalMode: "guided", directPlanKey: "", planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, addonPrices: {}, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, overridePlanKey: "", aiPlanComparisons: {} });
+      Object.assign(state, { company: "", startDate: todayIso, clientContact: "", clientLocation: "Argentina", industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: false, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, proposalMode: "guided", directPlanKey: "", planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, addonPrices: {}, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, overridePlanKey: "", aiPlanComparisons: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
       $("clientContact").value = "";
+      $("clientLocation").value = "Argentina";
       if ($("directCompany")) $("directCompany").value = "";
       if ($("directStartDate")) $("directStartDate").value = todayIso;
       location.hash = "/mode";

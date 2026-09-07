@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.9.8**
+Versión documentada: **MVP 0.9.9**
 Última actualización funcional: **2026-09-07**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -40,7 +40,7 @@ No hay framework frontend ni build step obligatorio. La app corre como HTML/CSS/
 2. En modo diagnóstico, carga compañía y fecha estimada.
 3. Completa un wizard de diagnóstico:
    - contexto del cliente;
-   - referente del cliente, opcional, capturado en el inicio;
+   - referente y ubicación del cliente, opcionales, capturados en el inicio;
    - alcance de usuarios;
    - readiness y oportunidad;
    - diagnóstico operativo Microsoft 365;
@@ -101,6 +101,8 @@ P1 se trata como iniciativa de adopción, no como training aislado. El catálogo
 La app incluye guardrails de progresión: si el cliente intenta saltar etapas (por ejemplo, pedir Cowork/agentes sin adopción Copilot, o pedir Copilot sin base Microsoft 365), la propuesta no bloquea la oportunidad pero muestra una lectura comercial con el prerrequisito y el escalón recomendado.
 
 La industria incluye una opción específica para **Energía, servicios eléctricos y construcción**, útil para clientes con obras, servicios técnicos, compras, documentación operativa, depósito y oficina técnica.
+
+La ubicación del cliente se usa para acotar el enriquecimiento público con IA. Por defecto se prioriza `Argentina`; si el comercial agrega provincia/localidad, por ejemplo `San Rafael, Mendoza, Argentina`, el backend de `api/ai-summary` suma esos términos a la búsqueda y prioriza dominios `.com.ar`/`.ar`.
 
 Variables principales del scoring:
 

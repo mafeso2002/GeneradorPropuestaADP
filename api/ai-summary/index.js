@@ -49,7 +49,7 @@ function isBlockedDomain(url) {
   ].some((blocked) => domain === blocked || domain.endsWith(`.${blocked}`));
 }
 
-function scoreOfficialUrl(url, tokens, sectorTerms = []) {
+function scoreOfficialUrl(url, tokens, sectorTerms = [], geoTerms = []) {
   const normalizedUrl = normalize(url);
   const domain = normalize(domainFromUrl(url));
   let score = 0;
@@ -61,6 +61,11 @@ function scoreOfficialUrl(url, tokens, sectorTerms = []) {
     if (domain.includes(term)) score += 3;
     else if (normalizedUrl.includes(term)) score += 1;
   });
+  geoTerms.forEach((term) => {
+    if (domain.includes(term)) score += 2;
+    else if (normalizedUrl.includes(term)) score += 1;
+  });
+  if (domain.endsWith(".com.ar") || domain.endsWith(".ar")) score += 6;
   if (isBlockedDomain(url)) score -= 20;
   if (/\/(tag|author|noticias|blog)\//i.test(url)) score -= 3;
   return score;
@@ -135,7 +140,23 @@ function likelySectorTerms(payload) {
   if (/seguro|financier|poliza|siniestro/.test(text)) return ["seguro", "seguros", "aseguradora"];
   if (/salud|clinica|paciente/.test(text)) return ["salud", "clinica"];
   if (/retail|commerce|tienda/.test(text)) return ["retail", "tienda"];
+  if (/energia|electric|construccion|obra|deposito|tecnica/.test(text)) return ["energia", "electricidad", "electrico", "obras", "construccion"];
   return [];
+}
+
+function geographicTerms(payload) {
+  const values = [
+    "Argentina",
+    payload.proposal && payload.proposal.country,
+    payload.proposal && payload.proposal.clientLocation,
+    payload.answers && payload.answers.customerContext && payload.answers.customerContext.country,
+    payload.answers && payload.answers.customerContext && payload.answers.customerContext.clientLocation
+  ].filter(Boolean);
+  const terms = values.flatMap((value) => normalize(value)
+    .replace(/[^a-z0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((token) => token.length > 2));
+  return [...new Set(["argentina", ...terms])];
 }
 
 function candidateDomains(tokens, sectorTerms) {
@@ -144,10 +165,10 @@ function candidateDomains(tokens, sectorTerms) {
   if (joined) {
     sectorTerms.forEach((term) => {
       if (!joined.includes(term)) {
-        [".com", ".com.ar"].forEach((tld) => candidates.add(`https://${joined}${term}${tld}`));
+        [".com.ar", ".com"].forEach((tld) => candidates.add(`https://${joined}${term}${tld}`));
       }
     });
-    [".com", ".com.ar", ".com.uy", ".com.br", ".net"].forEach((tld) => candidates.add(`https://${joined}${tld}`));
+    [".com.ar", ".ar", ".com", ".com.uy", ".com.br", ".net"].forEach((tld) => candidates.add(`https://${joined}${tld}`));
   }
   return [...candidates];
 }
@@ -208,7 +229,7 @@ function extractContacts(text) {
   return { phones, emails };
 }
 
-function buildBusinessContext(name, officialSite, pages) {
+function buildBusinessContext(name, officialSite, pages, searchScope = "") {
   const combinedText = pages.map((page) => `${page.title}. ${page.description}. ${page.body}`).join(" ");
   const products = extractProducts(combinedText);
   const contacts = extractContacts(combinedText);
@@ -220,6 +241,7 @@ function buildBusinessContext(name, officialSite, pages) {
   const overview = overviewParts.join(" ");
   const promptLines = [
     `Empresa consultada: ${name}`,
+    searchScope ? `Alcance geografico priorizado: ${searchScope}` : "",
     officialSite ? `Sitio oficial probable: ${officialSite}` : "",
     overview ? `Descripcion/actividad detectada: ${overview}` : "",
     products.length ? `Productos/servicios detectados: ${products.join(", ")}` : "",
@@ -235,7 +257,7 @@ function buildBusinessContext(name, officialSite, pages) {
   };
 }
 
-async function findOfficialSite(name, payload, tokens, sectorTerms, warn) {
+async function findOfficialSite(name, payload, tokens, sectorTerms, geoTerms, warn) {
   const explicitUrl = payload.proposal && (payload.proposal.companyWebsite || payload.proposal.website || payload.proposal.url);
   if (explicitUrl) return explicitUrl;
 
@@ -250,13 +272,13 @@ async function findOfficialSite(name, payload, tokens, sectorTerms, warn) {
   }
 
   try {
-    const query = `${name} ${sectorTerms.join(" ")} sitio oficial empresa productos contacto`;
+    const query = `${name} ${sectorTerms.join(" ")} ${geoTerms.join(" ")} sitio oficial empresa productos contacto`;
     const searchUrl = `https://duckduckgo.com/html/?${new URLSearchParams({ q: query })}`;
     const { html } = await fetchHtml(searchUrl, 7000);
     const urls = extractSearchUrls(html)
       .filter((url) => !isBlockedDomain(url))
-      .sort((a, b) => scoreOfficialUrl(b, tokens, sectorTerms) - scoreOfficialUrl(a, tokens, sectorTerms));
-    return urls.find((url) => scoreOfficialUrl(url, tokens, sectorTerms) >= 4) || "";
+      .sort((a, b) => scoreOfficialUrl(b, tokens, sectorTerms, geoTerms) - scoreOfficialUrl(a, tokens, sectorTerms, geoTerms));
+    return urls.find((url) => scoreOfficialUrl(url, tokens, sectorTerms, geoTerms) >= 4) || "";
   } catch (error) {
     warn(`Company official-site search failed for "${name}": ${error.message}`);
     return "";
@@ -275,17 +297,19 @@ async function getCompanyResearch(company, payload, context) {
 
   const tokens = companyTokens(name);
   const sectorTerms = likelySectorTerms(payload);
+  const geoTerms = geographicTerms(payload);
+  const searchScope = geoTerms.join(", ");
   const errors = [];
   const warn = (message) => {
     if (context.log && typeof context.log.warn === "function") context.log.warn(message);
     else if (typeof context.log === "function") context.log(message);
   };
 
-  const officialSite = await findOfficialSite(name, payload, tokens, sectorTerms, warn);
+  const officialSite = await findOfficialSite(name, payload, tokens, sectorTerms, geoTerms, warn);
   if (!officialSite) {
     return {
       status: "not_found",
-      query: name,
+      query: `${name} ${searchScope}`,
       summary: "No se encontro un sitio oficial probable. No inventar informacion externa.",
       sources: [],
       errors
@@ -320,7 +344,7 @@ async function getCompanyResearch(company, payload, context) {
     })
     .slice(0, 5);
 
-  const contextData = buildBusinessContext(name, officialSite, usefulPages);
+  const contextData = buildBusinessContext(name, officialSite, usefulPages, searchScope);
   const sources = usefulPages.map((page) => ({
     title: page.title || domainFromUrl(page.url) || name,
     url: page.url,
@@ -329,7 +353,8 @@ async function getCompanyResearch(company, payload, context) {
 
   return {
     status: usefulPages.length ? "found" : "not_found",
-    query: name,
+    query: `${name} ${searchScope}`,
+    searchScope,
     officialSite,
     overview: contextData.overview,
     products: contextData.products,
