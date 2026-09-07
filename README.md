@@ -42,7 +42,11 @@ La recomendación se calcula con un scoring ponderado. La app mantiene un plan p
 
 Variables decisoras principales: objetivo comercial, licenciamiento Copilot, uso semanal real de Copilot, madurez Microsoft 365, casos de uso concretos, necesidad de agentes, alcance/escala, gobierno/COE, sponsor y acompañamiento esperado. Las preguntas operativas y logísticas siguen alimentando argumentos, add-ons, propuesta enviada y resumen IA.
 
-La pantalla de add-ons muestra el plan probable y separa los módulos entre sugeridos para el caso, disponibles para ampliar alcance, ya incluidos en el plan y no disponibles por licenciamiento. Esto evita cotizar como adicional una actividad que ya forma parte del plan base.
+Productividad Digital (P1) se posiciona como **programa de adopción Microsoft 365**, no como capacitación puntual. Debe incluir diagnóstico de madurez, comunicación interna, formación aplicada, acompañamiento y medición por ola. Las sesiones de training son un componente del recorrido, pero la propuesta debe vender adopción medible y continuidad.
+
+La pantalla de add-ons muestra el plan probable y separa los módulos entre sugeridos para el caso, disponibles para ampliar alcance, ya incluidos en el plan y no disponibles por prerrequisito. Esto evita cotizar como adicional una actividad que ya forma parte del plan base.
+
+Cowork se trata como add-on con prerrequisito: solo puede activarse si el cliente tiene Microsoft 365 Copilot activo/trial y un caso concreto para profundizar, o como continuidad posterior a P2. No se ofrece como servicio suelto; se comunica como 3 a 5 sesiones de trabajo guiado. Para escenarios sin licencias o de exploración inicial, la app puede sugerir el **Webinar introductorio: Copilot en 30 minutos**, una entrada liviana de sensibilización con ejemplos generales, moderación y Q&A.
 
 El botón global "Ayuda · lógica de decisión" abre una explicación transparente del árbol/scoring, los planes, la confianza, las alternativas y el tratamiento de add-ons.
 

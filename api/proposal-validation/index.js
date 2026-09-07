@@ -150,8 +150,19 @@ function fallbackValidation(payload, summary) {
     risks.push("Hay interés en agentes, pero no hay licencias Microsoft 365 Copilot confirmadas.");
   }
 
+  addonStates.forEach((addon) => {
+    const title = addon.title || addon.id || "";
+    const normalizedTitle = normalizeText(title);
+    if (addon.selected && normalizedTitle.includes("cowork") && addon.state === "unavailable") {
+      status = "review";
+      addonReview.remove.push(title);
+      missingQuestions.push("¿Cowork queda como add-on posterior a P2 o como oportunidad futura cuando haya Microsoft 365 Copilot activo/trial?");
+      risks.push("Cowork requiere Microsoft 365 Copilot activo/trial y adopción mínima; no conviene ofrecerlo suelto.");
+    }
+  });
+
   if (!missingQuestions.length) {
-    missingQuestions.push("¿El alcance esperado es capacitación puntual, adopción por ola o programa integral?");
+    missingQuestions.push("¿El alcance esperado es capacitación puntual aislada o adopción Microsoft 365 con diagnóstico, comunicación, formación aplicada, acompañamiento y medición?");
   }
 
   const selectedAddons = addonStates.filter((addon) => addon.selected && addon.state !== "unavailable");
@@ -221,7 +232,7 @@ module.exports = async function (context, req) {
       ...(payload.aiInstructions || {}),
       task: "Validar el diagnostico comercial y la consistencia de la propuesta. No generar resumen ejecutivo ni texto para cliente.",
       scopeRules: "Revisar consistencia entre recommendedPlanDuration, recommendedPlanScope, adoptionWaveModel, quoteDetail, roadmap y presupuesto. Si hay modelo de olas, validar que no se presente precio por ola como total cerrado ni roadmap generico incompatible con las olas.",
-      responseFormat: "Responder en JSON valido con: status ('consistent', 'review' o 'risky'), statusLabel, planDecision ('mantener', 'cambiar' o 'validar alternativa'), planComment, missingQuestions (maximo 3), addonReview { keep, remove, add }, risks y commercialRecommendation. Tambien incluir markdownSummary con el mismo contenido en Markdown. No modificar automaticamente nada; solo recomendar."
+      responseFormat: "Responder en JSON valido con: status ('consistent', 'review' o 'risky'), statusLabel, planDecision ('mantener', 'cambiar' o 'validar alternativa'), planComment, missingQuestions (maximo 3), addonReview { keep, remove, add }, risks y commercialRecommendation. Tambien incluir markdownSummary con el mismo contenido en Markdown. No modificar automaticamente nada; solo recomendar. Si el plan es P1/Productividad Digital, validarlo como programa de adopcion Microsoft 365 con diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion; no reducirlo a capacitacion puntual. Cowork solo debe mantenerse si hay Microsoft 365 Copilot activo/trial y adopcion minima; describirlo como add-on de 3 a 5 sesiones o siguiente paso posterior a P2. El Webinar introductorio Copilot en 30 minutos es una entrada liviana de sensibilizacion, no un programa de adopcion completo."
     }
   };
 

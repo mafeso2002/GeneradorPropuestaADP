@@ -1,7 +1,7 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.9.5**
-Última actualización funcional: **2026-09-06**
+Versión documentada: **MVP 0.9.6**
+Última actualización funcional: **2026-09-07**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
 ## 1. Objetivo de la aplicación
@@ -88,12 +88,14 @@ Planes disponibles por escalera de madurez:
 
 | Nivel de madurez | Nombre visible | Referencia comercial vigente | Enfoque |
 | --- | --- | --- | --- |
-| Nivel 1 | Madurez Digital | Productividad Digital (P1) | Ordenar hábitos Microsoft 365, colaboración, documentos y tareas |
+| Nivel 1 | Madurez Digital | Productividad Digital (P1) | Programa de adopción Microsoft 365: diagnóstico, comunicación, formación aplicada, acompañamiento y medición |
 | Nivel 2 | IA inicial sin licencias | Envisioning IA (P0) | Exploración, business case y primeros casos de IA sin Microsoft 365 Copilot completo |
 | Nivel 3 | IA empresarial con Copilot | IA aplicada al trabajo (P2) | Activar uso y ROI de Microsoft 365 Copilot |
 | Nivel 4 | IA transformacional | Productividad Digital + Microsoft 365 Copilot (P3) | Programa integral con cambio, adopción, gobierno e IA |
 
 La lógica interna conserva las claves `plan0`, `plan1`, `plan2`, `plan3` para no romper referencias técnicas ni la presentación comercial existente. La UI muestra primero el nivel de madurez y debajo la referencia comercial.
+
+P1 se trata como iniciativa de adopción, no como training aislado. El catálogo, la propuesta final, el PDF, el roadmap y las instrucciones de IA deben presentarlo por pilares: diagnóstico de madurez, comunicación y convocatoria, formación aplicada al trabajo real, acompañamiento/refuerzos y medición ejecutiva por ola.
 
 Variables principales del scoring:
 
@@ -146,7 +148,9 @@ Estados posibles:
 | Sugerido | Aplica por las respuestas del diagnóstico |
 | Disponible | Puede sumarse comercialmente |
 | Incluido | Ya forma parte del plan base y no debería cotizarse aparte |
-| No disponible | Requiere Microsoft 365 Copilot y el cliente no tiene licencia/trial |
+| No disponible | Requiere Microsoft 365 Copilot activo/trial u otro prerrequisito comercial |
+
+Cowork tiene una regla especial: no se ofrece suelto ni reemplaza el plan base. Solo queda seleccionable cuando hay Microsoft 365 Copilot activo/trial y señales mínimas de adopción o casos concretos; se comunica como add-on de 3 a 5 sesiones o como siguiente paso posterior a P2. Para clientes sin licencias o en exploración inicial, se incorporó el **Webinar introductorio: Copilot en 30 minutos** como entrada liviana de sensibilización masiva con ejemplos generales, moderación y Q&A.
 
 Los precios pueden venir de Dataverse mediante Power Automate o usar fallback local.
 
