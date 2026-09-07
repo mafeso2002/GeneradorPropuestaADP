@@ -5775,19 +5775,28 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const original = plans[decision.recommendedKey];
       const selected = plans[selectedKey];
       const changed = selectedKey !== decision.recommendedKey;
+      if (!changed) {
+        return `<div class="plan-selection-panel">
+          <div class="plan-selection-card active" style="grid-column:1 / -1">
+            <span>Plan principal recomendado por la app</span>
+            <strong>${escapeHtml(planMaturityTitle(selected))}</strong>
+            <p>${escapeHtml(planReferenceLabel(selected))} · ${confidenceLabel(decision.level)} · ${decision.confidence}% · ${escapeHtml(quoteForPlan(selectedKey).main)}</p>
+          </div>
+        </div>`;
+      }
       return `<div class="plan-selection-panel">
         <div class="plan-selection-card original">
-          <span>Plan original sugerido por la app</span>
+          <span>Plan recomendado por la app</span>
           <strong>${escapeHtml(planMaturityTitle(original))}</strong>
           <p>${escapeHtml(planReferenceLabel(original))} · ${confidenceLabel(decision.level)} · ${decision.confidence}% · ${escapeHtml(quoteForPlan(decision.recommendedKey).main)}</p>
         </div>
         <div class="plan-selection-card active">
-          <span>Plan principal seleccionado · Versión 1</span>
+          <span>Plan principal elegido para presentar · Versión 1</span>
           <strong>${escapeHtml(planMaturityTitle(selected))}</strong>
-          <p>${escapeHtml(planReferenceLabel(selected))} · ${escapeHtml(quoteForPlan(selectedKey).main)} · ${changed ? "Ajustado manualmente por el comercial." : "Coincide con el plan original del algoritmo."}</p>
-          ${changed ? `<div class="manual-plan-actions"><button class="btn ghost" id="revertPlanBtn" type="button"><span class="btn-icon">${iconSvg("swap")}</span>Volver al plan original</button></div>` : ""}
+          <p>${escapeHtml(planReferenceLabel(selected))} · ${escapeHtml(quoteForPlan(selectedKey).main)} · Ajustado manualmente por el comercial.</p>
+          <div class="manual-plan-actions"><button class="btn ghost" id="revertPlanBtn" type="button"><span class="btn-icon">${iconSvg("swap")}</span>Volver al plan recomendado</button></div>
         </div>
-        ${changed ? addonPlanAdjustmentNotice(decision.recommendedKey, selectedKey) : ""}
+        ${addonPlanAdjustmentNotice(decision.recommendedKey, selectedKey)}
       </div>`;
     }
     function renderProposalPricePanel(recommendedKey) {
@@ -6177,8 +6186,12 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
               <p class="lead">${selectedLabel("industry")} · ${selectedLabel("users")}</p>
               <div class="chips">${focus.map((item) => `<span class="pill">${item}</span>`).join("")}<span class="pill license-pill ${hasCopilotLicense() ? "has-copilot" : ""}">${hasCopilotLicense() ? "Tiene M365 Copilot" : "Sin M365 Copilot"}</span><span class="pill">Cowork: ${state.cowork ? "Incluido" : "No incluido"}</span></div>
               <div class="decision-row">
-                ${directMode ? `<span class="confidence-badge high">Selección manual</span>` : `<button class="confidence-badge ${decision.level}" id="confidenceBadge" type="button">${confidenceLabel(decision.level)} · ${decision.confidence}%</button>`}
-                <span class="decision-note">${directMode ? "El comercial seleccionó el plan directamente para generar la Versión 1." : recommendedKey === algorithmRecommendedKey ? confidenceNote(decision) : `Plan ajustado manualmente. Original: ${plans[algorithmRecommendedKey].name}.`}</span>
+                ${directMode
+                  ? `<span class="confidence-badge high">Selección manual</span>`
+                  : recommendedKey === algorithmRecommendedKey
+                  ? `<button class="confidence-badge ${decision.level}" id="confidenceBadge" type="button">${confidenceLabel(decision.level)} · ${decision.confidence}%</button>`
+                  : `<button class="confidence-badge ${decision.level}" id="confidenceBadge" type="button">Cálculo original · ${confidenceLabel(decision.level)} · ${decision.confidence}%</button>`}
+                <span class="decision-note">${directMode ? "El comercial seleccionó el plan directamente para generar la Versión 1." : recommendedKey === algorithmRecommendedKey ? confidenceNote(decision) : `El plan final fue elegido manualmente. La confianza corresponde al plan recomendado por la app: ${plans[algorithmRecommendedKey].name}.`}</span>
               </div>
             </div>
             <div class="score">${durationLabel}</div>
