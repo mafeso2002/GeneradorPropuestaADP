@@ -4057,6 +4057,9 @@
         { id: "copilot-studio", title: "Agentes a medida con Copilot Studio", category: "IA aplicada", desc: "Diseño de agentes y automatizaciones avanzadas sobre procesos específicos.", icon: "automation", price: "USD 3.500 a 7.500 + IVA", requiresCopilot: true },
         { id: "copilot-intro-webinar", title: "Webinar introductorio: Copilot en 30 minutos", category: "Activación y cambio", desc: "Entrada comercial liviana y masiva para sensibilizar sobre Copilot: ejemplos generales, moderación y Q&A. No requiere licencias Microsoft 365 Copilot.", icon: "communication", price: "USD 450 a 700 + IVA", requirement: "Disponible para todos; ideal para exploración inicial" },
         { id: "webinar", title: "Webinar / kickoff ejecutivo", category: "Activación y cambio", desc: "Evento de lanzamiento, alineación o cierre ejecutivo para un programa de adopción ya definido.", icon: "communication", price: "USD 600 + IVA", requirement: "Disponible para todos" },
+        { id: "webinar-agents", title: "Webinar especializado: agentes", category: "Webinars especializados", desc: "Sesión puntual para explicar qué son los agentes, cuándo aplican y cómo evaluar oportunidades reales sin convertirlo en un programa completo.", icon: "automation", price: "USD 600 a 900 + IVA", requirement: "Disponible para exploración o profundización temática" },
+        { id: "webinar-sharepoint-agents", title: "Webinar especializado: agentes en SharePoint", category: "Webinars especializados", desc: "Profundización sobre agentes conectados a contenido, repositorios y escenarios de conocimiento en SharePoint.", icon: "teams", price: "USD 600 a 900 + IVA", requirement: "Recomendado si hay interés en agentes y contenido documental" },
+        { id: "webinar-notebooks", title: "Webinar especializado: notebooks y funcionalidades Copilot", category: "Webinars especializados", desc: "Recorrido de capacidades puntuales de Copilot, notebooks y casos demostrativos para equipos que piden mayor profundidad sin iniciar un despliegue.", icon: "spark", price: "USD 600 a 900 + IVA", requirement: "Disponible para audiencias interesadas en IA" },
         { id: "champions", title: "Programa Champions", category: "Activación y cambio", desc: "Activación y acompañamiento de referentes internos.", icon: "training", price: "USD 1.200 a 2.500 + IVA", requirement: "Disponible para todos" },
         { id: "office-hours", title: "Office Hours / acompañamiento", category: "Activación y cambio", desc: "Espacios de consulta, acompañamiento en piso y soporte post-sesión.", icon: "support", price: "USD 900 + IVA", requirement: "Disponible para todos" },
         { id: "change", title: "Gestión del cambio", category: "Activación y cambio", desc: "Comunicación interna, sponsors, adopción, medición y acompañamiento del cambio.", icon: "communication", price: "USD 2.500 a 5.000 + IVA", requirement: "Disponible para todos" },
@@ -4085,9 +4088,12 @@
       if (state.cowork) addIfExtra("cowork");
       if (state.primaryObjective === "explore-ai" || state.copilotLicenses === "none" || state.copilotLicenses === "chat") addIfExtra("copilot-intro-webinar");
       if (state.agentNeed === "explore" || state.agentNeed === "active" || state.primaryObjective === "agent-automation") {
+        addIfExtra("webinar-agents");
         addIfExtra("agents-cowork");
         addIfExtra("copilot-studio");
       }
+      if ((state.agentNeed === "explore" || state.agentNeed === "active" || state.primaryObjective === "agent-automation") && (state.teamsSharepointStructure === "partial" || state.teamsSharepointStructure === "governed" || state.informationLocation === "structured")) addIfExtra("webinar-sharepoint-agents");
+      if (state.primaryObjective === "explore-ai" || state.concreteUseCases === "some" || state.concreteUseCases === "many") addIfExtra("webinar-notebooks");
       const excelNeed = ["data-analysis", "sales-analysis", "student-analysis", "operations-analysis"].includes(state.create) || state.successMetric === "task-traceability";
       if (excelNeed && hasCopilotLicense()) addIfExtra("copilot-excel");
       if (excelNeed && !hasCopilotLicense()) addIfExtra(state.accompaniment === "training" ? "excel-intermediate" : "excel-advanced");
@@ -4146,7 +4152,7 @@
       if (state.proposalMode === "direct" && !state.selectedAddons.length) return [];
       const selected = state.selectedAddons && state.selectedAddons.length ? state.selectedAddons : suggestedAddonIds(planKey);
       const included = includedAddonIdsForPlan(planKey);
-      return addOnCatalog().filter((item) => selected.includes(item.id) && !included.has(item.id) && isAddonEnabled(item));
+      return addOnCatalog().filter((item) => selected.includes(item.id) && !included.has(item.id) && isAddonEnabled(item, planKey));
     }
     function addonIdFromAiValue(value) {
       const normalized = normalizeText(value);
@@ -5150,6 +5156,8 @@
         plan0: {
           name: "Plan 0 · Envisioning IA",
           shortName: "Envisioning IA (P0)",
+          commercialStage: "Etapa 1",
+          commercialStageName: "Envisioning IA",
           maturityOrder: 2,
           maturityLevel: "Nivel 2",
           maturityName: "IA inicial sin licencias",
@@ -5173,6 +5181,8 @@
         plan1: {
           name: "Plan 1 · Productividad Digital",
           shortName: "Productividad Digital (P1)",
+          commercialStage: "Etapa 0",
+          commercialStageName: "Productividad Digital",
           maturityOrder: 1,
           maturityLevel: "Nivel 1",
           maturityName: "Madurez Digital",
@@ -5196,6 +5206,8 @@
         plan2: {
           name: "Plan 2 · IA aplicada al trabajo",
           shortName: "IA aplicada al trabajo (P2)",
+          commercialStage: "Etapa 2",
+          commercialStageName: "IA aplicada al trabajo",
           maturityOrder: 3,
           maturityLevel: "Nivel 3",
           maturityName: "IA empresarial con Copilot",
@@ -5219,6 +5231,8 @@
         plan3: {
           name: "Plan 3 · Productividad Digital + Microsoft 365 Copilot",
           shortName: "Productividad Digital + Microsoft 365 Copilot (P3)",
+          commercialStage: "Etapa 3",
+          commercialStageName: "Productividad Digital + IA",
           maturityOrder: 4,
           maturityLevel: "Nivel 4",
           maturityName: "IA transformacional",
@@ -5242,7 +5256,7 @@
       };
     }
     function planMaturityTitle(plan) {
-      return `${plan.maturityLevel} · ${plan.maturityName}`;
+      return `${plan.commercialStage || plan.maturityLevel} · ${plan.commercialStageName || plan.maturityName}`;
     }
     function planReferenceLabel(plan) {
       return `Referencia comercial: ${plan.shortName || plan.name}`;
@@ -5656,6 +5670,62 @@
       if (decision.level === "high") return "La mayoría de las señales apuntan al mismo camino.";
       if (decision.level === "medium") return "Hay una recomendación principal, pero conviene revisar la alternativa antes de cerrar alcance.";
       return "Las respuestas mezclan señales; conviene validar con preventa/adopción antes de cerrar.";
+    }
+    function progressionGuidance(planKey = selectedProposalPlanKey()) {
+      const items = [];
+      const noCopilotLicense = state.copilotLicenses === "none" || state.copilotLicenses === "chat";
+      const lowM365Base = state.m365Maturity === "low" || ["scattered", "mixed"].includes(state.informationLocation) || ["none", "informal"].includes(state.teamsSharepointStructure) || ["manual", "partial"].includes(state.taskManagement);
+      const wantsCopilot = state.primaryObjective === "copilot-roi" || state.concreteUseCases === "some" || state.concreteUseCases === "many";
+      const wantsAdvanced = state.primaryObjective === "agent-automation" || state.agentNeed === "explore" || state.agentNeed === "active" || state.cowork;
+      const usageIsNotAdopted = state.copilotUsage === "not-applicable" || state.copilotUsage === "under-20" || !state.copilotUsage;
+      if (lowM365Base && ["plan0", "plan2"].includes(planKey)) {
+        items.push({
+          level: "Atajo a revisar",
+          title: "La base Microsoft 365 todavía no parece consolidada",
+          desc: "Antes de avanzar solo con IA, conviene considerar Etapa 0 · Productividad Digital o incluir una primera ola de hábitos Microsoft 365.",
+          action: "Validar si el cliente ya adoptó Outlook, Teams, OneDrive, SharePoint y seguimiento de tareas."
+        });
+      }
+      if (planKey === "plan3" && lowM365Base) {
+        items.push({
+          level: "Secuencia recomendada",
+          title: "El programa integral debe empezar por productividad digital",
+          desc: "Etapa 3 puede aplicar, pero la primera ola debería ordenar herramientas y hábitos antes de profundizar Copilot.",
+          action: "Presentar el roadmap como progresión: productividad digital primero, Copilot después."
+        });
+      }
+      if (noCopilotLicense && (planKey === "plan2" || planKey === "plan3" || wantsCopilot)) {
+        items.push({
+          level: "Prerrequisito",
+          title: "No hay Microsoft 365 Copilot activo/trial",
+          desc: "Para IA aplicada al trabajo se necesita licencia. Si todavía no existe, el paso natural es Envisioning IA o definición de licenciamiento.",
+          action: "No prometer adopción Copilot con datos corporativos sin confirmar licencias."
+        });
+      }
+      if (wantsAdvanced && (noCopilotLicense || usageIsNotAdopted)) {
+        items.push({
+          level: "Escalón posterior",
+          title: "Agentes, automatización y Cowork vienen después de adoptar Copilot",
+          desc: "Si el cliente pide automatización avanzada pero aún no adoptó Copilot, la propuesta debe ordenar primero el escalón de IA aplicada.",
+          action: "Ofrecer P2 como paso previo y dejar Cowork/agentes como add-on posterior o módulo focalizado."
+        });
+      }
+      return items;
+    }
+    function renderProgressionGuidance(planKey = selectedProposalPlanKey()) {
+      const items = progressionGuidance(planKey);
+      if (!items.length) return "";
+      return `<div class="addon-adjustment-notice">
+        <strong>Lectura de progresión comercial</strong>
+        <div class="decision-help-grid" style="margin-top:10px">
+          ${items.map((item) => `<div class="decision-plan-card">
+            <span>${escapeHtml(item.level)}</span>
+            <strong>${escapeHtml(item.title)}</strong>
+            <span>${escapeHtml(item.desc)}</span>
+            <span><b>Acción:</b> ${escapeHtml(item.action)}</span>
+          </div>`).join("")}
+        </div>
+      </div>`;
     }
     function decisionEvidenceMarkup(decision) {
       if (!decision.reasons.length) return "";
@@ -6151,9 +6221,12 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           startDateFormatted: formatDate(state.startDate),
           recommendedPlanKey: recommendedKey,
           recommendedPlanName: plans[recommendedKey].name,
+          commercialStage: plans[recommendedKey].commercialStage || "",
+          commercialStageName: plans[recommendedKey].commercialStageName || "",
           recommendedPlanDuration: proposalDurationLabel(recommendedKey),
           recommendedPlanScope: proposalScopeDetail(recommendedKey),
           adoptionWaveModel: wave,
+          progressionGuidance: progressionGuidance(recommendedKey),
           confidence: decision.confidence,
           confidenceLabel: confidenceLabel(decision.level),
           reasons: decision.reasons,
@@ -6178,7 +6251,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           timelineRules: wave
             ? `Este plan usa modelo de olas: ${wave.title}, ${wave.groups}, duracion ${wave.duration}. La hoja de ruta debe respetar ese calendario, sus olas y el templateRoadmap enviado; no volver a un roadmap generico.`
             : "La hoja de ruta debe respetar la duracion, alcance y templateRoadmap enviados para el plan seleccionado.",
-          responseFormat: "Responder JSON valido con { summary, items }. items debe tener 4 a 6 etapas con tag, title, date, desc, tasks (3 a 5 bullets), owner, deliverable, risk e icon. Usar los datos del relevamiento; no inventar informacion externa. Mantener fechas, olas, duracion y alcance exactamente consistentes con proposal.recommendedPlanDuration, proposal.recommendedPlanScope, proposal.adoptionWaveModel y proposal.templateRoadmap. Si el plan es P1/Productividad Digital, no reducirlo a capacitacion: cada hoja de ruta debe incluir diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion."
+          responseFormat: "Responder JSON valido con { summary, items }. items debe tener 4 a 6 etapas con tag, title, date, desc, tasks (3 a 5 bullets), owner, deliverable, risk e icon. Usar los datos del relevamiento; no inventar informacion externa. Mantener fechas, olas, duracion y alcance exactamente consistentes con proposal.recommendedPlanDuration, proposal.recommendedPlanScope, proposal.adoptionWaveModel y proposal.templateRoadmap. Respetar proposal.progressionGuidance: si hay prerrequisitos, atajos o escalones posteriores, ordenarlos en el roadmap. Si el plan es P1/Productividad Digital, no reducirlo a capacitacion: cada hoja de ruta debe incluir diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion."
         }
       };
     }
@@ -6265,6 +6338,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                     </div>
                   </div>
                   ${renderPlanSelectionPanel(decision, plans, recommendedKey, mode)}
+                  ${renderProgressionGuidance(recommendedKey)}
                   <p><strong>Análisis comercial:</strong> ${recommendationReason(recommendedKey)}</p>
                   ${decisionEvidenceMarkup(decision)}
                   ${decisionAlternativesMarkup(decision, plans, recommendedKey, mode)}
@@ -6610,6 +6684,7 @@ ${location.href}`
       const directMode = state.proposalMode === "direct";
       const planChangedByCommercial = !directMode && recommendedKey !== algorithmRecommendedKey;
       const wave = adoptionWaveModel(recommendedKey);
+      const progressionItems = progressionGuidance(recommendedKey);
       return {
         source: "GeneradorPropuestaADP",
         createdAt: new Date().toISOString(),
@@ -6622,7 +6697,7 @@ ${location.href}`
             "## Lectura comercial",
             "Madurez, dolores principales, confianza del algoritmo y oportunidad detectada.",
             "## Recomendacion Possumus",
-            "Plan recomendado, por que aplica, alternativas si la confianza es media/baja y como se relaciona con la realidad del cliente. Para P1/Productividad Digital, no presentarlo como capacitacion puntual: describirlo como programa de adopcion con diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion. Si aparece Cowork, tratarlo como add-on con prerrequisito de Microsoft 365 Copilot activo/trial y 3 a 5 sesiones; si aparece Webinar introductorio Copilot en 30 minutos, presentarlo como entrada liviana de sensibilizacion, no como programa de adopcion.",
+            "Plan recomendado, por que aplica, alternativas si la confianza es media/baja y como se relaciona con la realidad del cliente. Respetar progressionGuidance: si hay atajos o prerrequisitos, explicarlos como secuencia comercial sin invalidar la oportunidad. Para P1/Productividad Digital, no presentarlo como capacitacion puntual: describirlo como programa de adopcion con diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion. Si aparece Cowork, tratarlo como add-on con prerrequisito de Microsoft 365 Copilot activo/trial y 3 a 5 sesiones; si aparecen webinars especializados, presentarlos como consumo puntual por tecnologia, no como programa de adopcion.",
             ...(state.includeBudgetEstimate !== false ? [
               "## Estimacion asistida de presupuesto",
               "Rango recomendado, modalidad comercial sugerida, supuestos y alertas. Si la confianza es baja, no cerrar rango y pedir validacion con preventa/adopcion."
@@ -6651,11 +6726,14 @@ ${location.href}`
           recommendedPlanShortName: recommended.shortName || recommended.name,
           maturityLevel: recommended.maturityLevel,
           maturityName: recommended.maturityName,
+          commercialStage: recommended.commercialStage || "",
+          commercialStageName: recommended.commercialStageName || "",
           maturityTitle: planMaturityTitle(recommended),
           recommendedPlanBadge: recommended.badge,
           recommendedPlanDuration: proposalDurationLabel(recommendedKey),
           recommendedPlanScope: proposalScopeDetail(recommendedKey),
           adoptionWaveModel: wave,
+          progressionGuidance: progressionItems,
           quote: quote.main,
           quoteDetail: quote.detail,
           totalEstimate,
@@ -7061,6 +7139,7 @@ ${location.href}`
       const decision = planDecision();
       const directMode = state.proposalMode === "direct";
       const activeComparisons = directMode ? [] : activePlanComparisons(recommendedKey, decision);
+      const progressionItems = progressionGuidance(recommendedKey);
       const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
       const companyResearchMarkup = formatCompanyResearch(state.aiSummary && state.aiSummary.companyResearch);
       const validationSummaryText = state.aiValidation && state.aiValidation.summary ? filterValidationSummaryForProposal(state.aiValidation.summary) : "";
@@ -7212,6 +7291,7 @@ ${location.href}`
               </div>
               ${wave ? `<div class="card wave-card" style="margin-top:5mm"><strong>Modelo de olas para este alcance</strong><p>${escapeHtml(wave.note)}</p><div class="wave-meta"><div><span>Modalidad</span><strong>${escapeHtml(wave.label)}</strong></div><div><span>Despliegue</span><strong>${escapeHtml(wave.title)}</strong></div><div><span>Segmentación</span><strong>${escapeHtml(wave.groups)}</strong></div></div></div>` : ""}
               ${recommendedKey === "plan1" ? `<div class="card" style="margin-top:5mm"><strong>P1 no es solo capacitación</strong><p>Productividad Digital combina diagnóstico, comunicación, formación aplicada, acompañamiento y medición. Las sesiones son una parte del recorrido; el valor es instalar hábitos Microsoft 365 medibles por ola.</p></div>` : ""}
+              ${progressionItems.length ? `<div class="card" style="margin-top:5mm"><strong>Lectura de progresión comercial</strong><ul>${progressionItems.map((item) => `<li><strong>${escapeHtml(item.level)}:</strong> ${escapeHtml(item.desc)} ${escapeHtml(item.action)}</li>`).join("")}</ul></div>` : ""}
             </div>
             <div class="card price-card">
               <strong>Resumen económico</strong>
@@ -7367,7 +7447,7 @@ ${location.href}`
       </div>`;
       const questionGuide = `
         <section class="decision-help-section">
-          <h4>5. Guía de preguntas e impacto en el cálculo</h4>
+          <h4>6. Guía de preguntas e impacto en el cálculo</h4>
           <p>Esta guía explica cómo cada respuesta modifica el scoring, la confianza, los add-ons sugeridos o la precisión comercial de la propuesta.</p>
           <div class="decision-help-grid">
             ${contextCards}
@@ -7380,7 +7460,7 @@ ${location.href}`
         const included = addOnCatalog().filter((addon) => includedAddonIdsForPlan(key).has(addon.id)).map((addon) => addon.title);
         return `<div class="decision-plan-card">
           <strong>${escapeHtml(planMaturityTitle(plan))}</strong>
-          <span><b>Referencia:</b> ${escapeHtml(plan.name)}</span>
+          <span><b>Referencia:</b> ${escapeHtml(plan.shortName || plan.name)}</span>
           <span><b>Madurez:</b> ${escapeHtml(plan.maturityDesc)}</span>
           <span><b>Caso:</b> ${escapeHtml(plan.customerCase)}</span>
           <span><b>Nivel de IA:</b> ${escapeHtml(plan.aiLevel)} (${escapeHtml(plan.aiLevelDetail)})</span>
@@ -7396,22 +7476,33 @@ ${location.href}`
       $("decisionHelpContent").innerHTML = `
         <section class="decision-help-section">
           <h4>1. Planes disponibles</h4>
-          <p>La app muestra una escalera de madurez para orientar la conversación, manteniendo como referencia los nombres comerciales de la presentación vigente.</p>
+          <p>La app muestra una escalera de progresión para orientar la conversación. Las claves técnicas internas no cambian, pero la UI ordena comercialmente desde Etapa 0 hasta Etapa 3.</p>
           <div class="decision-help-grid">${planCards}</div>
         </section>
         <section class="decision-help-section">
           <h4>2. Árbol de decisión simplificado</h4>
           <p>El scoring suma señales. Si varias señales apuntan al mismo plan, la confianza sube; si se mezclan caminos, aparecen alternativas.</p>
           <ol class="decision-flow">
-            <li><b>1</b><div><strong>Objetivo principal</strong><span>Productividad M365 empuja Plan 1; explorar IA empuja Plan 0; ROI de Copilot empuja Plan 2; estrategia, COE o escalamiento empuja Plan 3.</span></div></li>
-            <li><b>2</b><div><strong>Licenciamiento y uso real</strong><span>Sin M365 Copilot se prioriza Plan 0 o Plan 1. Con licencias y bajo uso semanal, se prioriza Plan 2. Con uso alto, escala, agentes o COE, puede subir a Plan 3.</span></div></li>
-            <li><b>3</b><div><strong>Madurez Microsoft 365</strong><span>Madurez baja/media, información dispersa o Teams/SharePoint desordenado refuerzan Plan 1 y add-ons de orden digital.</span></div></li>
+            <li><b>1</b><div><strong>Objetivo principal</strong><span>Productividad M365 empuja Etapa 0; explorar IA empuja Etapa 1; ROI de Copilot empuja Etapa 2; estrategia, COE o escalamiento empuja Etapa 3.</span></div></li>
+            <li><b>2</b><div><strong>Licenciamiento y uso real</strong><span>Sin M365 Copilot se prioriza Etapa 0 o Etapa 1. Con licencias y bajo uso semanal, se prioriza Etapa 2. Con uso alto, escala, agentes o COE, puede subir a Etapa 3.</span></div></li>
+            <li><b>3</b><div><strong>Madurez Microsoft 365</strong><span>Madurez baja/media, información dispersa o Teams/SharePoint desordenado refuerzan Etapa 0 y add-ons de orden digital.</span></div></li>
             <li><b>4</b><div><strong>Casos de uso, agentes y gobierno</strong><span>Casos concretos, agentes activos, gobierno de IA, seguridad, datos o COE suman peso a Plan 3 o a add-ons específicos.</span></div></li>
             <li><b>5</b><div><strong>Escala y cambio</strong><span>Más usuarios, varias áreas, sponsor, despliegue escalado o gestión del cambio integral aumentan la necesidad de programa completo.</span></div></li>
           </ol>
         </section>
         <section class="decision-help-section">
-          <h4>3. Confianza y alternativas</h4>
+          <h4>3. Regla de progresión comercial</h4>
+          <p>La app no bloquea una oportunidad, pero marca cuando el cliente intenta saltar escalones y sugiere cómo ordenar la propuesta.</p>
+          <ol class="decision-flow">
+            <li><b>0</b><div><strong>Productividad Digital</strong><span>Si no adoptó bien Microsoft 365, primero ordenar hábitos, comunicación, documentos, reuniones y medición.</span></div></li>
+            <li><b>1</b><div><strong>Envisioning IA</strong><span>Si no tiene licencias Copilot, explorar IA y business case con Copilot Chat antes de prometer adopción con datos corporativos.</span></div></li>
+            <li><b>2</b><div><strong>IA aplicada al trabajo</strong><span>Con licencias/trial, trabajar casos reales, prompts, medición y uso sostenido de Microsoft 365 Copilot.</span></div></li>
+            <li><b>3</b><div><strong>Productividad + IA</strong><span>Para transformación completa, combinar olas de productividad digital con Copilot, gobierno, champions y medición.</span></div></li>
+            <li><b>+</b><div><strong>Add-ons</strong><span>Excel, Cowork, agentes y webinars se suman según madurez y necesidad; no reemplazan la secuencia principal.</span></div></li>
+          </ol>
+        </section>
+        <section class="decision-help-section">
+          <h4>4. Confianza y alternativas</h4>
           <p>La propuesta siempre mantiene un plan principal para que el comercial tenga una salida clara.</p>
           <div class="decision-help-grid">
             <div class="decision-plan-card"><strong>Confianza alta</strong><span>Se muestra un único plan porque la mayoría de señales coinciden.</span></div>
@@ -7423,13 +7514,13 @@ ${location.href}`
           </div>
         </section>
         <section class="decision-help-section">
-          <h4>4. Add-ons</h4>
+          <h4>5. Add-ons</h4>
           <p>Los add-ons se clasifican según el plan probable para evitar cotizar como adicional algo ya incluido.</p>
           <ul class="decision-help-list">${addonCategories}</ul>
           <ol class="decision-flow">
             <li><b>A</b><div><strong>Sugeridos</strong><span>Se activan por respuestas concretas: Excel/análisis, Teams/SharePoint, orden documental, agentes, modalidad presencial/mixta, gobierno o cambio.</span></div></li>
             <li><b>B</b><div><strong>Ya incluidos</strong><span>Se muestran separados para no duplicar alcance en la cotización.</span></div></li>
-            <li><b>C</b><div><strong>No disponibles</strong><span>Quedan deshabilitados cuando requieren Microsoft 365 Copilot y el cliente no tiene licencia/trial.</span></div></li>
+            <li><b>C</b><div><strong>No disponibles</strong><span>Quedan deshabilitados cuando requieren Microsoft 365 Copilot, adopción previa o un prerrequisito comercial que el cliente aún no cumple.</span></div></li>
           </ol>
         </section>
         ${questionGuide}`;
