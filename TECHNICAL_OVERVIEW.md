@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.11**
+Versión documentada: **MVP 0.10.12**
 Última actualización funcional: **2026-09-08**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -310,7 +310,7 @@ Endpoints implementados:
 
 Las utilidades comunes de las Functions (`fetchWithTimeout`, `findText`, `extractJsonObject`, `isPayloadTooLarge`) viven centralizadas en `api/shared/flow-utils.js` y se importan con `require("../shared/flow-utils")` para evitar copias divergentes. Todas las llamadas a Power Automate usan timeout (AbortController) y manejo de error. Las respuestas ya no exponen el objeto `raw` crudo del Flow al frontend.
 
-Endurecimiento de los endpoints POST (`handoff`, `ai-summary`, `ai-roadmap`, `plan-comparison`, `proposal-validation`): cada uno valida la forma del cuerpo (`proposal` + `answers`) devolviendo `400` ante payload inválido y `413` cuando el cuerpo supera el límite defensivo de tamaño (`isPayloadTooLarge`, 512 KB), evitando reenviar cuerpos enormes a Power Automate. `authLevel` es `anonymous` de forma intencional (app pública client-side); la protección real es same-origin en Static Web Apps + límites de tamaño + validación del lado del Flow. Cada `function.json` restringe los métodos HTTP admitidos (POST salvo `addon-prices`, que admite GET/POST).
+Endurecimiento de los endpoints POST (`handoff`, `ai-summary`, `ai-roadmap`, `plan-comparison`, `proposal-validation`): cada uno valida la forma del cuerpo (`proposal` + `answers`) devolviendo `400` ante payload inválido y `413` cuando el cuerpo supera el límite defensivo de tamaño (`isPayloadTooLarge`, 512 KB), evitando reenviar cuerpos enormes a Power Automate. Además, `handoff` valida que el objeto `email` traiga `from`, `to`, `subject` y `body` no vacíos antes de invocar el Flow; si faltan, responde `400` y no dispara la corrida (evita fallos "field of type 'Null'" y sus mails de alerta ante payloads incompletos). `authLevel` es `anonymous` de forma intencional (app pública client-side); la protección real es same-origin en Static Web Apps + límites de tamaño + validación del lado del Flow. Cada `function.json` restringe los métodos HTTP admitidos (POST salvo `addon-prices`, que admite GET/POST).
 
 ## 8. PDF y envío de propuesta
 

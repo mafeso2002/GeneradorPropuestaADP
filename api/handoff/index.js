@@ -33,6 +33,21 @@ module.exports = async function (context, req) {
     return;
   }
 
+  // El Flow arma un correo con estos campos; si faltan, Power Automate falla con
+  // "field of type 'Null'". Validamos antes de invocarlo para no disparar corridas
+  // fallidas (y sus mails de alerta) por payloads incompletos.
+  const email = payload.email;
+  const hasText = (value) => typeof value === "string" && value.trim().length > 0;
+  if (!email || typeof email !== "object" ||
+      !hasText(email.from) || !hasText(email.to) || !hasText(email.subject) || !hasText(email.body)) {
+    context.res = {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+      body: { error: "Faltan campos del correo (De, Para, Asunto y Cuerpo) para enviar la propuesta." }
+    };
+    return;
+  }
+
   try {
     const flowResponse = await fetchWithTimeout(flowUrl, {
       method: "POST",
