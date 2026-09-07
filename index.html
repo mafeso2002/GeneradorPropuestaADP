@@ -2897,7 +2897,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.2 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.3 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -4108,7 +4108,9 @@
         ["role-cases", "prompt-library", "dashboard", "copilot-excel"].forEach((id) => included.add(id));
       }
       if (planKey === "plan3") {
-        ["role-cases", "prompt-library", "dashboard", "champions", "change", "webinar", "copilot-excel"].forEach((id) => included.add(id));
+        addOnCatalog()
+          .filter((addon) => !["cowork", "copilot-studio"].includes(addon.id))
+          .forEach((addon) => included.add(addon.id));
       }
       return included;
     }
@@ -4116,6 +4118,7 @@
       if (planKey === "plan0") return new Set(["leaders", "readiness", "copilot-intro-webinar"]);
       if (planKey === "plan1") return new Set(["readiness", "excel-intermediate", "excel-advanced", "tool-module"]);
       if (planKey === "plan2") return new Set(["cowork", "agents-cowork", "copilot-studio", "webinar-agents", "webinar-sharepoint-agents", "webinar-notebooks"]);
+      if (planKey === "plan3") return new Set(["cowork", "copilot-studio"]);
       return null;
     }
     function isAddonAllowedForPlan(addon, planKey = selectedProposalPlanKey()) {
@@ -4291,6 +4294,7 @@
         if (planKey === "plan0") return "P0 se mantiene acotado. Si necesitás este módulo, conviene cambiar a P1, P2 o P3.";
         if (planKey === "plan1") return "P1 ya cubre adopción base. Si necesitás este módulo, conviene ampliar alcance o cambiar a P2/P3.";
         if (planKey === "plan2") return "P2 ya incluye activación Copilot, casos por rol, prompts y medición. Si necesitás este módulo, conviene revisar P1/P3 o tratarlo fuera del alcance.";
+        if (planKey === "plan3") return "P3 es el programa integral. Este módulo ya queda contemplado en el alcance base o no se cotiza por separado.";
         return "No disponible para este plan.";
       }
       if (addon.id === "cowork") return coworkEligibility(planKey).reason;
@@ -4361,6 +4365,12 @@
         return `<div class="addon-adjustment-notice">
           <strong>P2 solo suma profundizaciones Copilot</strong>
           IA aplicada al trabajo ya incluye casos por rol, Prompt Library, Copilot en Excel y medición. Solo se pueden sumar Cowork, Agents & Cowork, Copilot Studio o webinars especializados de agentes, agentes en SharePoint y notebooks/funcionalidades Copilot.
+        </div>`;
+      }
+      if (planKey === "plan3") {
+        return `<div class="addon-adjustment-notice">
+          <strong>P3 ya incluye el programa integral</strong>
+          Productividad Digital + IA contempla adopción Microsoft 365, Copilot, casos por rol, prompts, medición, comunicación, champions, cambio y webinars. Solo se pueden cotizar aparte Cowork y Agentes a medida con Copilot Studio.
         </div>`;
       }
       if (planKey !== "plan0") return "";
@@ -6821,7 +6831,7 @@ ${location.href}`
             "## Lectura comercial",
             "Madurez, dolores principales, confianza del algoritmo y oportunidad detectada.",
             "## Recomendacion Possumus",
-            "Plan recomendado, por que aplica, alternativas si la confianza es media/baja y como se relaciona con la realidad del cliente. Respetar progressionGuidance: si hay atajos o prerrequisitos, explicarlos como secuencia comercial sin invalidar la oportunidad. Para P0/Envisioning IA, mantener add-ons acotados a Casos para lideres, Readiness tecnico y Webinar introductorio Copilot en 30 minutos; si el cliente necesita mas, sugerir cambio de plan. Para P1/Productividad Digital, no presentarlo como capacitacion puntual: describirlo como programa de adopcion con diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion. En P1 solo permitir como add-ons Readiness tecnico, Excel intermedio, Excel avanzado y Modulo a medida de herramienta puntual; si hace falta mas, sugerir ampliar alcance o cambiar a P2/P3. En P2/IA aplicada al trabajo, solo permitir add-ons de profundizacion Copilot: Cowork, Agents & Cowork, Copilot Studio y webinars especializados de agentes, agentes en SharePoint o notebooks/funcionalidades Copilot. Si aparece Cowork, tratarlo como add-on con prerrequisito de Microsoft 365 Copilot activo/trial y 3 a 5 sesiones; si aparecen webinars especializados, presentarlos como consumo puntual por tecnologia, no como programa de adopcion.",
+            "Plan recomendado, por que aplica, alternativas si la confianza es media/baja y como se relaciona con la realidad del cliente. Respetar progressionGuidance: si hay atajos o prerrequisitos, explicarlos como secuencia comercial sin invalidar la oportunidad. Para P0/Envisioning IA, mantener add-ons acotados a Casos para lideres, Readiness tecnico y Webinar introductorio Copilot en 30 minutos; si el cliente necesita mas, sugerir cambio de plan. Para P1/Productividad Digital, no presentarlo como capacitacion puntual: describirlo como programa de adopcion con diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion. En P1 solo permitir como add-ons Readiness tecnico, Excel intermedio, Excel avanzado y Modulo a medida de herramienta puntual; si hace falta mas, sugerir ampliar alcance o cambiar a P2/P3. En P2/IA aplicada al trabajo, solo permitir add-ons de profundizacion Copilot: Cowork, Agents & Cowork, Copilot Studio y webinars especializados de agentes, agentes en SharePoint o notebooks/funcionalidades Copilot. En P3/Productividad Digital + IA, presentar el plan como programa integral con casi todo incluido; solo Cowork y Agentes a medida con Copilot Studio se cotizan aparte. Si aparece Cowork, tratarlo como add-on con prerrequisito de Microsoft 365 Copilot activo/trial y 3 a 5 sesiones; si aparecen webinars especializados, presentarlos como consumo puntual por tecnologia, no como programa de adopcion.",
             ...(state.includeBudgetEstimate !== false ? [
               "## Estimacion asistida de presupuesto",
               "Rango recomendado, modalidad comercial sugerida, supuestos y alertas. Si la confianza es baja, no cerrar rango y pedir validacion con preventa/adopcion."

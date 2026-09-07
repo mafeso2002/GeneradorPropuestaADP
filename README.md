@@ -63,6 +63,8 @@ En **P1 / Productividad Digital** los add-ons también quedan simplificados: sol
 
 En **P2 / IA aplicada al trabajo** los add-ons se limitan a profundizaciones de Copilot: **Cowork y Copilot**, **Agents & Cowork**, **Agentes a medida con Copilot Studio**, **Webinar especializado: agentes**, **Webinar especializado: agentes en SharePoint** y **Webinar especializado: notebooks y funcionalidades Copilot**. Casos por rol, Prompt Library, Copilot en Excel y Dashboard ya quedan incluidos en el plan base.
 
+En **P3 / Productividad Digital + IA** el programa se considera integral. Todo el catálogo queda incluido o absorbido por el alcance base salvo **Cowork y Copilot** y **Agentes a medida con Copilot Studio**, que son los únicos add-ons cotizables aparte.
+
 La app incluye una industria específica para **Energía, servicios eléctricos y construcción**, pensada para casos con obras, servicios técnicos, oficina técnica, compras, depósito y documentación operativa.
 
 La pantalla de add-ons muestra el plan probable y separa los módulos entre sugeridos para el caso, disponibles para ampliar alcance, ya incluidos en el plan y no disponibles por prerrequisito. Esto evita cotizar como adicional una actividad que ya forma parte del plan base.

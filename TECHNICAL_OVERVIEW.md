@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.2**
+Versión documentada: **MVP 0.10.3**
 Última actualización funcional: **2026-09-07**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -105,6 +105,8 @@ P0 / Envisioning IA queda deliberadamente acotado para preservar su función exp
 P1 / Productividad Digital también usa add-ons acotados para no duplicar lo que ya cubre el programa base. Solo quedan seleccionables **Readiness técnico**, **Excel intermedio**, **Excel avanzado** y **Módulo a medida de herramienta puntual**. El resto queda no disponible por alcance o como señal para ampliar el programa/cambiar a P2 o P3.
 
 P2 / IA aplicada al trabajo permite solo add-ons de profundización Copilot: **Cowork y Copilot**, **Agents & Cowork**, **Agentes a medida con Copilot Studio**, **Webinar especializado: agentes**, **Webinar especializado: agentes en SharePoint** y **Webinar especializado: notebooks y funcionalidades Copilot**. Casos por rol, Prompt Library, Copilot en Excel y Dashboard se consideran incluidos en el plan base.
+
+P3 / Productividad Digital + IA se modela como programa integral. Todo el catálogo de add-ons queda incluido o absorbido por el alcance base salvo **Cowork y Copilot** y **Agentes a medida con Copilot Studio**, que son los únicos módulos seleccionables/cotizables aparte.
 
 La industria incluye una opción específica para **Energía, servicios eléctricos y construcción**, útil para clientes con obras, servicios técnicos, compras, documentación operativa, depósito y oficina técnica.
 
