@@ -26,7 +26,8 @@ function parseUsdAmount(text) {
   return Number.isFinite(value) ? value : null;
 }
 
-function findRows(value) {
+function findRows(value, depth = 0) {
+  if (depth > 8) return [];
   if (!value) return [];
   if (Array.isArray(value)) return value;
   if (typeof value !== "object") return [];
@@ -40,10 +41,20 @@ function findRows(value) {
     value.result
   ];
   for (const candidate of candidates) {
-    const rows = findRows(candidate);
+    const rows = findRows(candidate, depth + 1);
     if (rows.length) return rows;
   }
   return [];
+}
+
+async function fetchWithTimeout(url, options, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 module.exports = async function (context, req) {
@@ -62,41 +73,54 @@ module.exports = async function (context, req) {
     return;
   }
 
-  const flowResponse = await fetch(flowUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      source: "GeneradorPropuestaADP",
-      requestedAt: new Date().toISOString()
-    })
-  });
-
-  const responseText = await flowResponse.text();
-  let responseBody;
   try {
-    responseBody = JSON.parse(responseText);
+    const flowResponse = await fetchWithTimeout(flowUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        source: "GeneradorPropuestaADP",
+        requestedAt: new Date().toISOString()
+      })
+    });
+
+    const responseText = await flowResponse.text();
+    let responseBody;
+    try {
+      responseBody = JSON.parse(responseText);
+    } catch (error) {
+      responseBody = { raw: responseText.slice(0, 1000) };
+    }
+
+    const prices = findRows(responseBody)
+      .map(normalizeRow)
+      .filter(Boolean);
+
+    context.res = {
+      status: flowResponse.ok ? 200 : 502,
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "no-store"
+      },
+      body: flowResponse.ok
+        ? {
+            configured: true,
+            prices,
+            rawCount: prices.length
+          }
+        : {
+            error: (responseBody && responseBody.error) || `Power Automate respondio ${flowResponse.status}`
+          }
+    };
   } catch (error) {
-    responseBody = { raw: responseText };
+    context.log.error(`Addon prices flow request failed: ${error && error.message}`);
+    context.res = {
+      status: 502,
+      headers: { "Content-Type": "application/json", "Cache-Control": "no-store" },
+      body: {
+        error: error && error.name === "AbortError"
+          ? "La lectura de precios excedio el tiempo de espera."
+          : "No se pudo contactar a Power Automate para leer precios."
+      }
+    };
   }
-
-  const prices = findRows(responseBody)
-    .map(normalizeRow)
-    .filter(Boolean);
-
-  context.res = {
-    status: flowResponse.ok ? 200 : 502,
-    headers: {
-      "Content-Type": "application/json",
-      "Cache-Control": "no-store"
-    },
-    body: flowResponse.ok
-      ? {
-          configured: true,
-          prices,
-          rawCount: prices.length
-        }
-      : {
-          error: responseBody.error || responseText || `Power Automate respondio ${flowResponse.status}`
-        }
-  };
 };

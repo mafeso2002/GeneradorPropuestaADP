@@ -16,6 +16,16 @@ function findText(value) {
     .sort((a, b) => b.length - a.length)[0] || "";
 }
 
+async function fetchWithTimeout(url, options, timeoutMs = 60000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 module.exports = async function (context, req) {
   const flowUrl = process.env.POWER_AUTOMATE_PLAN_COMPARISON_URL || process.env.POWER_AUTOMATE_AI_SUMMARY_URL;
 
@@ -53,35 +63,49 @@ module.exports = async function (context, req) {
     }
   };
 
-  const flowResponse = await fetch(flowUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(enrichedPayload)
-  });
-
-  const responseText = await flowResponse.text();
-  let responseBody;
   try {
-    responseBody = JSON.parse(responseText);
+    const flowResponse = await fetchWithTimeout(flowUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(enrichedPayload)
+    });
+
+    const responseText = await flowResponse.text();
+    let responseBody;
+    try {
+      responseBody = JSON.parse(responseText);
+    } catch (error) {
+      responseBody = { summary: responseText };
+    }
+
+    const summary = findText(responseBody);
+
+    context.res = {
+      status: flowResponse.ok ? 200 : 502,
+      headers: { "Content-Type": "application/json" },
+      body: flowResponse.ok
+        ? {
+            summary,
+            fallbackRequired: !summary,
+            message: summary ? "" : "El Flow respondió, pero no devolvió una comparación utilizable.",
+            source: process.env.POWER_AUTOMATE_PLAN_COMPARISON_URL ? "Power Automate Plan Comparison" : "Power Automate AI",
+            raw: responseBody
+          }
+        : {
+            error: (responseBody && responseBody.error) || `Power Automate respondio ${flowResponse.status}`
+          }
+    };
   } catch (error) {
-    responseBody = { summary: responseText };
+    context.log.error(`Plan comparison flow request failed: ${error && error.message}`);
+    context.res = {
+      status: 502,
+      headers: { "Content-Type": "application/json" },
+      body: {
+        fallbackRequired: true,
+        error: error && error.name === "AbortError"
+          ? "La comparacion de planes excedio el tiempo de espera."
+          : "No se pudo contactar a Power Automate para comparar planes."
+      }
+    };
   }
-
-  const summary = findText(responseBody);
-
-  context.res = {
-    status: flowResponse.ok ? 200 : 502,
-    headers: { "Content-Type": "application/json" },
-    body: flowResponse.ok
-      ? {
-          summary,
-          fallbackRequired: !summary,
-          message: summary ? "" : "El Flow respondió, pero no devolvió una comparación utilizable.",
-          source: process.env.POWER_AUTOMATE_PLAN_COMPARISON_URL ? "Power Automate Plan Comparison" : "Power Automate AI",
-          raw: responseBody
-        }
-      : {
-          error: responseBody.error || responseText || `Power Automate respondio ${flowResponse.status}`
-        }
-  };
 };

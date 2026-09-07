@@ -1,3 +1,13 @@
+async function fetchWithTimeout(url, options, timeoutMs = 60000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function findText(value) {
   if (!value) return "";
   if (typeof value === "string") return value;
@@ -239,7 +249,7 @@ module.exports = async function (context, req) {
   let flowResponse;
   let responseText;
   try {
-    flowResponse = await fetch(flowUrl, {
+    flowResponse = await fetchWithTimeout(flowUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(enrichedPayload)

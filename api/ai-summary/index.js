@@ -419,13 +419,30 @@ module.exports = async function (context, req) {
     }
   };
 
-  const flowResponse = await fetch(flowUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(enrichedPayload)
-  });
+  let flowResponse;
+  let responseText;
+  try {
+    flowResponse = await fetchWithTimeout(flowUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(enrichedPayload)
+    }, 60000);
+    responseText = await flowResponse.text();
+  } catch (error) {
+    context.log.error(`AI summary flow request failed: ${error && error.message}`);
+    context.res = {
+      status: 502,
+      headers: { "Content-Type": "application/json" },
+      body: {
+        companyResearch,
+        error: error && error.name === "AbortError"
+          ? "El resumen ejecutivo excedio el tiempo de espera."
+          : "No se pudo contactar a Power Automate para el resumen ejecutivo."
+      }
+    };
+    return;
+  }
 
-  const responseText = await flowResponse.text();
   let responseBody;
   try {
     responseBody = JSON.parse(responseText);

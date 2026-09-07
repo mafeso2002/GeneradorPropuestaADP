@@ -1,3 +1,13 @@
+async function fetchWithTimeout(url, options, timeoutMs = 60000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 function findText(value) {
   if (!value) return "";
   if (typeof value === "string") return value;
@@ -89,38 +99,53 @@ module.exports = async function (context, req) {
     }
   };
 
-  const flowResponse = await fetch(flowUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(enrichedPayload)
-  });
-
-  const responseText = await flowResponse.text();
-  let responseBody;
   try {
-    responseBody = JSON.parse(responseText);
+    const flowResponse = await fetchWithTimeout(flowUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(enrichedPayload)
+    }, 60000);
+
+    const responseText = await flowResponse.text();
+    let responseBody;
+    try {
+      responseBody = JSON.parse(responseText);
+    } catch (error) {
+      responseBody = { summary: responseText };
+    }
+
+    const text = findText(responseBody);
+    const parsed = findRoadmap(responseBody) || findRoadmap(extractJsonObject(text)) || findRoadmap(extractJsonObject(responseText));
+    const hasItems = parsed && Array.isArray(parsed.items) && parsed.items.length;
+
+    context.res = {
+      status: flowResponse.ok ? 200 : 502,
+      headers: { "Content-Type": "application/json" },
+      body: flowResponse.ok
+        ? {
+            summary: parsed && parsed.summary ? parsed.summary : text,
+            items: hasItems ? parsed.items : [],
+            fallbackRequired: !hasItems,
+            message: hasItems ? "" : "El Flow respondió, pero no devolvió etapas de roadmap en JSON.",
+            source: process.env.POWER_AUTOMATE_AI_ROADMAP_URL ? "Power Automate AI Roadmap" : "Power Automate AI",
+            raw: responseBody
+          }
+        : {
+            error: (responseBody && responseBody.error) || `Power Automate respondio ${flowResponse.status}`
+          }
+    };
   } catch (error) {
-    responseBody = { summary: responseText };
+    context.log.error(`AI roadmap flow request failed: ${error && error.message}`);
+    context.res = {
+      status: 502,
+      headers: { "Content-Type": "application/json" },
+      body: {
+        fallbackRequired: true,
+        items: [],
+        error: error && error.name === "AbortError"
+          ? "La generacion de roadmap excedio el tiempo de espera."
+          : "No se pudo contactar a Power Automate para el roadmap."
+      }
+    };
   }
-
-  const text = findText(responseBody);
-  const parsed = findRoadmap(responseBody) || findRoadmap(extractJsonObject(text)) || findRoadmap(extractJsonObject(responseText));
-  const hasItems = parsed && Array.isArray(parsed.items) && parsed.items.length;
-
-  context.res = {
-    status: flowResponse.ok ? 200 : 502,
-    headers: { "Content-Type": "application/json" },
-    body: flowResponse.ok
-      ? {
-          summary: parsed && parsed.summary ? parsed.summary : text,
-          items: hasItems ? parsed.items : [],
-          fallbackRequired: !hasItems,
-          message: hasItems ? "" : "El Flow respondió, pero no devolvió etapas de roadmap en JSON.",
-          source: process.env.POWER_AUTOMATE_AI_ROADMAP_URL ? "Power Automate AI Roadmap" : "Power Automate AI",
-          raw: responseBody
-        }
-      : {
-          error: responseBody.error || responseText || `Power Automate respondio ${flowResponse.status}`
-        }
-  };
 };

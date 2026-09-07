@@ -2897,7 +2897,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.7 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.8 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -4255,6 +4255,24 @@
       if (addon.id === "cowork") return coworkEligibility(planKey).canSelect;
       return !addon.requiresCopilot || hasCopilotLicense();
     }
+    function sanitizeSelectedAddons(planKey = selectedProposalPlanKey()) {
+      // Mantiene state.selectedAddons coherente con el plan efectivo: descarta cargos
+      // automáticos de modalidad, add-ons no permitidos/incluidos y los que dejaron de
+      // estar habilitados (por ejemplo cowork sin licencia). Evita arrastrar selecciones
+      // inválidas al cambiar de plan o editar respuestas del wizard.
+      if (!Array.isArray(state.selectedAddons)) {
+        state.selectedAddons = [];
+        return;
+      }
+      const included = includedAddonIdsForPlan(planKey);
+      const selectable = new Set(selectableAddonCatalog().map((addon) => addon.id));
+      state.selectedAddons = state.selectedAddons.filter((id) => {
+        if (!selectable.has(id) || included.has(id)) return false;
+        const addon = selectableAddonCatalog().find((item) => item.id === id);
+        return Boolean(addon) && isAddonEnabled(addon, planKey);
+      });
+      if (!state.selectedAddons.includes("cowork")) state.cowork = false;
+    }
     function invalidateAiArtifacts() {
       // Cualquier cambio sustantivo en las respuestas del relevamiento puede volver obsoletos
       // los artefactos generados con IA (resumen, validación, roadmap, comparación de planes).
@@ -4994,9 +5012,8 @@
         ensureCoworkEligibility(planKey);
         const decision = planDecision();
         const plan = planCatalog()[planKey];
-        const included = includedAddonIdsForPlan(planKey);
         if (!state.selectedAddons.length) state.selectedAddons = suggestedAddonIds(planKey);
-        state.selectedAddons = state.selectedAddons.filter((id) => !included.has(id));
+        sanitizeSelectedAddons(planKey);
         const selected = new Set(state.selectedAddons);
         const catalog = selectableAddonCatalog();
         const suggested = sortAddonsForProposal(catalog.filter((addon) => addonState(addon, planKey) === "suggested"), planKey);
@@ -5306,7 +5323,13 @@
     }
     function loadPlan(id) {
       const stored = localStorage.getItem(`copilot-plan-${id}`);
-      if (stored) Object.assign(state, JSON.parse(stored));
+      if (!stored) return;
+      // Los precios vigentes se cargan desde Dataverse al iniciar la app (loadAddonPrices).
+      // El estado guardado del plan incluye un snapshot de addonPrices que puede estar vacío
+      // o desactualizado; preservamos los precios vigentes salvo que no se hayan podido cargar.
+      const livePrices = state.addonPrices;
+      Object.assign(state, JSON.parse(stored));
+      if (livePrices && Object.keys(livePrices).length) state.addonPrices = livePrices;
     }
     function loadUserPlan(userId) {
       const planId = localStorage.getItem(`copilot-user-${userId}`);
@@ -5635,14 +5658,6 @@
           addons: pricingItemsSummary(addons)
         };
       }
-      if (recommendedKey === "plan1" && state.userRange === "medium" && wave) {
-        return {
-          label: `${quote.main} por ola`,
-          detail: `Referencia por ola. ${wave.note}${addons.length ? " Los opcionales y adicionales se suman según alcance final." : ""}${unknownCount ? ` ${unknownCount} adicional${unknownCount === 1 ? "" : "es"} queda${unknownCount === 1 ? "" : "n"} a validar.` : ""}`,
-          plan: `${quote.main} por ola`,
-          addons: pricingItemsSummary(addons)
-        };
-      }
       const total = planAmount + addonTotal;
       return {
         label: formatUsd(total),
@@ -5827,6 +5842,8 @@
     function promoteAlternativePlan(planKey, mode = "admin") {
       if (!planCatalog()[planKey] || planKey === recommendedPlanKey()) return;
       state.overridePlanKey = planKey;
+      ensureCoworkEligibility(planKey);
+      sanitizeSelectedAddons(planKey);
       clearPlanDependentAiArtifacts();
       if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
       showToast("Plan alternativo seleccionado como principal.");
@@ -5834,6 +5851,8 @@
     }
     function revertToOriginalPlan(mode = "admin") {
       state.overridePlanKey = "";
+      ensureCoworkEligibility(recommendedPlanKey());
+      sanitizeSelectedAddons(recommendedPlanKey());
       clearPlanDependentAiArtifacts();
       if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
       showToast("Volviste al plan original.");
@@ -7049,8 +7068,10 @@ ${location.href}`
     }
     function buildValidationPayload() {
       const recommendedKey = recommendedPlanKey();
+      sanitizeSelectedAddons(recommendedKey);
       const payload = buildHandoffPayload(recommendedKey);
       const planKey = payload.proposal.recommendedPlanKey;
+      const selectedForPlan = new Set(selectedAddonItems(planKey).map((item) => item.id));
       payload.validationNotes = state.validationNotes || "";
       payload.validationInstructions = {
         purpose: "Auditar la consistencia comercial de la propuesta antes de generarla. No modificar automaticamente el plan ni las respuestas.",
@@ -7062,7 +7083,7 @@ ${location.href}`
           title: addon.title,
           category: addon.category || "Add-on",
           state: addonState(addon, planKey),
-          selected: state.selectedAddons.includes(addon.id),
+          selected: selectedForPlan.has(addon.id),
           requiresCopilot: Boolean(addon.requiresCopilot)
         })),
         actionsAvailableToCommercial: [

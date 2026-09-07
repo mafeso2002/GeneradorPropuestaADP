@@ -1,3 +1,13 @@
+async function fetchWithTimeout(url, options, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 module.exports = async function (context, req) {
   const flowUrl = process.env.POWER_AUTOMATE_HANDOFF_URL;
 
@@ -22,21 +32,35 @@ module.exports = async function (context, req) {
     return;
   }
 
-  const flowResponse = await fetch(flowUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  });
+  try {
+    const flowResponse = await fetchWithTimeout(flowUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
 
-  const responseText = await flowResponse.text();
+    const responseText = await flowResponse.text();
 
-  context.res = {
-    status: flowResponse.ok ? 200 : 502,
-    headers: { "Content-Type": "application/json" },
-    body: {
-      ok: flowResponse.ok,
-      status: flowResponse.status,
-      response: responseText
-    }
-  };
+    context.res = {
+      status: flowResponse.ok ? 200 : 502,
+      headers: { "Content-Type": "application/json" },
+      body: {
+        ok: flowResponse.ok,
+        status: flowResponse.status,
+        response: responseText.slice(0, 4000)
+      }
+    };
+  } catch (error) {
+    context.log.error(`Handoff flow request failed: ${error && error.message}`);
+    context.res = {
+      status: 502,
+      headers: { "Content-Type": "application/json" },
+      body: {
+        ok: false,
+        error: error && error.name === "AbortError"
+          ? "El envio a Power Automate excedio el tiempo de espera."
+          : "No se pudo contactar a Power Automate para enviar la propuesta."
+      }
+    };
+  }
 };
