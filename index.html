@@ -2897,7 +2897,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.9 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.10 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -5174,7 +5174,7 @@
       currentStep = Math.min(currentStep, steps.length - 1);
       renderNav("reviewNav");
       const items = [
-        { label: "Contexto del cliente", title: selectedLabel("industry"), desc: `${find(industries, state.industry)[2]}${state.clientContact ? ` Referente relevado: ${state.clientContact}.` : ""}${state.clientLocation ? ` Ubicación: ${state.clientLocation}.` : ""}`, edit: stepIndexByKey("industry"), icon: "client-context" },
+        { label: "Contexto del cliente", title: selectedLabel("industry"), desc: `${find(industries, state.industry)[2]}${state.clientContact ? ` Referente relevado: ${escapeHtml(state.clientContact)}.` : ""}${state.clientLocation ? ` Ubicación: ${escapeHtml(state.clientLocation)}.` : ""}`, edit: stepIndexByKey("industry"), icon: "client-context" },
         { label: "Alcance de usuarios", title: selectedLabel("users"), desc: state.usersMode === "mix" ? "Adopción transversal con referentes de varias áreas" : "Foco inicial en un equipo o función con mayor oportunidad de impacto", edit: stepIndexByKey("users"), icon: state.usersMode === "mix" ? "users-mix" : "users-dept" },
         { label: "Calificación comercial", title: qualificationSummary(), desc: `Inicio: ${formatDate(state.startDate)} · ${qualificationValue("m365Maturity")} · Uso Copilot: ${qualificationValue("copilotUsage")} · Agentes: ${qualificationValue("agentNeed")} · IA/COE: ${qualificationValue("iaGovernanceNeed")}`, edit: stepIndexByKey("qualification"), icon: "diagnostic" },
         {
@@ -5271,8 +5271,9 @@
       if ($("applyValidationAddonsBtn")) $("applyValidationAddonsBtn").addEventListener("click", applyValidationAddons);
     }
     function formatDate(iso) {
-      if (!iso) return "";
+      if (!iso || typeof iso !== "string") return "";
       const [y, m, d] = iso.split("-");
+      if (!y || !m || !d) return iso;
       return `${d}/${m}/${y}`;
     }
     function addDays(iso, days) {
@@ -5327,17 +5328,26 @@
     }
     function loadPlan(id) {
       const stored = localStorage.getItem(`copilot-plan-${id}`);
-      if (!stored) return;
+      if (!stored) return false;
       // Los precios vigentes se cargan desde Dataverse al iniciar la app (loadAddonPrices).
       // El estado guardado del plan incluye un snapshot de addonPrices que puede estar vacío
       // o desactualizado; preservamos los precios vigentes salvo que no se hayan podido cargar.
       const livePrices = state.addonPrices;
-      Object.assign(state, JSON.parse(stored));
+      let parsed;
+      try {
+        parsed = JSON.parse(stored);
+      } catch (error) {
+        console.warn(`No se pudo leer el plan ${id} desde localStorage.`, error);
+        return false;
+      }
+      Object.assign(state, parsed);
       if (livePrices && Object.keys(livePrices).length) state.addonPrices = livePrices;
+      return true;
     }
     function loadUserPlan(userId) {
       const planId = localStorage.getItem(`copilot-user-${userId}`);
-      if (planId) loadPlan(planId);
+      if (!planId) return false;
+      return loadPlan(planId);
     }
     function planCatalog() {
       return {
@@ -6135,6 +6145,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
     }
     function decisionAlternativesMarkup(decision, plans, selectedKey = selectedProposalPlanKey(), mode = "admin") {
       if (state.proposalMode === "direct") return "";
+      if (mode === "user") return "";
       const alternativeItems = decision.alternatives.filter((item) => item.key !== selectedKey);
       if (!alternativeItems.length) return "";
       return `<div class="alternative-panel">
@@ -6503,7 +6514,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
             <div>
               <p class="eyebrow">POSSUMUS · PROPUESTA INTEGRAL DE ADOPCIÓN</p>
               <h2>${mode === "user" ? "Plan recomendado para la iniciativa" : directMode ? "Propuesta directa: " + planMaturityTitle(recommended) : "Propuesta versión final: " + planMaturityTitle(recommended)}</h2>
-              <div class="client-highlight">${state.company}</div>
+              <div class="client-highlight">${escapeHtml(state.company)}</div>
               ${state.clientContact ? `<p class="lead">Referente relevado: ${escapeHtml(state.clientContact)}</p>` : ""}
               ${state.clientLocation ? `<p class="lead">Ubicación: ${escapeHtml(state.clientLocation)}</p>` : ""}
               <p class="lead">${selectedLabel("industry")} · ${selectedLabel("users")}</p>
@@ -6548,7 +6559,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                   ${renderPlanSelectionPanel(decision, plans, recommendedKey, mode)}
                   ${renderProgressionGuidance(recommendedKey)}
                   <p><strong>Análisis comercial:</strong> ${recommendationReason(recommendedKey)}</p>
-                  ${decisionEvidenceMarkup(decision)}
+                  ${mode === "user" ? "" : decisionEvidenceMarkup(decision)}
                   ${decisionAlternativesMarkup(decision, plans, recommendedKey, mode)}
                   <p>${recommended.desc}</p>
                   <div class="plan-metric-row">
@@ -6621,10 +6632,10 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
             ${renderProposalPricePanel(recommendedKey)}
           </div>
           <div class="proposal-actions">
-            <button class="btn" id="editPlanBtn">Editar datos</button>
+            ${mode === "user" ? "" : `<button class="btn" id="editPlanBtn">Editar datos</button>`}
             <div class="proposal-action-buttons">
               <button class="btn action-pdf" id="printBtn">Generar PDF</button>
-              <button class="btn action-mail" id="handoffBtn"><span class="btn-icon">${iconSvg("mail")}</span>Enviar propuesta</button>
+              ${mode === "user" ? "" : `<button class="btn action-mail" id="handoffBtn"><span class="btn-icon">${iconSvg("mail")}</span>Enviar propuesta</button>`}
             </div>
           </div>
           <div class="proposal-note-row">
@@ -6633,7 +6644,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
             <div class="handoff-status" id="handoffStatus"></div>
           </div>
         </div>
-        ${directMode ? "" : `<details class="proposal-accordion">
+        ${(directMode || mode === "user") ? "" : `<details class="proposal-accordion">
           <summary><div class="stage-icon">${iconSvg("diagnostic")}</div><div><h2>Criterios que definieron el plan</h2><p>Variables usadas por el scoring y señales principales.</p></div></summary>
           <div class="proposal-accordion-body">
             <p>La recomendación se calcula con scoring ponderado: objetivo, licenciamiento, uso real de Copilot, madurez M365, casos de uso, agentes, escala, gobierno/COE, sponsor y acompañamiento. Si la confianza baja, se muestran alternativas posibles.</p>
@@ -6721,7 +6732,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         `;
       show("plan");
       $("topDynamicsBtn").classList.toggle("hidden", mode === "user");
-      $("editPlanBtn").addEventListener("click", () => {
+      if ($("editPlanBtn")) $("editPlanBtn").addEventListener("click", () => {
         if (directMode) {
           currentDirectStep = 0;
           renderDirectStep();
@@ -6758,7 +6769,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         renderPlan(mode);
       });
       $("printBtn").addEventListener("click", () => generateProposalPdf(recommendedKey));
-      $("handoffBtn").addEventListener("click", () => openHandoffModal(recommendedKey));
+      if ($("handoffBtn")) $("handoffBtn").addEventListener("click", () => openHandoffModal(recommendedKey));
     }
     function buildDefaultHandoffEmail(recommendedKey = selectedProposalPlanKey()) {
       const recommended = planCatalog()[recommendedKey];
@@ -7456,13 +7467,13 @@ ${location.href}`
           .accent { color: #2e2d31; background: linear-gradient(180deg, transparent 56%, #fcd702 56%); }
         </style>`;
       const footer = `<div class="footer"><span>Possumus · Propuesta de adopción</span><span>${generatedAt}</span></div>`;
-      return `<!doctype html><html lang="es"><head><meta charset="UTF-8"><title>Propuesta de adopción - ${state.company}</title>${css}</head><body>
+      return `<!doctype html><html lang="es"><head><meta charset="UTF-8"><title>Propuesta de adopción - ${escapeHtml(state.company)}</title>${css}</head><body>
         <section class="slide dark">
           <p class="eyebrow">Possumus · Microsoft Solutions Partner</p>
           <h1>Propuesta integral de adopción Microsoft 365 Copilot</h1>
           <div class="hero-bottom">
             <div>
-              <p style="font-size:24pt;color:#ffffff;font-weight:900">${state.company}</p>
+              <p style="font-size:24pt;color:#ffffff;font-weight:900">${escapeHtml(state.company)}</p>
               ${state.clientContact ? `<p>Referente relevado: ${escapeHtml(state.clientContact)}</p>` : ""}
               ${state.clientLocation ? `<p>Ubicación: ${escapeHtml(state.clientLocation)}</p>` : ""}
               <p>Inicio estimado: ${formatDate(state.startDate)} · Fin estimado: ${endDate}</p>
@@ -7913,9 +7924,13 @@ ${location.href}`
     function route() {
       const hash = location.hash.replace(/^#/, "");
       const [, routeName, id] = hash.split("/");
-      if (routeName === "admin") { loadPlan(id); renderPlan("admin"); return; }
-      if (routeName === "user") { loadUserPlan(id); renderPlan("user"); return; }
-      if (routeName === "done") { loadPlan(id); renderPlan("admin"); return; }
+      const notFound = () => {
+        show("modeSelect");
+        showToast("No encontramos esa propuesta en este navegador. Generá una nueva o abrila donde la creaste.");
+      };
+      if (routeName === "admin") { if (!loadPlan(id)) { notFound(); return; } renderPlan("admin"); return; }
+      if (routeName === "user") { if (!loadUserPlan(id)) { notFound(); return; } renderPlan("user"); return; }
+      if (routeName === "done") { if (!loadPlan(id)) { notFound(); return; } renderPlan("admin"); return; }
       show("modeSelect");
     }
     restoreMicrosoftSession();
