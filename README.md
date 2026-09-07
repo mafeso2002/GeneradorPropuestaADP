@@ -67,7 +67,7 @@ En **P3 / Productividad Digital + IA** el programa se considera integral. Todo e
 
 La app incluye una industria específica para **Energía, servicios eléctricos y construcción**, pensada para casos con obras, servicios técnicos, oficina técnica, compras, depósito y documentación operativa.
 
-La pantalla de add-ons muestra el plan probable y separa los módulos entre sugeridos para el caso, disponibles para ampliar alcance, ya incluidos en el plan y no disponibles por prerrequisito. Esto evita cotizar como adicional una actividad que ya forma parte del plan base.
+La pantalla de opcionales separa tres conceptos: **componentes incluidos en el plan base**, **opcionales cotizables** y **no aplica para este plan**. Lo incluido no es un add-on por defecto: no se selecciona, no se suma al precio y se muestra solo para aclarar el alcance base.
 
 Cowork se trata como add-on con prerrequisito: solo puede activarse si el cliente tiene Microsoft 365 Copilot activo/trial y un caso concreto para profundizar, o como continuidad posterior a P2. No se ofrece como servicio suelto; se comunica como 3 a 5 sesiones de trabajo guiado. Para escenarios sin licencias o de exploración inicial, la app puede sugerir el **Webinar introductorio: Copilot en 30 minutos**, una entrada liviana de sensibilización con ejemplos generales, moderación y Q&A.
 

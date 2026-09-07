@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.3**
+Versión documentada: **MVP 0.10.4**
 Última actualización funcional: **2026-09-07**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -160,10 +160,10 @@ Estados posibles:
 
 | Estado | Significado |
 | --- | --- |
-| Sugerido | Aplica por las respuestas del diagnóstico |
-| Disponible | Puede sumarse comercialmente |
-| Incluido | Ya forma parte del plan base y no debería cotizarse aparte |
-| No disponible | Requiere Microsoft 365 Copilot activo/trial u otro prerrequisito comercial |
+| Sugerido | Opcional cotizable recomendado por las respuestas del diagnóstico |
+| Disponible | Opcional cotizable que puede sumarse comercialmente |
+| Incluido | Componente del plan base; no es add-on por defecto, no se selecciona ni se suma al precio |
+| No disponible | No aplica para este plan o requiere Microsoft 365 Copilot activo/trial u otro prerrequisito comercial |
 
 Cowork tiene una regla especial: no se ofrece suelto ni reemplaza el plan base. Solo queda seleccionable cuando hay Microsoft 365 Copilot activo/trial y señales mínimas de adopción o casos concretos; se comunica como add-on de 3 a 5 sesiones o como siguiente paso posterior a P2. Para clientes sin licencias o en exploración inicial, se incorporó el **Webinar introductorio: Copilot en 30 minutos** como entrada liviana de sensibilización masiva con ejemplos generales, moderación y Q&A.
 

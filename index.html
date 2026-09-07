@@ -2897,7 +2897,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.3 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.4 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -4283,13 +4283,13 @@
       return "available";
     }
     function addonStateLabel(stateName) {
-      if (stateName === "included") return "Incluido en el plan";
+      if (stateName === "included") return "Componente del plan base";
       if (stateName === "suggested") return "Sugerido";
       if (stateName === "unavailable") return "No disponible";
       return "Disponible";
     }
     function addonRequirement(addon, stateName, planKey = selectedProposalPlanKey()) {
-      if (stateName === "included") return "Ya cubierto por el plan base";
+      if (stateName === "included") return "Parte del alcance base; no se selecciona ni se cotiza aparte";
       if (!isAddonAllowedForPlan(addon, planKey)) {
         if (planKey === "plan0") return "P0 se mantiene acotado. Si necesitás este módulo, conviene cambiar a P1, P2 o P3.";
         if (planKey === "plan1") return "P1 ya cubre adopción base. Si necesitás este módulo, conviene ampliar alcance o cambiar a P2/P3.";
@@ -4350,7 +4350,7 @@
         </div>
         <div class="addon-price-list">
           <div class="addon-price-row"><span>Plan base</span><strong>${quote.main}</strong></div>
-          ${selected.length ? selected.map((addon) => `<div class="addon-price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("") : `<div class="addon-price-row"><span>Add-ons seleccionados</span><strong>Sin adicionales</strong></div>`}
+          ${selected.length ? selected.map((addon) => `<div class="addon-price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("") : `<div class="addon-price-row"><span>Opcionales cotizables</span><strong>Sin adicionales</strong></div>`}
         </div>
       </div>`;
     }
@@ -4779,7 +4779,7 @@
         create: `¿Qué tarda más en crear o analizar el equipo de ${company}?`,
         automate: `¿Qué trabajo repetitivo consume más tiempo en ${company}?`,
         cowork: `¿Conviene incluir Copilot Cowork para ${company}?`,
-        addons: `¿Qué add-ons querés sumar a la propuesta de ${company}?`,
+        addons: `¿Qué opcionales querés sumar a la propuesta de ${company}?`,
         logistics: `¿Cómo conviene entregar y medir la adopción en ${company}?`
       };
       return titles[step.key] || step.title;
@@ -4981,15 +4981,15 @@
                 <span class="pill">${plan.duration}</span>
                 <span class="pill">${plan.effort}</span>
               </div>
-              <p>Los módulos de abajo se separan entre lo que ya cubre el plan, lo recomendado como adicional y lo disponible para cotizar aparte.</p>
+              <p>Separá claramente componentes del plan base y opcionales cotizables. Lo incluido no se selecciona ni se suma como add-on: forma parte del alcance del plan.</p>
             </div>
           </div>
           ${renderAddonPriceSummary(planKey)}
           ${renderAddonPolicyNotice(planKey)}
-          ${renderAddonSection("Add-ons sugeridos para este caso", "Se marcan por las respuestas del relevamiento y el árbol de decisión.", suggested, selected, planKey, true)}
-          ${availableByCategory.map(([category, addons]) => renderAddonSection(category, "Disponibles para sumar si el comercial quiere ampliar alcance.", addons, selected, planKey)).join("")}
-          ${renderAddonSection("Ya incluido en el plan probable", "No lo cotices como adicional salvo que el alcance sea mayor al previsto.", includedAddons, selected, planKey)}
-          ${renderAddonSection("No disponible por prerrequisito", "Requieren Microsoft 365 Copilot activo/trial o una adopción Copilot previa.", unavailable, selected, planKey)}
+          ${renderAddonSection("Opcionales sugeridos para sumar", "Add-ons fuera del precio base, sugeridos por las respuestas del relevamiento.", suggested, selected, planKey, true)}
+          ${availableByCategory.map(([category, addons]) => renderAddonSection(category, "Opcionales disponibles para cotizar aparte si el comercial decide ampliar alcance.", addons, selected, planKey)).join("")}
+          ${renderAddonSection("Componentes incluidos en el plan base", "Forman parte del alcance del plan. No se seleccionan ni se cotizan como add-ons.", includedAddons, selected, planKey)}
+          ${renderAddonSection("No aplica para este plan", "No corresponde ofrecerlo en este plan; puede requerir otro plan, licencias o mayor madurez.", unavailable, selected, planKey)}
         </div>`;
       }
       $("stepBody").innerHTML = body;
@@ -5139,7 +5139,7 @@
           ]
         }
       ];
-      items.push({ label: "Add-ons", title: selectedAddonItems().length ? selectedAddonItems().map((item) => item.title).join(", ") : "Sin add-ons seleccionados", desc: "Módulos opcionales para cotizar por separado", edit: stepIndexByKey("addons"), icon: "proposal-doc" });
+      items.push({ label: "Opcionales cotizables", title: selectedAddonItems().length ? selectedAddonItems().map((item) => item.title).join(", ") : "Sin opcionales seleccionados", desc: "Módulos fuera del plan base para cotizar por separado", edit: stepIndexByKey("addons"), icon: "proposal-doc" });
       items.push({
         label: "Logística y medición",
         title: discoverySummary(logisticsFields),
@@ -5571,7 +5571,7 @@
           label: quote.main,
           detail: unknownCount ? `Plan y ${unknownCount} add-on${unknownCount === 1 ? "" : "s"} requieren validación comercial.` : quote.detail,
           plan: quote.main,
-          addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin add-ons adicionales"
+          addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin opcionales adicionales"
         };
       }
       if (/por ola/i.test(quote.main) && wave) {
@@ -5579,7 +5579,7 @@
           label: quote.main,
           detail: `Referencia por ola. ${wave.note}${addons.length ? " Los add-ons se suman según alcance final." : ""}${unknownCount ? ` ${unknownCount} add-on${unknownCount === 1 ? "" : "s"} queda${unknownCount === 1 ? "" : "n"} a validar.` : ""}`,
           plan: quote.main,
-          addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin add-ons adicionales"
+          addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin opcionales adicionales"
         };
       }
       if (recommendedKey === "plan1" && state.userRange === "medium" && wave) {
@@ -5587,16 +5587,16 @@
           label: `${quote.main} por ola`,
           detail: `Referencia por ola. ${wave.note}${addons.length ? " Los add-ons se suman según alcance final." : ""}${unknownCount ? ` ${unknownCount} add-on${unknownCount === 1 ? "" : "s"} queda${unknownCount === 1 ? "" : "n"} a validar.` : ""}`,
           plan: `${quote.main} por ola`,
-          addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin add-ons adicionales"
+          addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin opcionales adicionales"
         };
       }
       const totalMin = planRange.min + addonMin;
       const totalMax = planRange.max + addonMax;
       return {
         label: totalMin === totalMax ? formatUsd(totalMin) : `${formatUsd(totalMin).replace(" + IVA", "")} a ${formatUsd(totalMax)}`,
-        detail: `Incluye plan base (${quote.main}) + ${addons.length ? "add-ons seleccionados" : "sin add-ons adicionales"}.${unknownCount ? ` ${unknownCount} add-on${unknownCount === 1 ? "" : "s"} queda${unknownCount === 1 ? "" : "n"} a validar.` : ""}`,
+        detail: `Incluye plan base (${quote.main}) + ${addons.length ? "opcionales cotizables seleccionados" : "sin opcionales adicionales"}.${unknownCount ? ` ${unknownCount} opcional${unknownCount === 1 ? "" : "es"} queda${unknownCount === 1 ? "" : "n"} a validar.` : ""}`,
         plan: quote.main,
-        addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin add-ons adicionales"
+        addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin opcionales adicionales"
       };
     }
     function addOnsForPlan(key) {
@@ -6044,7 +6044,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const selectedAddons = selectedAddonItems(recommendedKey);
       const addonRows = selectedAddons.length
         ? selectedAddons.map((addon) => `<div class="proposal-price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("")
-        : `<div class="proposal-price-row"><span>Add-ons seleccionados</span><strong>Sin add-ons</strong></div>`;
+        : `<div class="proposal-price-row"><span>Opcionales cotizables</span><strong>Sin adicionales</strong></div>`;
       return `<aside class="proposal-price-panel">
         <div class="money-icon">$</div>
         <h3>Resumen económico</h3>
@@ -6323,7 +6323,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           tasks.push(hasCopilot ? "Medir adopción de Copilot y oportunidades de escalado" : "Definir decisión de licenciamiento o siguiente ola de adopción");
         }
         if (addons.length && index === Math.min(2, base.length - 1)) {
-          tasks.push(`Incorporar add-ons seleccionados: ${addons.slice(0, 2).join(", ")}`);
+          tasks.push(`Incorporar opcionales seleccionados: ${addons.slice(0, 2).join(", ")}`);
         }
         return {
           ...item,
@@ -6537,8 +6537,8 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
             ${formatAiSummaryText(validationProposalText)}
           </div>` : ""}
               ${addons.length ? `<div class="addons-panel">
-            <h3>Add-ons y módulos sugeridos</h3>
-            <p>Estos módulos amplían el alcance funcional; los importes quedan consolidados en el resumen económico.</p>
+            <h3>Opcionales cotizables seleccionados</h3>
+            <p>Estos módulos están fuera del alcance base del plan; los importes quedan consolidados en el resumen económico.</p>
             <div class="proposal-addon-functional-grid">${addons.map(([title, desc, icon]) => `<div class="addon-item"><div class="stage-icon">${iconSvg(icon)}</div><div><strong>${title}</strong><p>${desc}</p></div></div>`).join("")}</div>
           </div>` : ""}
             </div>
@@ -6753,7 +6753,7 @@ ${location.href}`
         includeBudgetEstimate,
         shouldEstimate: includeBudgetEstimate && (directMode || decision.level !== "low"),
         instruction: directMode
-          ? "Propuesta directa: el comercial ya seleccionó el plan. Generar estimación usando el rango base y add-ons seleccionados, sin cuestionar el scoring."
+          ? "Propuesta directa: el comercial ya seleccionó el plan. Generar estimación usando el rango base y opcionales cotizables seleccionados, sin cuestionar el scoring."
           : decision.level === "low"
           ? "No cerrar rango de presupuesto. Indicar que requiere validación con preventa/adopción por baja confianza."
           : !includeBudgetEstimate
@@ -6775,7 +6775,7 @@ ${location.href}`
           `Acompañamiento: ${qualificationValue("accompaniment")}`,
           `Modalidad: ${discoveryValue(logisticsFields, "deliveryMode")}`,
           `Frecuencia: ${discoveryValue(logisticsFields, "sessionFrequency")}`,
-          addons.length ? `Add-ons adicionales: ${addons.map((item) => item.title).join(", ")}` : "Sin add-ons adicionales seleccionados"
+          addons.length ? `Opcionales cotizables: ${addons.map((item) => item.title).join(", ")}` : "Sin opcionales adicionales seleccionados"
         ].filter(Boolean)
       };
     }
@@ -7275,7 +7275,7 @@ ${location.href}`
       const endDate = proposalEndDate(recommendedKey);
       const printableAddonRows = selectedAddons.length
         ? selectedAddons.map((addon) => `<div class="price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("")
-        : `<div class="price-row"><span>Add-ons seleccionados</span><strong>Sin add-ons</strong></div>`;
+        : `<div class="price-row"><span>Opcionales cotizables</span><strong>Sin adicionales</strong></div>`;
       const decision = planDecision();
       const directMode = state.proposalMode === "direct";
       const activeComparisons = directMode ? [] : activePlanComparisons(recommendedKey, decision);
@@ -7477,9 +7477,9 @@ ${location.href}`
           <div class="card" style="margin-top:8mm"><strong>Rol del equipo Possumus</strong><p>Acompañar el diagnóstico, facilitar sesiones, orientar casos de uso, activar comunicación, medir avance y cerrar una recomendación ejecutiva accionable.</p></div>${footer}
         </section>
         ${addons.length ? `<section class="slide">
-          <p class="eyebrow">Add-ons y módulos focalizados</p>
+          <p class="eyebrow">Opcionales cotizables</p>
           <h2>Módulos sugeridos para complementar ${plan.name}</h2>
-          <p>Estos módulos amplían el alcance funcional de la propuesta. Sus importes ya están consolidados en el resumen económico.</p>
+          <p>Estos módulos están fuera del alcance base del plan. Sus importes ya están consolidados en el resumen económico.</p>
           <div class="grid-2">${addons.map(([title, desc]) => `<div class="card ${title.includes("Cowork") ? "cowork-pdf" : ""}"><strong>${title}</strong><p>${desc}</p></div>`).join("")}</div>${footer}
         </section>` : ""}
         <section class="slide">
@@ -7661,7 +7661,7 @@ ${location.href}`
           <ul class="decision-help-list">${addonCategories}</ul>
           <ol class="decision-flow">
             <li><b>A</b><div><strong>Sugeridos</strong><span>Se activan por respuestas concretas: Excel/análisis, Teams/SharePoint, orden documental, agentes, modalidad presencial/mixta, gobierno o cambio.</span></div></li>
-            <li><b>B</b><div><strong>Ya incluidos</strong><span>Se muestran separados para no duplicar alcance en la cotización.</span></div></li>
+            <li><b>B</b><div><strong>Componentes incluidos</strong><span>Se muestran separados para aclarar que pertenecen al plan base y no son add-ons por defecto.</span></div></li>
             <li><b>C</b><div><strong>No disponibles</strong><span>Quedan deshabilitados cuando requieren Microsoft 365 Copilot, adopción previa o un prerrequisito comercial que el cliente aún no cumple.</span></div></li>
           </ol>
         </section>
