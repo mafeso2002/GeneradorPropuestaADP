@@ -26,7 +26,7 @@ Tabla Dataverse en **Possumus - Desarrollo**: `PreciosAddonsAdopcion` (`pss_Prec
 
 | Campo | Uso |
 | --- | --- |
-| `addon_id` | ID técnico usado por la app, por ejemplo `excel-intermediate` |
+| `addon_id` | ID técnico usado por la app, por ejemplo `excel-intermediate`, `delivery-onsite` o `delivery-hybrid` |
 | `nombre` | Nombre visible del add-on |
 | `categoria` | Categoría comercial |
 | `precio_texto` | Texto comercial, por ejemplo `USD 850 + IVA` |
@@ -68,6 +68,8 @@ En **P3 / Productividad Digital + IA** el programa se considera integral. Todo e
 La app incluye una industria específica para **Energía, servicios eléctricos y construcción**, pensada para casos con obras, servicios técnicos, oficina técnica, compras, depósito y documentación operativa.
 
 La pantalla de opcionales separa tres conceptos: **componentes incluidos en el plan base**, **opcionales cotizables** y **no aplica para este plan**. Lo incluido no es un add-on por defecto: no se selecciona, no se suma al precio y se muestra solo para aclarar el alcance base.
+
+La modalidad **virtual** queda incluida en el precio base. Si se selecciona **presencial** o **mixta**, la app suma automáticamente un cargo de modalidad desde el mismo catálogo de add-ons (`delivery-onsite` o `delivery-hybrid`). Estos cargos no aparecen como módulos funcionales para seleccionar: se muestran en el resumen económico y pueden administrarse desde Dataverse como cualquier otro precio de referencia.
 
 Cowork se trata como add-on con prerrequisito: solo puede activarse si el cliente tiene Microsoft 365 Copilot activo/trial y un caso concreto para profundizar, o como continuidad posterior a P2. No se ofrece como servicio suelto; se comunica como 3 a 5 sesiones de trabajo guiado. Para escenarios sin licencias o de exploración inicial, la app puede sugerir el **Webinar introductorio: Copilot en 30 minutos**, una entrada liviana de sensibilización con ejemplos generales, moderación y Q&A.
 

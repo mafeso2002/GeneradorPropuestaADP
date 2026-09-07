@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.4**
+Versión documentada: **MVP 0.10.5**
 Última actualización funcional: **2026-09-07**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -47,7 +47,7 @@ No hay framework frontend ni build step obligatorio. La app corre como HTML/CSS/
    - dolores de comunicación, reuniones, creación/análisis y automatización;
    - Copilot Cowork;
    - logística y medición;
-   - add-ons sugeridos.
+   - add-ons sugeridos y adicionales automáticos por modalidad.
 4. La app calcula un plan recomendado mediante scoring.
 5. El comercial puede validar el diagnóstico con IA.
 6. En modo propuesta directa, el comercial carga compañía, fecha y selecciona directamente Plan 0/1/2/3. La app salta a la propuesta final sin scoring visible, sin alternativas y sin comparador.
@@ -57,7 +57,7 @@ No hay framework frontend ni build step obligatorio. La app corre como HTML/CSS/
    - razones de recomendación;
    - confianza;
    - resumen económico;
-   - add-ons;
+   - add-ons y adicionales de modalidad;
    - roadmap visual;
    - resumen IA;
    - comparación IA contra alternativas, si existen.
@@ -108,6 +108,8 @@ P2 / IA aplicada al trabajo permite solo add-ons de profundización Copilot: **C
 
 P3 / Productividad Digital + IA se modela como programa integral. Todo el catálogo de add-ons queda incluido o absorbido por el alcance base salvo **Cowork y Copilot** y **Agentes a medida con Copilot Studio**, que son los únicos módulos seleccionables/cotizables aparte.
 
+La modalidad **virtual** no genera cargo adicional. Si el comercial selecciona **presencial** o **mixta**, `deliveryChargeItem()` suma automáticamente un cargo operativo de modalidad usando los IDs del catálogo `delivery-onsite` o `delivery-hybrid`. Estos ítems viven en la misma fuente de precios de add-ons para poder administrarlos desde Dataverse, pero no se muestran como módulos funcionales seleccionables.
+
 La industria incluye una opción específica para **Energía, servicios eléctricos y construcción**, útil para clientes con obras, servicios técnicos, compras, documentación operativa, depósito y oficina técnica.
 
 La ubicación del cliente se usa para acotar el enriquecimiento público con IA. Por defecto se prioriza `Argentina`; si el comercial agrega provincia/localidad, por ejemplo `San Rafael, Mendoza, Argentina`, el backend de `api/ai-summary` suma esos términos a la búsqueda y prioriza dominios `.com.ar`/`.ar`.
@@ -154,7 +156,7 @@ En propuesta directa, `selectedProposalPlanKey()` devuelve `directPlanKey`; no s
 
 ## 5. Add-ons y precios
 
-Los add-ons se definen en `addOnCatalog()`.
+Los add-ons se definen en `addOnCatalog()`. Los cargos de modalidad presencial/mixta también usan este catálogo para tomar precio desde Dataverse, pero se filtran con `selectableAddonCatalog()` para no aparecer como add-ons manuales.
 
 Estados posibles:
 
@@ -172,6 +174,13 @@ También existe la categoría **Webinars especializados** para consumos puntuale
 En escenarios de Productividad Digital o baja madurez Microsoft 365, los add-ons se priorizan para mostrar primero ordenamiento y adopción base: Arquitectura Teams + SharePoint, Orden documental y trazabilidad, Office Hours, Readiness y Champions. Los webinars quedan disponibles, pero no desplazan los módulos core de adopción.
 
 Los precios pueden venir de Dataverse mediante Power Automate o usar fallback local.
+
+IDs especiales para cargos automáticos de modalidad:
+
+| ID | Uso |
+| --- | --- |
+| `delivery-onsite` | Se suma cuando la modalidad elegida es presencial |
+| `delivery-hybrid` | Se suma cuando la modalidad elegida es mixta |
 
 Tabla Dataverse esperada:
 

@@ -2897,7 +2897,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.4 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.5 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -4098,9 +4098,42 @@
         { id: "teams-sharepoint", title: "Arquitectura Teams + SharePoint", category: "Gobierno y orden digital", desc: "Diseño funcional de equipos, canales, bibliotecas y repositorios para ordenar colaboración.", icon: "teams", price: "USD 1.500 a 3.000 + IVA", requirement: "Disponible para todos" },
         { id: "document-governance", title: "Orden documental y trazabilidad", category: "Gobierno y orden digital", desc: "Estructura de archivos, criterios de uso, migración desde canales dispersos y buenas prácticas.", icon: "proposal-doc", price: "USD 1.200 a 2.500 + IVA", requirement: "Disponible para todos" },
         { id: "readiness", title: "Readiness técnico", category: "Gobierno y orden digital", desc: "Revisión de SharePoint, oversharing, Purview, permisos y preparación para IA.", icon: "shield", price: "USD 1.500 + IVA", requirement: "Disponible para todos" },
-        { id: "dashboard", title: "Copilot Dashboard / reporte de adopción", category: "Gobierno y orden digital", desc: "Medición, seguimiento y lectura ejecutiva de adopción con datos de Copilot.", icon: "diagnostic", price: "USD 900 + IVA", requiresCopilot: true }
+        { id: "dashboard", title: "Copilot Dashboard / reporte de adopción", category: "Gobierno y orden digital", desc: "Medición, seguimiento y lectura ejecutiva de adopción con datos de Copilot.", icon: "diagnostic", price: "USD 900 + IVA", requiresCopilot: true },
+        { id: "delivery-onsite", title: "Adicional modalidad presencial", category: "Modalidad de entrega", desc: "Cargo operativo de referencia para dictado presencial: coordinación, traslados locales y logística de facilitación.", icon: "calendar", price: "USD 900 a 1.500 + IVA", automaticCharge: true, requirement: "Se suma automáticamente cuando la modalidad seleccionada es presencial." },
+        { id: "delivery-hybrid", title: "Adicional modalidad mixta", category: "Modalidad de entrega", desc: "Cargo operativo de referencia para combinar sesiones virtuales con instancias presenciales.", icon: "calendar", price: "USD 500 a 900 + IVA", automaticCharge: true, requirement: "Se suma automáticamente cuando la modalidad seleccionada es mixta." }
       ];
       return baseAddons.map(applyAddonPrice).filter((addon) => addonPriceData(addon.id)?.active !== false);
+    }
+    function selectableAddonCatalog() {
+      return addOnCatalog().filter((addon) => !addon.automaticCharge);
+    }
+    function deliveryChargeId() {
+      if (state.deliveryMode === "onsite") return "delivery-onsite";
+      if (state.deliveryMode === "hybrid") return "delivery-hybrid";
+      return "";
+    }
+    function deliveryChargeItem() {
+      const id = deliveryChargeId();
+      return id ? addOnCatalog().find((addon) => addon.id === id) || null : null;
+    }
+    function pricingItemsForPlan(planKey = selectedProposalPlanKey()) {
+      return [...selectedAddonItems(planKey), deliveryChargeItem()].filter(Boolean);
+    }
+    function pricingItemsSummary(items) {
+      return items.length ? items.map((item) => `${item.title}: ${item.price}`).join(" · ") : "Sin opcionales adicionales";
+    }
+    function deliveryChargePayload() {
+      const item = deliveryChargeItem();
+      return item ? {
+        id: item.id,
+        title: item.title,
+        description: item.desc,
+        price: item.price,
+        priceMinUsd: item.priceMinUsd || null,
+        priceMaxUsd: item.priceMaxUsd || null,
+        pricingNotes: item.pricingNotes || "",
+        category: item.category || "Modalidad de entrega"
+      } : null;
     }
     function includedAddonIdsForPlan(planKey = selectedProposalPlanKey()) {
       const included = new Set();
@@ -4108,7 +4141,7 @@
         ["role-cases", "prompt-library", "dashboard", "copilot-excel"].forEach((id) => included.add(id));
       }
       if (planKey === "plan3") {
-        addOnCatalog()
+        selectableAddonCatalog()
           .filter((addon) => !["cowork", "copilot-studio"].includes(addon.id))
           .forEach((addon) => included.add(addon.id));
       }
@@ -4232,12 +4265,12 @@
       if (state.proposalMode === "direct" && !state.selectedAddons.length) return [];
       const selected = state.selectedAddons && state.selectedAddons.length ? state.selectedAddons : suggestedAddonIds(planKey);
       const included = includedAddonIdsForPlan(planKey);
-      return sortAddonsForProposal(addOnCatalog().filter((item) => selected.includes(item.id) && !included.has(item.id) && isAddonEnabled(item, planKey)), planKey);
+      return sortAddonsForProposal(selectableAddonCatalog().filter((item) => selected.includes(item.id) && !included.has(item.id) && isAddonEnabled(item, planKey)), planKey);
     }
     function addonIdFromAiValue(value) {
       const normalized = normalizeText(value);
       if (!normalized) return "";
-      const catalog = addOnCatalog();
+      const catalog = selectableAddonCatalog();
       const direct = catalog.find((addon) => addon.id === value);
       if (direct) return direct.id;
       const byTitle = catalog.find((addon) => normalizeText(addon.title) === normalized);
@@ -4262,7 +4295,7 @@
       const included = includedAddonIdsForPlan();
       changes.remove.forEach((id) => selected.delete(id));
       changes.add.forEach((id) => {
-        const addon = addOnCatalog().find((item) => item.id === id);
+        const addon = selectableAddonCatalog().find((item) => item.id === id);
         if (addon && isAddonEnabled(addon) && !included.has(id)) selected.add(id);
       });
       state.selectedAddons = Array.from(selected);
@@ -4340,7 +4373,7 @@
     }
     function renderAddonPriceSummary(planKey) {
       const quote = quoteForPlan(planKey);
-      const selected = selectedAddonItems(planKey);
+      const selected = pricingItemsForPlan(planKey);
       const total = proposalTotalEstimate(planKey);
       return `<div class="addon-price-summary">
         <div class="addon-total-box">
@@ -4960,7 +4993,7 @@
         if (!state.selectedAddons.length) state.selectedAddons = suggestedAddonIds(planKey);
         state.selectedAddons = state.selectedAddons.filter((id) => !included.has(id));
         const selected = new Set(state.selectedAddons);
-        const catalog = addOnCatalog();
+        const catalog = selectableAddonCatalog();
         const suggested = sortAddonsForProposal(catalog.filter((addon) => addonState(addon, planKey) === "suggested"), planKey);
         const available = sortAddonsForProposal(catalog.filter((addon) => addonState(addon, planKey) === "available"), planKey);
         const includedAddons = sortAddonsForProposal(catalog.filter((addon) => addonState(addon, planKey) === "included"), planKey);
@@ -5042,7 +5075,7 @@
       }));
       $("stepBody").querySelectorAll("[data-app]").forEach((btn) => btn.addEventListener("click", () => { state.meetingApp = btn.dataset.app; invalidateAiArtifacts(); renderStep(); }));
       $("stepBody").querySelectorAll("[data-addon]").forEach((btn) => btn.addEventListener("click", () => {
-        const addon = addOnCatalog().find((item) => item.id === btn.dataset.addon);
+        const addon = selectableAddonCatalog().find((item) => item.id === btn.dataset.addon);
         const stateName = addonState(addon);
         if (stateName !== "suggested" && stateName !== "available") return;
         const selected = new Set(state.selectedAddons);
@@ -5550,7 +5583,7 @@
     function proposalTotalEstimate(recommendedKey = selectedProposalPlanKey()) {
       const quote = quoteForPlan(recommendedKey);
       const planRange = parseUsdRange(quote.main);
-      const addons = selectedAddonItems(recommendedKey);
+      const addons = pricingItemsForPlan(recommendedKey);
       const wave = adoptionWaveModel(recommendedKey);
       let addonMin = 0;
       let addonMax = 0;
@@ -5569,34 +5602,34 @@
       if (!planRange) {
         return {
           label: quote.main,
-          detail: unknownCount ? `Plan y ${unknownCount} add-on${unknownCount === 1 ? "" : "s"} requieren validación comercial.` : quote.detail,
+          detail: unknownCount ? `Plan y ${unknownCount} adicional${unknownCount === 1 ? "" : "es"} requieren validación comercial.` : quote.detail,
           plan: quote.main,
-          addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin opcionales adicionales"
+          addons: pricingItemsSummary(addons)
         };
       }
       if (/por ola/i.test(quote.main) && wave) {
         return {
           label: quote.main,
-          detail: `Referencia por ola. ${wave.note}${addons.length ? " Los add-ons se suman según alcance final." : ""}${unknownCount ? ` ${unknownCount} add-on${unknownCount === 1 ? "" : "s"} queda${unknownCount === 1 ? "" : "n"} a validar.` : ""}`,
+          detail: `Referencia por ola. ${wave.note}${addons.length ? " Los opcionales y adicionales se suman según alcance final." : ""}${unknownCount ? ` ${unknownCount} adicional${unknownCount === 1 ? "" : "es"} queda${unknownCount === 1 ? "" : "n"} a validar.` : ""}`,
           plan: quote.main,
-          addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin opcionales adicionales"
+          addons: pricingItemsSummary(addons)
         };
       }
       if (recommendedKey === "plan1" && state.userRange === "medium" && wave) {
         return {
           label: `${quote.main} por ola`,
-          detail: `Referencia por ola. ${wave.note}${addons.length ? " Los add-ons se suman según alcance final." : ""}${unknownCount ? ` ${unknownCount} add-on${unknownCount === 1 ? "" : "s"} queda${unknownCount === 1 ? "" : "n"} a validar.` : ""}`,
+          detail: `Referencia por ola. ${wave.note}${addons.length ? " Los opcionales y adicionales se suman según alcance final." : ""}${unknownCount ? ` ${unknownCount} adicional${unknownCount === 1 ? "" : "es"} queda${unknownCount === 1 ? "" : "n"} a validar.` : ""}`,
           plan: `${quote.main} por ola`,
-          addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin opcionales adicionales"
+          addons: pricingItemsSummary(addons)
         };
       }
       const totalMin = planRange.min + addonMin;
       const totalMax = planRange.max + addonMax;
       return {
         label: totalMin === totalMax ? formatUsd(totalMin) : `${formatUsd(totalMin).replace(" + IVA", "")} a ${formatUsd(totalMax)}`,
-        detail: `Incluye plan base (${quote.main}) + ${addons.length ? "opcionales cotizables seleccionados" : "sin opcionales adicionales"}.${unknownCount ? ` ${unknownCount} opcional${unknownCount === 1 ? "" : "es"} queda${unknownCount === 1 ? "" : "n"} a validar.` : ""}`,
+        detail: `Incluye plan base (${quote.main}) + ${addons.length ? "opcionales cotizables y/o adicionales de modalidad" : "sin opcionales adicionales"}.${unknownCount ? ` ${unknownCount} adicional${unknownCount === 1 ? "" : "es"} queda${unknownCount === 1 ? "" : "n"} a validar.` : ""}`,
         plan: quote.main,
-        addons: addons.length ? addons.map((addon) => `${addon.title}: ${addon.price}`).join(" · ") : "Sin opcionales adicionales"
+        addons: pricingItemsSummary(addons)
       };
     }
     function addOnsForPlan(key) {
@@ -5956,6 +5989,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           confidence: decision.confidence,
           confidenceLabel: confidenceLabel(decision.level),
           selectedAddons: selectedAddonItems(primaryKey).map((item) => ({ title: item.title, price: item.price, description: item.desc, requirement: addonRequirement(item, addonState(item, primaryKey), primaryKey) })),
+          deliveryCharge: deliveryChargePayload(),
           totalEstimate: proposalTotalEstimate(primaryKey)
         },
         answers: {
@@ -5988,7 +6022,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const selectedIds = new Set(state.selectedAddons.length ? state.selectedAddons : suggestedAddonIds(originalKey));
       const selectedIncluded = includedAddonIdsForPlan(selectedKey);
       const originalIncluded = includedAddonIdsForPlan(originalKey);
-      const includedNow = addOnCatalog()
+      const includedNow = selectableAddonCatalog()
         .filter((addon) => selectedIds.has(addon.id) && selectedIncluded.has(addon.id) && !originalIncluded.has(addon.id))
         .map((addon) => addon.title);
       const detail = includedNow.length
@@ -6041,9 +6075,9 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
     function renderProposalPricePanel(recommendedKey) {
       const quote = quoteForPlan(recommendedKey);
       const totalEstimate = proposalTotalEstimate(recommendedKey);
-      const selectedAddons = selectedAddonItems(recommendedKey);
-      const addonRows = selectedAddons.length
-        ? selectedAddons.map((addon) => `<div class="proposal-price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("")
+      const pricingItems = pricingItemsForPlan(recommendedKey);
+      const addonRows = pricingItems.length
+        ? pricingItems.map((addon) => `<div class="proposal-price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("")
         : `<div class="proposal-price-row"><span>Opcionales cotizables</span><strong>Sin adicionales</strong></div>`;
       return `<aside class="proposal-price-panel">
         <div class="money-icon">$</div>
@@ -6725,7 +6759,8 @@ Alcance: ${proposalScopeDetail(recommendedKey)}
 ${wave ? `Modelo de olas: ${wave.title} · ${wave.groups} · ${wave.note}` : ""}
 Cotización: ${quote.main}
 Total estimado: ${totalEstimate.label}
-Detalle: ${quote.detail}${aiSection}${validationSection}
+Detalle: ${quote.detail}
+Opcionales/adicionales: ${totalEstimate.addons}${aiSection}${validationSection}
 
 Motivo de recomendación:
 ${recommendationReason(recommendedKey)}
@@ -6745,7 +6780,7 @@ ${location.href}`
     }
     function budgetEstimateInput(recommendedKey, quote, decision) {
       const addons = selectedAddonItems(recommendedKey);
-      const included = addOnCatalog().filter((item) => includedAddonIdsForPlan(recommendedKey).has(item.id));
+      const included = selectableAddonCatalog().filter((item) => includedAddonIdsForPlan(recommendedKey).has(item.id));
       const includeBudgetEstimate = state.includeBudgetEstimate !== false;
       const directMode = state.proposalMode === "direct";
       const wave = adoptionWaveModel(recommendedKey);
@@ -6765,6 +6800,7 @@ ${location.href}`
         adoptionWaveModel: wave,
         wavePricingInstruction: wave ? "Si el modelo de olas indica precio por ola, explicitarlo como referencia por ola y no como total cerrado para todo el universo de usuarios." : "",
         selectedAddons: addons.map((item) => ({ title: item.title, price: item.price, priceMinUsd: item.priceMinUsd || null, priceMaxUsd: item.priceMaxUsd || null, notes: item.pricingNotes || "", category: item.category || "Add-on" })),
+        deliveryCharge: deliveryChargePayload(),
         includedInPlan: included.map((item) => item.title),
         factors: [
           directMode ? "Modo: propuesta directa seleccionada por el comercial" : `Confianza del algoritmo: ${confidenceLabel(decision.level)} ${decision.confidence}%`,
@@ -6775,7 +6811,8 @@ ${location.href}`
           `Acompañamiento: ${qualificationValue("accompaniment")}`,
           `Modalidad: ${discoveryValue(logisticsFields, "deliveryMode")}`,
           `Frecuencia: ${discoveryValue(logisticsFields, "sessionFrequency")}`,
-          addons.length ? `Opcionales cotizables: ${addons.map((item) => item.title).join(", ")}` : "Sin opcionales adicionales seleccionados"
+          addons.length ? `Opcionales cotizables: ${addons.map((item) => item.title).join(", ")}` : "Sin opcionales adicionales seleccionados",
+          deliveryChargeItem() ? `Adicional de modalidad: ${deliveryChargeItem().title} (${deliveryChargeItem().price})` : "Modalidad virtual incluida en el plan base"
         ].filter(Boolean)
       };
     }
@@ -6928,6 +6965,7 @@ ${location.href}`
             requiresCopilot: Boolean(item.requiresCopilot),
             requirement: addonRequirement(item, addonState(item, recommendedKey), recommendedKey)
           })),
+          deliveryCharge: deliveryChargePayload(),
           focus,
           recommendationReason: recommendationReason(recommendedKey),
           roadmap: roadmapItems.map((item) => ({
@@ -7001,7 +7039,7 @@ ${location.href}`
         responseFormat: "Devolver JSON con campos status, statusLabel, planDecision, planComment, missingQuestions, addonReview, risks, commercialRecommendation y markdownSummary. status debe ser consistent, review o risky. addonReview.keep/remove/add deben usar nombres exactos de add-ons cuando sea posible.",
         currentPlan: payload.proposal.recommendedPlanName,
         decisionConfidence: payload.proposal.decision,
-        addonStates: addOnCatalog().map((addon) => ({
+        addonStates: selectableAddonCatalog().map((addon) => ({
           id: addon.id,
           title: addon.title,
           category: addon.category || "Add-on",
@@ -7268,13 +7306,14 @@ ${location.href}`
       const addons = addOnsForPlan(recommendedKey);
       const roadmapState = roadmapStatus(recommendedKey);
       const selectedAddons = selectedAddonItems(recommendedKey);
+      const pricingItems = pricingItemsForPlan(recommendedKey);
       const wave = adoptionWaveModel(recommendedKey);
       const durationLabel = proposalDurationLabel(recommendedKey);
       const scopeLabel = proposalScopeLabel(recommendedKey);
       const scopeDetail = proposalScopeDetail(recommendedKey);
       const endDate = proposalEndDate(recommendedKey);
-      const printableAddonRows = selectedAddons.length
-        ? selectedAddons.map((addon) => `<div class="price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("")
+      const printableAddonRows = pricingItems.length
+        ? pricingItems.map((addon) => `<div class="price-row"><span>${escapeHtml(addon.title)}</span><strong>${escapeHtml(addon.price)}</strong></div>`).join("")
         : `<div class="price-row"><span>Opcionales cotizables</span><strong>Sin adicionales</strong></div>`;
       const decision = planDecision();
       const directMode = state.proposalMode === "direct";
@@ -7599,7 +7638,7 @@ ${location.href}`
           </div>
         </section>`;
       const planCards = maturityPlanEntries(plans).map(([key, plan]) => {
-        const included = addOnCatalog().filter((addon) => includedAddonIdsForPlan(key).has(addon.id)).map((addon) => addon.title);
+        const included = selectableAddonCatalog().filter((addon) => includedAddonIdsForPlan(key).has(addon.id)).map((addon) => addon.title);
         return `<div class="decision-plan-card">
           <strong>${escapeHtml(planMaturityTitle(plan))}</strong>
           <span><b>Referencia:</b> ${escapeHtml(plan.shortName || plan.name)}</span>
@@ -7610,7 +7649,7 @@ ${location.href}`
           ${included.length ? `<span><b>Ya cubre:</b> ${included.map(escapeHtml).join(" · ")}</span>` : ""}
         </div>`;
       }).join("");
-      const addonCategories = Object.entries(addOnCatalog().reduce((groups, addon) => {
+      const addonCategories = Object.entries(selectableAddonCatalog().reduce((groups, addon) => {
         groups[addon.category] = groups[addon.category] || [];
         groups[addon.category].push(addon.title);
         return groups;
