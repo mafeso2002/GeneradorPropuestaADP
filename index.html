@@ -2897,7 +2897,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.0 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.1 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -4114,6 +4114,7 @@
     }
     function allowedAddonIdsForPlan(planKey = selectedProposalPlanKey()) {
       if (planKey === "plan0") return new Set(["leaders", "readiness", "copilot-intro-webinar"]);
+      if (planKey === "plan1") return new Set(["readiness", "excel-intermediate", "excel-advanced", "tool-module"]);
       return null;
     }
     function isAddonAllowedForPlan(addon, planKey = selectedProposalPlanKey()) {
@@ -4285,7 +4286,11 @@
     }
     function addonRequirement(addon, stateName, planKey = selectedProposalPlanKey()) {
       if (stateName === "included") return "Ya cubierto por el plan base";
-      if (!isAddonAllowedForPlan(addon, planKey)) return "P0 se mantiene acotado. Si necesitás este módulo, conviene cambiar a P1, P2 o P3.";
+      if (!isAddonAllowedForPlan(addon, planKey)) {
+        if (planKey === "plan0") return "P0 se mantiene acotado. Si necesitás este módulo, conviene cambiar a P1, P2 o P3.";
+        if (planKey === "plan1") return "P1 ya cubre adopción base. Si necesitás este módulo, conviene ampliar alcance o cambiar a P2/P3.";
+        return "No disponible para este plan.";
+      }
       if (addon.id === "cowork") return coworkEligibility(planKey).reason;
       if (stateName === "unavailable") return "Requiere licencia/trial de Microsoft 365 Copilot";
       return addon.requiresCopilot ? "Requiere licencia Copilot" : addon.requirement;
@@ -4344,6 +4349,12 @@
       </div>`;
     }
     function renderAddonPolicyNotice(planKey) {
+      if (planKey === "plan1") {
+        return `<div class="addon-adjustment-notice">
+          <strong>P1 mantiene add-ons simples</strong>
+          Productividad Digital ya incluye diagnóstico, comunicación, formación aplicada, acompañamiento básico y medición. Solo se pueden sumar Readiness técnico, Excel intermedio, Excel avanzado o un módulo puntual de herramienta. Si el cliente pide más alcance, conviene ampliar el programa o cambiar a P2/P3.
+        </div>`;
+      }
       if (planKey !== "plan0") return "";
       return `<div class="addon-adjustment-notice">
         <strong>P0 mantiene add-ons acotados</strong>
@@ -6802,7 +6813,7 @@ ${location.href}`
             "## Lectura comercial",
             "Madurez, dolores principales, confianza del algoritmo y oportunidad detectada.",
             "## Recomendacion Possumus",
-            "Plan recomendado, por que aplica, alternativas si la confianza es media/baja y como se relaciona con la realidad del cliente. Respetar progressionGuidance: si hay atajos o prerrequisitos, explicarlos como secuencia comercial sin invalidar la oportunidad. Para P0/Envisioning IA, mantener add-ons acotados a Casos para lideres, Readiness tecnico y Webinar introductorio Copilot en 30 minutos; si el cliente necesita mas, sugerir cambio de plan. Para P1/Productividad Digital, no presentarlo como capacitacion puntual: describirlo como programa de adopcion con diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion. Si aparece Cowork, tratarlo como add-on con prerrequisito de Microsoft 365 Copilot activo/trial y 3 a 5 sesiones; si aparecen webinars especializados, presentarlos como consumo puntual por tecnologia, no como programa de adopcion.",
+            "Plan recomendado, por que aplica, alternativas si la confianza es media/baja y como se relaciona con la realidad del cliente. Respetar progressionGuidance: si hay atajos o prerrequisitos, explicarlos como secuencia comercial sin invalidar la oportunidad. Para P0/Envisioning IA, mantener add-ons acotados a Casos para lideres, Readiness tecnico y Webinar introductorio Copilot en 30 minutos; si el cliente necesita mas, sugerir cambio de plan. Para P1/Productividad Digital, no presentarlo como capacitacion puntual: describirlo como programa de adopcion con diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion. En P1 solo permitir como add-ons Readiness tecnico, Excel intermedio, Excel avanzado y Modulo a medida de herramienta puntual; si hace falta mas, sugerir ampliar alcance o cambiar a P2/P3. Si aparece Cowork, tratarlo como add-on con prerrequisito de Microsoft 365 Copilot activo/trial y 3 a 5 sesiones; si aparecen webinars especializados, presentarlos como consumo puntual por tecnologia, no como programa de adopcion.",
             ...(state.includeBudgetEstimate !== false ? [
               "## Estimacion asistida de presupuesto",
               "Rango recomendado, modalidad comercial sugerida, supuestos y alertas. Si la confianza es baja, no cerrar rango y pedir validacion con preventa/adopcion."
