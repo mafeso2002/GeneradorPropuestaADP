@@ -2939,7 +2939,7 @@
             <ul>
               <li>Elegir el nivel de madurez y su referencia comercial.</li>
               <li>Ajustar alcance, precio y add-ons del plan.</li>
-              <li>Generar PDF o handoff sin pasar por diagnóstico.</li>
+              <li>Generar PDF o enviar propuesta sin pasar por diagnóstico.</li>
             </ul>
           </article>
         </div>
@@ -3105,9 +3105,9 @@
     <div class="modal-card">
       <div class="modal-header">
         <div>
-          <span class="ai-badge">Handoff por mail</span>
+          <span class="ai-badge">Propuesta por mail</span>
           <h3 id="handoffModalTitle">Revisar envío</h3>
-          <p>Podés ajustar los campos antes de disparar Power Automate.</p>
+          <p>Podés ajustar los campos antes de enviar la propuesta al equipo interno.</p>
         </div>
         <button class="btn ghost" id="closeHandoffModalBtn">Cerrar</button>
       </div>
@@ -3135,7 +3135,7 @@
       </div>
       <div class="modal-actions">
         <button class="btn" id="cancelHandoffBtn">Cancelar</button>
-        <button class="btn primary" id="confirmHandoffBtn">Enviar handoff</button>
+        <button class="btn primary" id="confirmHandoffBtn">Enviar propuesta</button>
       </div>
       <div class="handoff-status" id="handoffModalStatus"></div>
     </div>
@@ -3619,7 +3619,7 @@
       { key: "direct-start", label: "Paso 1 · Plan", kicker: "Propuesta directa", title: "Elegí el plan que querés presentar", subtitle: "Cargá cliente, fecha y plan. El plan queda definido por el comercial y no se calcula por scoring." },
       { key: "direct-industry", label: "Paso 2 · Tipo de cliente", kicker: "Contexto comercial", title: "¿Qué tipo de cliente es?", subtitle: "Usá este contexto para que la propuesta hable el idioma del cliente: ejemplos, dolores típicos y foco ejecutivo." },
       { key: "direct-users", label: "Paso 3 · Audiencia", kicker: "Audiencia objetivo", title: "¿Qué áreas o perfiles participarán?", subtitle: "Seleccioná si la propuesta se orienta a un área prioritaria o a perfiles de distintas áreas." },
-      { key: "direct-logistics", label: "Paso 4 · Alcance y entrega", kicker: "Cierre de entrega", title: "¿Cómo conviene dimensionar y entregar la adopción?", subtitle: "Definí tamaño del grupo, modalidad, frecuencia, modelo de trabajo y métrica para que el PDF y el handoff salgan completos." }
+      { key: "direct-logistics", label: "Paso 4 · Alcance y entrega", kicker: "Cierre de entrega", title: "¿Cómo conviene dimensionar y entregar la adopción?", subtitle: "Definí tamaño del grupo, modalidad, frecuencia, modelo de trabajo y métrica para que el PDF y la propuesta salgan completos." }
     ];
     let currentStep = 0;
     let currentDirectStep = 0;
@@ -5690,7 +5690,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         : "Los add-ons y el total se recalculan según el plan principal seleccionado.";
       return `<div class="addon-adjustment-notice">
         <strong>Impacto del cambio de plan en add-ons</strong>
-        ${detail} Revisá el resumen económico antes de generar PDF o handoff.
+        ${detail} Revisá el resumen económico antes de generar PDF o enviar propuesta.
       </div>`;
     }
     function renderPlanSelectionPanel(decision, plans, selectedKey, mode = "admin") {
@@ -5748,7 +5748,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       if (!alternativeItems.length) return "";
       return `<div class="alternative-panel">
         <strong>Planes alternativos para evaluar</strong>
-        <p class="decision-note">Estas opciones aparecen porque algunas respuestas apuntan a otro camino posible. El comercial puede promover una alternativa como versión final antes de generar PDF o handoff.</p>
+        <p class="decision-note">Estas opciones aparecen porque algunas respuestas apuntan a otro camino posible. El comercial puede promover una alternativa como versión final antes de generar PDF o enviar propuesta.</p>
         <div class="alternative-grid">${alternativeItems.map((item) => `<div class="alternative-card">
           <h4>${planMaturityTitle(plans[item.key])}</h4>
           <p><strong>${escapeHtml(planReferenceLabel(plans[item.key]))}</strong></p>
@@ -6203,7 +6203,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
             <button class="btn" id="editPlanBtn">Editar datos</button>
             <div class="proposal-action-buttons">
               <button class="btn action-pdf" id="printBtn">Generar PDF</button>
-              <button class="btn action-mail" id="handoffBtn"><span class="btn-icon">${iconSvg("mail")}</span>Enviar handoff</button>
+              <button class="btn action-mail" id="handoffBtn"><span class="btn-icon">${iconSvg("mail")}</span>Enviar propuesta</button>
             </div>
           </div>
           <div class="proposal-note-row">
@@ -6364,8 +6364,8 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         from: "adopcion@possumus.tech",
         to,
         cc: "",
-        subject: `Handoff adopción - ${state.company} - ${planMaturityTitle(recommended)} - ${recommended.shortName || recommended.name}`,
-        body: `Nuevo handoff de propuesta de adopción
+        subject: `Propuesta adopción - ${state.company} - ${planMaturityTitle(recommended)} - ${recommended.shortName || recommended.name}`,
+        body: `Nueva propuesta de adopción
 
 Cliente: ${state.company}
 Plan principal seleccionado (Versión 1): ${planMaturityTitle(recommended)}
@@ -6840,7 +6840,7 @@ ${location.href}`
     async function copyHandoffPayload(payload) {
       try {
         await navigator.clipboard.writeText(JSON.stringify(payload, null, 2));
-        showToast("No se pudo enviar. Copié el payload para revisar o pegar en el Flow.");
+        showToast("No se pudo enviar. Copié los datos de la propuesta para revisar o pegar en el Flow.");
       } catch (error) {
         console.error(error);
       }
@@ -6864,7 +6864,7 @@ ${location.href}`
       }
       button.disabled = true;
       $("confirmHandoffBtn").disabled = true;
-      setStatus("handoff-status", "Enviando handoff a Power Automate...");
+      setStatus("handoff-status", "Enviando propuesta a Power Automate...");
       try {
         const response = await fetch("/api/handoff", {
           method: "POST",
@@ -6873,12 +6873,12 @@ ${location.href}`
         });
         const result = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
-        setStatus("handoff-status success", "Handoff enviado correctamente.");
+        setStatus("handoff-status success", "Propuesta enviada correctamente.");
         closeHandoffModal();
-        showToast("Handoff enviado.");
+        showToast("Propuesta enviada.");
       } catch (error) {
         console.error(error);
-        setStatus("handoff-status error", `No se pudo enviar el handoff: ${error.message}`);
+        setStatus("handoff-status error", `No se pudo enviar la propuesta: ${error.message}`);
         copyHandoffPayload(payload);
       } finally {
         button.disabled = false;

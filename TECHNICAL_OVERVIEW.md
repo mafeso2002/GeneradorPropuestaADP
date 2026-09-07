@@ -14,7 +14,7 @@ La aplicación permite que un comercial o preventa de Possumus releve informaci�
 - resumen económico;
 - propuesta final;
 - PDF comercial;
-- handoff a Power Automate;
+- envío de propuesta a Power Automate;
 - capacidades asistidas con IA para validación, resumen, roadmap y comparación de planes.
 
 ## 2. Arquitectura general
@@ -60,7 +60,7 @@ No hay framework frontend ni build step obligatorio. La app corre como HTML/CSS/
    - roadmap visual;
    - resumen IA;
    - comparación IA contra alternativas, si existen.
-8. La propuesta puede exportarse a PDF o enviarse como handoff a Power Automate.
+8. La propuesta puede exportarse a PDF o enviarse a Power Automate.
 
 ## 3.1 Modos de trabajo
 
@@ -78,7 +78,7 @@ Pasos del modo directo:
 3. Alcance/audiencia.
 4. Entrega y medición.
 
-Estos datos no recalculan el plan elegido; solo enriquecen propuesta final, roadmap, PDF y handoff.
+Estos datos no recalculan el plan elegido; solo enriquecen propuesta final, roadmap, PDF y propuesta enviada.
 
 ## 4. Modelo de decisión
 
@@ -127,9 +127,9 @@ La app separa la recomendación algorítmica de la versión final que el comerci
 | Plan principal seleccionado | `selectedProposalPlanKey()` |
 | Override manual | `state.overridePlanKey` |
 | Propuesta directa | `state.proposalMode === "direct"` y `state.directPlanKey` |
-| Trazabilidad en handoff | `algorithmRecommendedPlanKey`, `selectedPlanKey`, `planWasChangedByCommercial` |
+| Trazabilidad en propuesta enviada | `algorithmRecommendedPlanKey`, `selectedPlanKey`, `planWasChangedByCommercial` |
 
-Si hay alternativas, el comercial puede promover una alternativa con **Usar como principal**. La propuesta final, el PDF y el handoff se recalculan con ese plan seleccionado. En la vista interna queda visible el plan original y el plan final seleccionado; para el cliente se mantiene una propuesta limpia con un único plan principal.
+Si hay alternativas, el comercial puede promover una alternativa con **Usar como principal**. La propuesta final, el PDF y la propuesta enviada se recalculan con ese plan seleccionado. En la vista interna queda visible el plan original y el plan final seleccionado; para el cliente se mantiene una propuesta limpia con un único plan principal.
 
 La reversión se hace con **Volver al plan original**.
 
@@ -243,7 +243,7 @@ Variables Azure:
 
 Power Automate se usa como capa de integración para:
 
-- enviar handoff comercial;
+- enviar propuesta comercial;
 - consultar Dataverse;
 - ejecutar IA;
 - desacoplar URLs sensibles del HTML público.
@@ -252,14 +252,14 @@ Endpoints implementados:
 
 | Endpoint | Variable Azure | Función |
 | --- | --- | --- |
-| `/api/handoff` | `POWER_AUTOMATE_HANDOFF_URL` | Enviar propuesta/handoff |
+| `/api/handoff` | `POWER_AUTOMATE_HANDOFF_URL` | Enviar propuesta |
 | `/api/addon-prices` | `POWER_AUTOMATE_ADDON_PRICES_URL` | Leer precios desde Dataverse |
 | `/api/ai-summary` | `POWER_AUTOMATE_AI_SUMMARY_URL` | Generar resumen ejecutivo IA |
 | `/api/proposal-validation` | `POWER_AUTOMATE_AI_SUMMARY_URL` | Validar diagnóstico con IA |
 | `/api/ai-roadmap` | `POWER_AUTOMATE_AI_ROADMAP_URL` | Generar roadmap personalizado |
 | `/api/plan-comparison` | `POWER_AUTOMATE_PLAN_COMPARISON_URL` | Comparar planes |
 
-## 8. PDF y handoff
+## 8. PDF y envío de propuesta
 
 El PDF se genera desde `buildPrintableProposal()` abriendo una ventana imprimible.
 
@@ -278,7 +278,7 @@ Incluye:
 - roadmap visual;
 - detalle de etapas.
 
-El handoff se construye en `buildHandoffPayload()` e incluye:
+La propuesta enviada se construye en `buildHandoffPayload()` e incluye:
 
 - datos de propuesta;
 - plan principal seleccionado;
@@ -322,7 +322,7 @@ El MVP ya cubre el ciclo comercial completo:
 - pricing;
 - propuesta;
 - PDF;
-- handoff;
+- envío de propuesta;
 - roadmap visual;
 - comparador de planes;
 - preparación para Dynamics.

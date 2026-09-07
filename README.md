@@ -4,13 +4,13 @@ Aplicación HTML para que equipos comerciales y preventa de Possumus releven nec
 
 ## Resumen técnico
 
-Ver `TECHNICAL_OVERVIEW.md` para una descripción técnica del MVP: arquitectura, flujo comercial, scoring, add-ons, IA, Power Automate, Dataverse, PDF, handoff y preparación para Dynamics.
+Ver `TECHNICAL_OVERVIEW.md` para una descripción técnica del MVP: arquitectura, flujo comercial, scoring, add-ons, IA, Power Automate, Dataverse, PDF, envío de propuesta y preparación para Dynamics.
 
 ## Uso
 
 Abrir `index.html` en el navegador. El flujo guía la selección de contexto, alcance, readiness, dolores, add-ons y genera una propuesta exportable a PDF.
 
-## Handoff con Power Automate
+## Envío de propuesta con Power Automate
 
 La app publica una API `POST /api/handoff` para reenviar el payload de la propuesta a Power Automate sin exponer la URL del Flow en el HTML público.
 
@@ -40,7 +40,7 @@ Tabla Dataverse en **Possumus - Desarrollo**: `PreciosAddonsAdopcion` (`pss_Prec
 
 La recomendación se calcula con un scoring ponderado. La app mantiene un plan principal para que el comercial tenga una salida clara, pero agrega una etiqueta de confianza. Si la confianza no es alta, muestra alternativas posibles para validar con preventa/adopción antes de cerrar el alcance.
 
-Variables decisoras principales: objetivo comercial, licenciamiento Copilot, uso semanal real de Copilot, madurez Microsoft 365, casos de uso concretos, necesidad de agentes, alcance/escala, gobierno/COE, sponsor y acompañamiento esperado. Las preguntas operativas y logísticas siguen alimentando argumentos, add-ons, handoff y resumen IA.
+Variables decisoras principales: objetivo comercial, licenciamiento Copilot, uso semanal real de Copilot, madurez Microsoft 365, casos de uso concretos, necesidad de agentes, alcance/escala, gobierno/COE, sponsor y acompañamiento esperado. Las preguntas operativas y logísticas siguen alimentando argumentos, add-ons, propuesta enviada y resumen IA.
 
 La pantalla de add-ons muestra el plan probable y separa los módulos entre sugeridos para el caso, disponibles para ampliar alcance, ya incluidos en el plan y no disponibles por licenciamiento. Esto evita cotizar como adicional una actividad que ya forma parte del plan base.
 
@@ -62,7 +62,7 @@ La estimación asistida puede activarse o desactivarse desde el bloque "Resumen 
 
 ## Roadmap personalizado con IA
 
-La app publica una API `POST /api/ai-roadmap` para generar una hoja de ruta personalizada a partir del plan recomendado, diagnóstico, industria, área, madurez, licencias, add-ons, modalidad y fecha de inicio. El resultado reemplaza la hoja de ruta base en la propuesta, el PDF y el handoff.
+La app publica una API `POST /api/ai-roadmap` para generar una hoja de ruta personalizada a partir del plan recomendado, diagnóstico, industria, área, madurez, licencias, add-ons, modalidad y fecha de inicio. El resultado reemplaza la hoja de ruta base en la propuesta, el PDF y la propuesta enviada.
 
 Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_AUTOMATE_AI_ROADMAP_URL` con la URL del trigger HTTP del Flow. Si no está configurada, la API reutiliza `POWER_AUTOMATE_AI_SUMMARY_URL`. Si no hay Flow disponible, el frontend genera una versión personalizada local para no bloquear la propuesta.
 
@@ -70,7 +70,7 @@ El Flow debe devolver JSON con la forma `{ "summary": "...", "items": [...] }`. 
 
 ## Comparador de planes con IA
 
-La app publica una API `POST /api/plan-comparison` para comparar el plan recomendado contra una alternativa cercana. El botón aparece en la sección "También podría aplicar" cuando el scoring detecta alternativas. La comparación se guarda en la propuesta, el PDF y el handoff.
+La app publica una API `POST /api/plan-comparison` para comparar el plan recomendado contra una alternativa cercana. El botón aparece en la sección "También podría aplicar" cuando el scoring detecta alternativas. La comparación se guarda en la propuesta, el PDF y la propuesta enviada.
 
 Configurar en Azure Static Web Apps una variable de aplicación llamada `POWER_AUTOMATE_PLAN_COMPARISON_URL` con la URL del trigger HTTP del Flow. Si no está configurada, la API reutiliza `POWER_AUTOMATE_AI_SUMMARY_URL`. Si el Flow no devuelve una comparación utilizable, el frontend genera una comparación local para no bloquear al comercial.
 
