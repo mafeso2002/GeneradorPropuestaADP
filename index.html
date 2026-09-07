@@ -2893,6 +2893,7 @@
       <span class="auth-status hidden" id="authStatus">Login Microsoft deshabilitado para pruebas</span>
       <button class="btn ghost hidden" id="loginBtn">Iniciar sesión</button>
       <button class="btn ghost icon-only" id="decisionHelpBtn" title="Ayuda · lógica de decisión" aria-label="Ayuda · lógica de decisión"><span class="btn-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.8 9a2.4 2.4 0 0 1 4.4 1.3c0 1.7-1.5 2.2-2.2 3"></path><path d="M12 17h.01"></path></svg></span></button>
+      <button class="btn action-dynamics hidden" id="topDynamicsBtn" type="button"><span class="btn-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4.5 7.2 12 11.4l7.5-4.2L12 3z"></path><path d="M4.5 7.2v8.4L12 20V11.4"></path><path d="M19.5 7.2v8.4L12 20"></path></svg></span>Subir a Dynamics</button>
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
@@ -3857,7 +3858,11 @@
     function show(section) {
       ["modeSelect", "onboarding", "directPlan", "wizard", "review", "plan"].forEach((id) => $(id).classList.add("hidden"));
       $(section).classList.remove("hidden");
+      if ($("topDynamicsBtn")) $("topDynamicsBtn").classList.add("hidden");
       window.scrollTo(0, 0);
+    }
+    function showDynamicsPlaceholder() {
+      showToast("Integración con Dynamics pendiente: el botón ya quedó reservado para subir la propuesta.");
     }
     function showThinking(title, text) {
       $("thinkingTitle").textContent = title;
@@ -6198,7 +6203,6 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
             <button class="btn" id="editPlanBtn">Editar datos</button>
             <div class="proposal-action-buttons">
               <button class="btn action-pdf" id="printBtn">Generar PDF</button>
-              ${mode !== "user" ? `<button class="btn action-dynamics" id="dynamicsBtn" type="button"><span class="btn-icon">${iconSvg("dynamics")}</span>Subir a Dynamics</button>` : ""}
               <button class="btn action-mail" id="handoffBtn"><span class="btn-icon">${iconSvg("mail")}</span>Enviar handoff</button>
             </div>
           </div>
@@ -6295,6 +6299,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         </details>
         `;
       show("plan");
+      $("topDynamicsBtn").classList.toggle("hidden", mode === "user");
       $("editPlanBtn").addEventListener("click", () => {
         if (directMode) {
           currentDirectStep = 0;
@@ -6332,9 +6337,6 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         renderPlan(mode);
       });
       $("printBtn").addEventListener("click", () => generateProposalPdf(recommendedKey));
-      if ($("dynamicsBtn")) $("dynamicsBtn").addEventListener("click", () => {
-        showToast("Integración con Dynamics pendiente: el botón ya quedó reservado para subir la propuesta.");
-      });
       $("handoffBtn").addEventListener("click", () => openHandoffModal(recommendedKey));
     }
     function buildDefaultHandoffEmail(recommendedKey = selectedProposalPlanKey()) {
@@ -7349,6 +7351,7 @@ ${location.href}`
     }
     activateCardWithKeyboard($("guidedModeBtn"));
     activateCardWithKeyboard($("directModeBtn"));
+    $("topDynamicsBtn").addEventListener("click", showDynamicsPlaceholder);
     $("guidedModeBtn").addEventListener("click", () => {
       state.proposalMode = "guided";
       state.directPlanKey = "";
