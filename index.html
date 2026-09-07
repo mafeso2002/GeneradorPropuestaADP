@@ -4390,13 +4390,19 @@
       if (key === "direct-logistics") return Boolean(state.userRange) && logisticsFields.every((field) => Boolean(state[field.key]));
       return true;
     }
-    function normalizeUserRangeForAudience() {
-      if (state.usersMode === "department") state.userRange = "small";
+    function normalizeScopeForAudience() {
+      if (state.usersMode === "department") {
+        state.userRange = "small";
+        state.groupModel = "by-area";
+      }
     }
     function optionsForField(field) {
       if (!field) return [];
       if (field.key === "userRange" && state.usersMode === "department") {
         return field.options.filter(([value]) => value === "small");
+      }
+      if (field.key === "groupModel" && state.usersMode === "department") {
+        return field.options.filter(([value]) => value === "by-area");
       }
       return field.options;
     }
@@ -4458,7 +4464,7 @@
       }
       if (step.key === "direct-logistics") {
         ensureLogisticsDefaults();
-        normalizeUserRangeForAudience();
+        normalizeScopeForAudience();
         body = `${renderDiscoveryFields([qualificationFields.find((field) => field.key === "userRange"), ...logisticsFields])}`;
       }
       $("directStepBody").innerHTML = body;
@@ -4486,7 +4492,7 @@
           const selected = selectedDepartments()[0] || state.department || "RR. HH.";
           state.department = selected;
           state.departments = [selected];
-          normalizeUserRangeForAudience();
+          normalizeScopeForAudience();
         }
         renderDirectStep();
       }));
@@ -4502,7 +4508,7 @@
           state.usersMode = "department";
           state.department = dept;
           state.departments = [dept];
-          normalizeUserRangeForAudience();
+          normalizeScopeForAudience();
         }
         renderDirectStep();
       }));
@@ -4549,7 +4555,7 @@
       return values.slice(0, 2).join(" · ");
     }
     function renderDiscoveryFields(fields) {
-      normalizeUserRangeForAudience();
+      normalizeScopeForAudience();
       return `<div class="qualification-grid">${fields.map((field, index) => `<div class="qualification-field ${state[field.key] ? "answered" : ""}">
         <div class="qualification-number">${String(index + 1).padStart(2, "0")}</div>
         <div class="qualification-icon">${iconSvg(field.icon)}</div>
@@ -4856,7 +4862,7 @@
           const selected = selectedDepartments()[0] || state.department || "";
           state.department = selected;
           state.departments = selected ? [selected] : [];
-          normalizeUserRangeForAudience();
+          normalizeScopeForAudience();
         }
         invalidateAiArtifacts();
         renderStep();
@@ -4873,7 +4879,7 @@
           if (!state.usersMode) state.usersMode = "department";
           state.department = dept;
           state.departments = [dept];
-          normalizeUserRangeForAudience();
+          normalizeScopeForAudience();
         }
         invalidateAiArtifacts();
         renderStep();
