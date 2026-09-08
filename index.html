@@ -1646,7 +1646,7 @@
     .alternative-quote strong { color: var(--cp-text); }
     .plan-selection-panel {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: 1fr;
       gap: 12px;
       margin: 16px 0 4px;
     }
@@ -1661,6 +1661,32 @@
       background:
         linear-gradient(90deg, var(--cp-cowork) 0 5px, transparent 5px),
         var(--cp-cowork-soft);
+    }
+    .plan-selection-card.current {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: start;
+    }
+    .plan-selection-card .selection-secondary {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border: 1px solid rgba(46,45,49,.12);
+      border-radius: 12px;
+      background: rgba(255,255,255,.72);
+      color: var(--cp-text-muted);
+      font-size: 13px;
+    }
+    .plan-selection-card .selection-secondary strong {
+      display: inline;
+    }
+    .plan-selection-card.current .manual-plan-actions {
+      margin-top: 0;
+      justify-content: flex-end;
+    }
+    .plan-selection-card.current .manual-plan-actions .btn {
+      padding: 10px 12px;
+      font-size: 12px;
     }
     .plan-selection-card.original {
       border-color: var(--cp-brand-yellow);
@@ -3018,7 +3044,7 @@
     .hidden { display: none !important; }
     @media (max-width: 860px) {
       .hero, .layout, .form-row, .review-grid, .roadmap, .links, .mode-grid, .direct-plan-grid { grid-template-columns: 1fr; }
-      .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-selection-panel, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-includes-wide .execution-grid, .plan-metric-row, .wave-plan-grid, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .alternative-card, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option, .roadmap-edit-grid, .priority-matrix { grid-template-columns: 1fr; }
+      .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-selection-panel, .plan-selection-card.current, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-includes-wide .execution-grid, .plan-metric-row, .wave-plan-grid, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .alternative-card, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option, .roadmap-edit-grid, .priority-matrix { grid-template-columns: 1fr; }
       .proposal-price-panel { position: static; }
       .addon-pricing { border-left: 0; border-top: 1px solid var(--cp-border); padding-left: 0; padding-top: 10px; }
       .topbar, .top-actions { align-items: flex-start; flex-direction: column; }
@@ -3079,7 +3105,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.37 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.38 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -5680,7 +5706,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.37",
+          version: "MVP 0.10.38",
           createdAt: publishedAt,
           state: snapshot
         })
@@ -5918,7 +5944,7 @@
       const wave = adoptionWaveModel(planKey);
       if (!wave) return "";
       return `<div class="wave-plan-panel">
-        <strong>Modelo de olas para este alcance</strong>
+        <strong>Modelo de olas del plan principal actual</strong>
         <p>${escapeHtml(wave.note)}</p>
         <div class="wave-plan-grid">
           <div class="wave-plan-item"><span>Modalidad</span><strong>${escapeHtml(wave.label)}</strong></div>
@@ -6517,24 +6543,26 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const changed = selectedKey !== decision.recommendedKey;
       if (!changed) {
         return `<div class="plan-selection-panel">
-          <div class="plan-selection-card active" style="grid-column:1 / -1">
-            <span>Plan principal recomendado por la app</span>
+          <div class="plan-selection-card active current">
+            <div>
+            <span>Plan principal actual · recomendado por la app</span>
             <strong>${escapeHtml(planMaturityTitle(selected))}</strong>
             <p>${escapeHtml(planReferenceLabel(selected))} · ${confidenceLabel(decision.level)} · ${decision.confidence}% · ${escapeHtml(quoteForPlan(selectedKey).main)}</p>
+            </div>
           </div>
         </div>`;
       }
       return `<div class="plan-selection-panel">
-        <div class="plan-selection-card original">
-          <span>Plan recomendado por la app</span>
-          <strong>${escapeHtml(planMaturityTitle(original))}</strong>
-          <p>${escapeHtml(planReferenceLabel(original))} · ${confidenceLabel(decision.level)} · ${decision.confidence}% · ${escapeHtml(quoteForPlan(decision.recommendedKey).main)}</p>
-        </div>
-        <div class="plan-selection-card active">
-          <span>Plan principal elegido para presentar · Versión 1</span>
-          <strong>${escapeHtml(planMaturityTitle(selected))}</strong>
-          <p>${escapeHtml(planReferenceLabel(selected))} · ${escapeHtml(quoteForPlan(selectedKey).main)} · Ajustado manualmente por el comercial.</p>
-          <div class="manual-plan-actions"><button class="btn ghost" id="revertPlanBtn" type="button"><span class="btn-icon">${iconSvg("swap")}</span>Volver al plan recomendado</button></div>
+        <div class="plan-selection-card active current">
+          <div>
+            <span>Plan principal actual para presentar · Versión 1</span>
+            <strong>${escapeHtml(planMaturityTitle(selected))}</strong>
+            <p>${escapeHtml(planReferenceLabel(selected))} · ${escapeHtml(quoteForPlan(selectedKey).main)} · Este es el plan que alimenta alcance, olas, precio, PDF y envío.</p>
+            <div class="selection-secondary">
+              Recomendación original de la app: <strong>${escapeHtml(planMaturityTitle(original))}</strong> · ${confidenceLabel(decision.level)} · ${decision.confidence}% · ${escapeHtml(quoteForPlan(decision.recommendedKey).main)}
+            </div>
+          </div>
+          <div class="manual-plan-actions"><button class="btn ghost" id="revertPlanBtn" type="button"><span class="btn-icon">${iconSvg("swap")}</span>Volver al recomendado</button></div>
         </div>
         ${addonPlanAdjustmentNotice(decision.recommendedKey, selectedKey)}
       </div>`;
@@ -6565,13 +6593,13 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       if (!alternativeItems.length) return "";
       return `<div class="alternative-panel">
         <strong>Planes alternativos para evaluar</strong>
-        <p class="decision-note">Estas opciones aparecen porque algunas respuestas apuntan a otro camino posible. El comercial puede promover una alternativa como versión final antes de generar PDF o enviar propuesta.</p>
+        <p class="decision-note">No están activos todavía. Solo cambian alcance, calendario, precio, PDF y envío si elegís uno como plan principal.</p>
         <div class="alternative-grid">${alternativeItems.map((item) => `<div class="alternative-card">
           <div>
+            <span class="badge">Alternativa no activa</span>
             <h4>${planMaturityTitle(plans[item.key])}</h4>
             <p><strong>${escapeHtml(planReferenceLabel(plans[item.key]))}</strong></p>
             <p>${item.reasons.slice(0, 2).map(escapeSentence).join(". ") || plans[item.key].bestFor}</p>
-            ${renderPlanComparison(currentPlanComparison(selectedKey, item.key))}
           </div>
           <div>
             <div class="alternative-quote">
@@ -6579,8 +6607,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
               <span><strong>Diferencia:</strong> ${escapeHtml(quoteDifference(selectedKey, item.key))}</span>
             </div>
             <div class="alternative-actions">
-              ${mode !== "user" ? `<button class="btn action-mail swap-plan-btn" type="button" data-promote-plan="${item.key}"><span class="btn-icon">${iconSvg("swap")}</span>Usar como principal</button>` : ""}
-              <button class="btn action-ai compare-plan-btn" type="button" data-compare-plan="${item.key}"><span class="btn-icon">${iconSvg("spark")}</span>Comparar IA</button>
+              ${mode !== "user" ? `<button class="btn action-mail swap-plan-btn" type="button" data-promote-plan="${item.key}"><span class="btn-icon">${iconSvg("swap")}</span>Elegir este plan</button>` : ""}
             </div>
           </div>
         </div>`).join("")}</div>
@@ -8208,7 +8235,7 @@ ${clientUrlSection}`);
                 <div class="card metric"><strong>${durationLabel}</strong><p>Duración · ${formatDate(state.startDate)} a ${endDate}</p></div>
                 <div class="card metric"><strong>${scopeLabel}</strong><p>${scopeDetail}</p></div>
               </div>
-              ${wave ? `<div class="card wave-card" style="margin-top:5mm"><strong>Modelo de olas para este alcance</strong><p>${escapeHtml(wave.note)}</p><div class="wave-meta"><div><span>Modalidad</span><strong>${escapeHtml(wave.label)}</strong></div><div><span>Despliegue</span><strong>${escapeHtml(wave.title)}</strong></div><div><span>Segmentación</span><strong>${escapeHtml(wave.groups)}</strong></div></div></div>` : ""}
+              ${wave ? `<div class="card wave-card" style="margin-top:5mm"><strong>Modelo de olas del plan principal actual</strong><p>${escapeHtml(wave.note)}</p><div class="wave-meta"><div><span>Modalidad</span><strong>${escapeHtml(wave.label)}</strong></div><div><span>Despliegue</span><strong>${escapeHtml(wave.title)}</strong></div><div><span>Segmentación</span><strong>${escapeHtml(wave.groups)}</strong></div></div></div>` : ""}
               ${recommendedKey === "plan1" ? `<div class="card" style="margin-top:5mm"><strong>P1 no es solo capacitación</strong><p>Productividad Digital combina diagnóstico, comunicación, formación aplicada, acompañamiento y medición. Las sesiones son una parte del recorrido; el valor es instalar hábitos Microsoft 365 medibles por ola.</p></div>` : ""}
               ${progressionItems.length ? `<div class="card" style="margin-top:5mm"><strong>Lectura de progresión comercial</strong><ul>${progressionItems.map((item) => `<li><strong>${escapeHtml(item.level)}:</strong> ${escapeHtml(item.desc)} ${escapeHtml(item.action)}</li>`).join("")}</ul></div>` : ""}
             </div>
