@@ -1317,6 +1317,69 @@
         radial-gradient(circle at right top, var(--cp-brand-sky), transparent 12rem),
         var(--cp-surface);
     }
+    .adoption-method-panel {
+      background:
+        linear-gradient(90deg, #7c3aed 0 7px, transparent 7px),
+        radial-gradient(circle at right top, rgba(124, 58, 237, .12), transparent 14rem),
+        var(--cp-surface);
+    }
+    .adoption-method-panel > p {
+      margin-top: 0;
+      color: var(--cp-text-muted);
+    }
+    .maturity-speech {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin: 14px 0;
+      padding: 13px 14px;
+      border: 1px solid rgba(124, 58, 237, .22);
+      border-radius: 14px;
+      background: rgba(124, 58, 237, .07);
+    }
+    .maturity-speech .stage-icon {
+      flex: 0 0 auto;
+      background: #f3e8ff;
+      color: #6d28d9;
+    }
+    .maturity-speech p { margin: 2px 0 0; }
+    .priority-matrix {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .priority-cell {
+      min-height: 128px;
+      border: 1px solid var(--cp-border);
+      border-radius: 14px;
+      padding: 13px;
+      background: rgba(255,255,255,.78);
+    }
+    .priority-cell.quick { border-color: rgba(0, 163, 81, .45); background: #effbf4; }
+    .priority-cell.strategic { border-color: rgba(37, 99, 235, .35); background: #eff6ff; }
+    .priority-cell.prepare { border-color: rgba(252, 215, 2, .7); background: #fffdf0; }
+    .priority-cell.later { border-color: rgba(100, 116, 139, .3); background: #f8fafc; }
+    .priority-cell span {
+      display: inline-flex;
+      margin-bottom: 6px;
+      border-radius: 999px;
+      padding: 3px 8px;
+      background: #fff;
+      color: var(--cp-text-muted);
+      font-size: 10px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .priority-cell strong { display: block; margin-bottom: 6px; }
+    .priority-cell ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--cp-text-muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
     .recommendation-title {
       display: flex;
       align-items: center;
@@ -2925,7 +2988,7 @@
     .hidden { display: none !important; }
     @media (max-width: 860px) {
       .hero, .layout, .form-row, .review-grid, .roadmap, .links, .mode-grid, .direct-plan-grid { grid-template-columns: 1fr; }
-      .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-selection-panel, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .wave-plan-grid, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option, .roadmap-edit-grid { grid-template-columns: 1fr; }
+      .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-selection-panel, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .wave-plan-grid, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option, .roadmap-edit-grid, .priority-matrix { grid-template-columns: 1fr; }
       .proposal-price-panel { position: static; }
       .addon-pricing { border-left: 0; border-top: 1px solid var(--cp-border); padding-left: 0; padding-top: 10px; }
       .topbar, .top-actions { align-items: flex-start; flex-direction: column; }
@@ -2986,7 +3049,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.33 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.34 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -5587,7 +5650,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.33",
+          version: "MVP 0.10.34",
           createdAt: publishedAt,
           state: snapshot
         })
@@ -6533,6 +6596,74 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         ["Medición", "KPIs de adopción, participación, satisfacción, uso y reportes ejecutivos periódicos.", "measurement"]
       ];
     }
+    function priorityMatrixItems(recommendedKey = selectedProposalPlanKey()) {
+      const communication = selectedLabel("inbox") || "comunicación diaria";
+      const meeting = selectedLabel("meeting") || "reuniones y seguimiento";
+      const create = selectedLabel("create") || "documentos y análisis";
+      const automate = selectedLabel("automate") || "trabajo repetitivo";
+      const noCopilot = state.copilotLicenses === "none" || state.copilotLicenses === "chat";
+      return [
+        {
+          key: "quick",
+          axis: "Alto impacto · bajo esfuerzo",
+          title: "Quick wins",
+          items: [
+            communication,
+            meeting,
+            "Prácticas simples de Teams, documentos y tareas"
+          ]
+        },
+        {
+          key: "prepare",
+          axis: "Habilitador",
+          title: "Base para escalar",
+          items: [
+            "Orden documental y permisos",
+            "Audiencias, responsables y calendario",
+            "Métrica de adopción y evidencias"
+          ]
+        },
+        {
+          key: "strategic",
+          axis: "Alto impacto · mayor preparación",
+          title: "Iniciativas estratégicas",
+          items: [
+            create,
+            automate,
+            recommendedKey === "plan3" ? "Gobierno, champions y programa integral" : "Backlog para siguiente ola"
+          ]
+        },
+        {
+          key: "later",
+          axis: "Depende de prerrequisitos",
+          title: "Postergar o condicionar",
+          items: [
+            noCopilot ? "Microsoft 365 Copilot con datos corporativos" : "Escalado masivo sin medición previa",
+            noCopilot ? "Cowork, agentes y automatizaciones avanzadas" : "Agentes sin caso priorizado",
+            "Cambios fuera del alcance sin sponsor"
+          ]
+        }
+      ];
+    }
+    function renderAdoptionMethodPanel(recommendedKey = selectedProposalPlanKey()) {
+      const matrix = priorityMatrixItems(recommendedKey);
+      return `<div class="proposal-panel adoption-method-panel">
+        <h3>Cómo priorizamos la adopción</h3>
+        <p>La propuesta no parte de “usar más tecnología”, sino de ordenar el punto de partida y elegir el siguiente paso viable.</p>
+        <div class="maturity-speech">
+          <div class="stage-icon">${iconSvg("maturity")}</div>
+          <div>
+            <strong>Madurez como punto de partida</strong>
+            <p>La madurez no es un examen: ayuda a entender hábitos actuales, riesgos y oportunidades para definir una adopción realista y medible.</p>
+          </div>
+        </div>
+        <div class="priority-matrix">${matrix.map((cell) => `<div class="priority-cell ${cell.key}">
+          <span>${escapeHtml(cell.axis)}</span>
+          <strong>${escapeHtml(cell.title)}</strong>
+          <ul>${cell.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        </div>`).join("")}</div>
+      </div>`;
+    }
     function proposalRoadmap(planKey) {
       const start = roadmapStartDate();
       const inbox = find(inboxOptions(), state.inbox)[1];
@@ -7018,6 +7149,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                   </div>
                 </div>
               </div>
+              ${renderAdoptionMethodPanel(recommendedKey)}
               <div class="ai-summary-panel ${aiSummaryText ? "" : "ai-summary-empty"}">
                 <div>
                   ${aiSummaryText ? `<div class="ai-summary-head">
@@ -7882,6 +8014,7 @@ ${clientUrlSection}`);
         discoveryValue(logisticsFields, "groupModel"),
         discoveryValue(logisticsFields, "successMetric")
       ].filter(Boolean);
+      const priorityMatrix = priorityMatrixItems(recommendedKey);
       const css = `
         <style>
           @page { size: A4 landscape; margin: 0; }
@@ -7918,6 +8051,15 @@ ${clientUrlSection}`);
           .card.yellow { background: #fff7bf; border-color: #fcd702; }
           .card strong { display: block; margin-bottom: 2mm; font-size: 16pt; color: #2e2d31; }
           .metric strong { font-size: 23pt; }
+          .priority-matrix-pdf { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; margin-top: 6mm; }
+          .priority-cell-pdf { border: 1px solid #dedede; border-radius: 4mm; padding: 4.5mm; background: #ffffff; }
+          .priority-cell-pdf.quick { border-color: #9fd9b8; background: #effbf4; }
+          .priority-cell-pdf.prepare { border-color: #fcd702; background: #fffdf0; }
+          .priority-cell-pdf.strategic { border-color: #bfdbfe; background: #eff6ff; }
+          .priority-cell-pdf.later { border-color: #cbd5e1; background: #f8fafc; }
+          .priority-cell-pdf span { display: block; margin-bottom: 1.5mm; color: #73757d; font-size: 8.5pt; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; }
+          .priority-cell-pdf strong { display: block; margin: 0 0 1.5mm; font-size: 13pt; }
+          .priority-cell-pdf ul { margin: 0; padding-left: 4mm; color: #5f6168; font-size: 9.5pt; line-height: 1.35; }
           .wave-card { border-color: #fcd702; background: #fffdf0; }
           .wave-card .wave-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-top: 4mm; }
           .wave-card .wave-meta div { border: 1px solid #eadf9a; border-radius: 3mm; padding: 3mm; background: #ffffff; }
@@ -7997,6 +8139,16 @@ ${clientUrlSection}`);
           <p class="eyebrow">Metodología Possumus</p>
           <h2>Cuatro pilares para convertir tecnología en hábitos de trabajo.</h2>
           <div class="grid-4">${methodologyPillars().map(([title, desc]) => `<div class="card"><strong>${title}</strong><p>${desc}</p></div>`).join("")}</div>${footer}
+        </section>
+        <section class="slide">
+          <p class="eyebrow">Priorización de adopción</p>
+          <h2>La madurez define el punto de partida, no un juicio sobre el cliente.</h2>
+          <p>Priorizamos oportunidades por impacto y esfuerzo: primero quick wins medibles, luego habilitadores y apuestas estratégicas; lo avanzado se condiciona a prerrequisitos reales.</p>
+          <div class="priority-matrix-pdf">${priorityMatrix.map((cell) => `<div class="priority-cell-pdf ${cell.key}">
+            <span>${escapeHtml(cell.axis)}</span>
+            <strong>${escapeHtml(cell.title)}</strong>
+            <ul>${cell.items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+          </div>`).join("")}</div>${footer}
         </section>
         <section class="slide">
           <p class="eyebrow">${directMode ? "Propuesta directa" : "Recomendación generada"}</p>

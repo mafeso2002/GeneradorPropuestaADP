@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.33**
+Versión documentada: **MVP 0.10.34**
 Última actualización funcional: **2026-09-08**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -219,6 +219,8 @@ Variable Azure:
 ## 6. Capacidades de IA
 
 La app usa IA de forma asistida y consultiva. La IA no modifica automáticamente respuestas estructuradas salvo que el comercial aplique una acción explícita.
+
+La propuesta final incluye una capa metodológica no decisoria: explica la madurez como punto de partida (no como examen) y muestra una matriz impacto/esfuerzo para priorizar quick wins, habilitadores, iniciativas estratégicas y elementos a postergar por prerrequisitos. Esta matriz no cambia scoring, precios ni selección de plan; solo mejora el speech del proceso de adopción.
 
 ### 6.1 Validación IA del diagnóstico
 
