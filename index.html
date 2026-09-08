@@ -1296,6 +1296,10 @@
       gap: 18px;
       margin-top: 22px;
     }
+    .proposal-grid.proposal-main-grid {
+      grid-template-columns: 1fr;
+      margin-top: 0;
+    }
     .proposal-panel,
     .plan-option-card,
     .pillar-card,
@@ -1316,6 +1320,12 @@
         linear-gradient(90deg, #2563eb 0 7px, transparent 7px),
         radial-gradient(circle at right top, var(--cp-brand-sky), transparent 12rem),
         var(--cp-surface);
+    }
+    .plan-includes-wide {
+      margin-top: 16px;
+    }
+    .plan-includes-wide .execution-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
     .adoption-method-panel {
       background:
@@ -3008,7 +3018,7 @@
     .hidden { display: none !important; }
     @media (max-width: 860px) {
       .hero, .layout, .form-row, .review-grid, .roadmap, .links, .mode-grid, .direct-plan-grid { grid-template-columns: 1fr; }
-      .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-selection-panel, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .wave-plan-grid, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .alternative-card, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option, .roadmap-edit-grid, .priority-matrix { grid-template-columns: 1fr; }
+      .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-selection-panel, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-includes-wide .execution-grid, .plan-metric-row, .wave-plan-grid, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .alternative-card, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option, .roadmap-edit-grid, .priority-matrix { grid-template-columns: 1fr; }
       .proposal-price-panel { position: static; }
       .addon-pricing { border-left: 0; border-top: 1px solid var(--cp-border); padding-left: 0; padding-top: 10px; }
       .topbar, .top-actions { align-items: flex-start; flex-direction: column; }
@@ -3069,7 +3079,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.35 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.36 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -5670,7 +5680,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.35",
+          version: "MVP 0.10.36",
           createdAt: publishedAt,
           state: snapshot
         })
@@ -7135,6 +7145,19 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           </div>
         </div>
       </details>`;
+      const planIncludesPanel = `<div class="proposal-panel includes-panel plan-includes-wide">
+        <h3>Qué incluye este plan</h3>
+        <div class="execution-grid">
+          <div class="execution-card">
+            <strong>Ejecución</strong>
+            <ul>${recommended.execution.map((item) => `<li>${item}</li>`).join("")}</ul>
+          </div>
+          <div class="execution-card">
+            <strong>Entregables</strong>
+            <ul>${recommended.deliverables.map((item) => `<li>${item}</li>`).join("")}</ul>
+          </div>
+        </div>
+      </div>`;
       $("plan").innerHTML = `
         <div class="result-hero">
           <div class="result-top">
@@ -7162,9 +7185,10 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
             <div class="proposal-meta-card"><strong>${endDate}</strong><span>Fin estimado</span></div>
           </div>
           ${decisionCriteriaAccordion}
+          ${planIncludesPanel}
           <div class="proposal-commercial-grid">
             <div class="proposal-functional-stack">
-              <div class="proposal-grid">
+              <div class="proposal-grid proposal-main-grid">
                 <div class="proposal-panel">
                   <div class="recommendation-title">
                     <div class="stage-icon">${iconSvg(recommended.icon)}</div>
@@ -7197,19 +7221,6 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                   </div>
                   ${renderWavePlanPanel(recommendedKey)}
                   ${renderPlanAdoptionClarification(recommendedKey)}
-                </div>
-                <div class="proposal-panel includes-panel">
-                  <h3>Qué incluye este plan</h3>
-                  <div class="execution-grid" style="grid-template-columns:1fr">
-                    <div class="execution-card">
-                      <strong>Ejecución</strong>
-                      <ul>${recommended.execution.map((item) => `<li>${item}</li>`).join("")}</ul>
-                    </div>
-                    <div class="execution-card">
-                      <strong>Entregables</strong>
-                      <ul>${recommended.deliverables.map((item) => `<li>${item}</li>`).join("")}</ul>
-                    </div>
-                  </div>
                 </div>
               </div>
               <div class="ai-summary-panel ${aiSummaryText ? "" : "ai-summary-empty"}">
