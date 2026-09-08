@@ -2914,7 +2914,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.24 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.25 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -5489,7 +5489,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.24",
+          version: "MVP 0.10.25",
           createdAt: publishedAt,
           state: snapshot
         })
@@ -6414,65 +6414,65 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const automate = find(data.automate, state.automate)[1];
       if (planKey === "plan3") {
         return [
-          { tag: "Ola 1 · 3 meses", title: "Productividad digital + base IA", date: formatDate(start), icon: "diagnostic", desc: "Diagnóstico, comunicación y formación integral de Microsoft 365 con introducción a IA.", tasks: ["Encuestas, entrevistas y segmentación de audiencias", `Escenarios de productividad: ${inbox.toLowerCase()} y ${meeting.toLowerCase()}`, "Definición de champions, KPIs y plan de comunicación"] },
-          { tag: "Ola 2 · 3 meses", title: "Microsoft 365 Copilot aplicado", date: formatDate(addDays(start, 90)), icon: "spark", desc: "Profundización en Copilot, casos por rol y medición de valor real.", tasks: [`Casos con datos corporativos: ${create.toLowerCase()}`, `Automatización y agentes: ${automate.toLowerCase()}`, "Reporte ejecutivo y plan de mejora continua"] }
+          { tag: "Ola 1 · 3 meses", title: "Productividad digital + base IA", date: formatDate(start), icon: "diagnostic", desc: "Diagnóstico, comunicación y formación integral de Microsoft 365 con introducción a IA.", tasks: ["Encuestas, entrevistas y segmentación de audiencias", "Diseño de gobierno, sponsors y modelo de champions", `Escenarios de productividad: ${inbox.toLowerCase()} y ${meeting.toLowerCase()}`, "Plan de comunicación y calendario por ola", "Medición inicial de adopción y hábitos digitales"] },
+          { tag: "Ola 2 · 3 meses", title: "Microsoft 365 Copilot aplicado", date: formatDate(addDays(start, 90)), icon: "spark", desc: "Profundización en Copilot, casos por rol y medición de valor real.", tasks: ["Activación de usuarios Copilot por rol", `Casos con datos corporativos: ${create.toLowerCase()}`, `Automatización y agentes: ${automate.toLowerCase()}`, "Tablero ejecutivo de avance y adopción", "Plan de mejora continua y backlog de oportunidades"] }
         ];
       }
       if (planKey === "plan1") {
         const wave = adoptionWaveModel(planKey);
         if (state.userRange === "small") {
           return [
-            { tag: "Semana 1", title: "Diagnóstico y diseño de ola", date: formatDate(start), icon: "diagnostic", desc: "Relevar madurez digital, validar área prioritaria, mensajes de cambio y grupos de trabajo.", tasks: ["Encuesta breve de madurez digital", "Validación de audiencia y responsables", "Diseño de comunicación, quick wins y calendario"] },
-            { tag: "Semana 2", title: "Comunicación y formación aplicada", date: formatDate(addDays(start, 7)), icon: "training", desc: "Activar la ola con mensajes internos y práctica guiada sobre hábitos Microsoft 365.", tasks: [`Comunicación y correo: ${inbox.toLowerCase()}`, `Colaboración y reuniones: ${meeting.toLowerCase()}`, "Archivos, tareas y Copilot Chat introductorio"] },
-            { tag: "Semana 3", title: "Acompañamiento y refuerzo", date: formatDate(addDays(start, 14)), icon: "communication", desc: "Sostener la adopción inicial con materiales, recordatorios, consultas y buenas prácticas.", tasks: ["Materiales de aprendizaje y quick wins", "Office hours o espacio de consultas", "Refuerzo de hábitos por área"] },
-            { tag: "Semana 4", title: "Medición y cierre de ola", date: formatDate(addDays(start, 21)), icon: "measurement", desc: "Medir participación, satisfacción y próximos pasos de adopción.", tasks: ["Encuesta de satisfacción", "Reporte ejecutivo de resultados", "Recomendación de siguiente ola o evolución a IA"] }
+            { tag: "Semana 1", title: "Diagnóstico y diseño de ola", date: formatDate(start), icon: "diagnostic", desc: "Relevar madurez digital, validar área prioritaria, mensajes de cambio y grupos de trabajo.", tasks: ["Kickoff con sponsor y responsables", "Encuesta breve de madurez digital", "Validación de audiencia, roles y dolores prioritarios", "Diseño de comunicación, quick wins y calendario", "Definición de métrica de éxito y evidencias de avance"] },
+            { tag: "Semana 2", title: "Comunicación y formación aplicada", date: formatDate(addDays(start, 7)), icon: "training", desc: "Activar la ola con mensajes internos y práctica guiada sobre hábitos Microsoft 365.", tasks: ["Lanzamiento de la ola y mensajes internos", `Comunicación y correo: ${inbox.toLowerCase()}`, `Colaboración y reuniones: ${meeting.toLowerCase()}`, "Archivos, tareas y Copilot Chat introductorio", "Ejercicios prácticos con casos reales del área"] },
+            { tag: "Semana 3", title: "Acompañamiento y refuerzo", date: formatDate(addDays(start, 14)), icon: "communication", desc: "Sostener la adopción inicial con materiales, recordatorios, consultas y buenas prácticas.", tasks: ["Materiales de aprendizaje y quick wins", "Office hours o espacio de consultas", "Refuerzo de hábitos por área", "Revisión de dudas, blockers y adopción inicial", "Ajustes de contenidos según feedback"] },
+            { tag: "Semana 4", title: "Medición y cierre de ola", date: formatDate(addDays(start, 21)), icon: "measurement", desc: "Medir participación, satisfacción y próximos pasos de adopción.", tasks: ["Encuesta de satisfacción", "Revisión de participación y evidencias de uso", "Reporte ejecutivo de resultados", "Sesión de cierre con sponsor y referentes", "Recomendación de siguiente ola o evolución a IA"] }
           ];
         }
         if (state.userRange === "medium") {
           return [
-            { tag: "Mes 1 · Ola 1", title: "Diagnóstico, comunicación y primera ola", date: formatDate(start), icon: "diagnostic", desc: `Preparar el modelo de olas para ${wave ? wave.users.toLowerCase() : "el alcance definido"} y activar los primeros grupos con mensajes, práctica y medición.`, tasks: ["Diagnóstico de madurez y segmentación de audiencias", "Priorización de áreas, perfiles y calendario", "Comunicación interna, formación aplicada y quick wins"] },
-            { tag: "Mes 2 · Olas 2 y 3", title: "Escalamiento con acompañamiento", date: formatDate(addMonths(start, 1)), icon: "training", desc: "Replicar la adopción con nuevas audiencias, manteniendo grupos manejables, soporte y seguimiento por ola.", tasks: [`Escenarios de comunicación: ${inbox.toLowerCase()}`, `Escenarios de reuniones: ${meeting.toLowerCase()}`, "Ajuste de contenidos y refuerzos según feedback"] },
-            { tag: "Mes 3 · Olas 4 y 5", title: "Consolidación y medición transversal", date: formatDate(addMonths(start, 2)), icon: "measurement", desc: "Cerrar el despliegue de hasta 300 usuarios con medición y recomendaciones de continuidad.", tasks: ["Medición de participación y satisfacción por ola", "Reporte ejecutivo consolidado", "Recomendación de continuidad, champions o evolución a IA"] },
-            { tag: "Cierre · 90 días", title: "Roadmap de continuidad", date: formatDate(addDays(start, 85)), icon: "spark", desc: "Ordenar oportunidades detectadas para sostener hábitos digitales o avanzar a Copilot.", tasks: [`Oportunidades de creación/análisis: ${create.toLowerCase()}`, `Procesos repetitivos detectados: ${automate.toLowerCase()}`, "Plan de siguiente etapa y backlog de mejoras"] }
+            { tag: "Mes 1 · Ola 1", title: "Diagnóstico, comunicación y primera ola", date: formatDate(start), icon: "diagnostic", desc: `Preparar el modelo de olas para ${wave ? wave.users.toLowerCase() : "el alcance definido"} y activar los primeros grupos con mensajes, práctica y medición.`, tasks: ["Diagnóstico de madurez y segmentación de audiencias", "Priorización de áreas, perfiles y calendario", "Kickoff con sponsors, referentes y champions", "Comunicación interna, formación aplicada y quick wins", "Medición inicial y acuerdos de seguimiento"] },
+            { tag: "Mes 2 · Olas 2 y 3", title: "Escalamiento con acompañamiento", date: formatDate(addMonths(start, 1)), icon: "training", desc: "Replicar la adopción con nuevas audiencias, manteniendo grupos manejables, soporte y seguimiento por ola.", tasks: [`Escenarios de comunicación: ${inbox.toLowerCase()}`, `Escenarios de reuniones: ${meeting.toLowerCase()}`, "Office hours y soporte a referentes", "Ajuste de contenidos y refuerzos según feedback", "Registro de quick wins y blockers"] },
+            { tag: "Mes 3 · Olas 4 y 5", title: "Consolidación y medición transversal", date: formatDate(addMonths(start, 2)), icon: "measurement", desc: "Cerrar el despliegue de hasta 300 usuarios con medición y recomendaciones de continuidad.", tasks: ["Medición de participación y satisfacción por ola", "Revisión de hábitos digitales adoptados", "Reporte ejecutivo consolidado", "Sesión de aprendizajes con champions", "Recomendación de continuidad, champions o evolución a IA"] },
+            { tag: "Cierre · 90 días", title: "Roadmap de continuidad", date: formatDate(addDays(start, 85)), icon: "spark", desc: "Ordenar oportunidades detectadas para sostener hábitos digitales o avanzar a Copilot.", tasks: [`Oportunidades de creación/análisis: ${create.toLowerCase()}`, `Procesos repetitivos detectados: ${automate.toLowerCase()}`, "Backlog priorizado de mejoras", "Plan de siguiente etapa y responsables", "Decisión comercial de continuidad"] }
           ];
         }
         return [
-          { tag: "Trimestre 1 · Olas 1-2", title: "Diagnóstico, comunicación y primeras olas", date: formatDate(start), icon: "diagnostic", desc: "Diseñar el calendario anual, segmentar audiencias, preparar comunicación y activar los primeros grupos.", tasks: ["Diagnóstico de madurez digital", "Priorización de áreas y referentes", "Primeras olas con formación aplicada y quick wins"] },
-          { tag: "Trimestre 2 · Olas 3-5", title: "Escalamiento de hábitos digitales", date: formatDate(addMonths(start, 3)), icon: "training", desc: "Extender la adopción por áreas o perfiles, incorporando comunicación, acompañamiento y aprendizajes de las olas iniciales.", tasks: [`Comunicación y correo: ${inbox.toLowerCase()}`, `Colaboración y reuniones: ${meeting.toLowerCase()}`, "Ajuste de contenidos, materiales y refuerzos por audiencia"] },
-          { tag: "Trimestre 3 · Olas 6-8", title: "Consolidación y champions", date: formatDate(addMonths(start, 6)), icon: "communication", desc: "Sostener la adopción con referentes, comunicación y seguimiento de buenas prácticas.", tasks: ["Activación de champions o referentes", "Campañas de refuerzo y quick wins", "Office hours o espacios de consulta"] },
-          { tag: "Trimestre 4 · Olas 9-10", title: "Medición anual y evolución", date: formatDate(addMonths(start, 9)), icon: "measurement", desc: "Cerrar el programa anual con medición ejecutiva y recomendación de evolución.", tasks: ["Reporte anual de adopción", "Encuesta de satisfacción y aprendizajes", "Roadmap de continuidad o evolución a IA/Copilot"] }
+          { tag: "Trimestre 1 · Olas 1-2", title: "Diagnóstico, comunicación y primeras olas", date: formatDate(start), icon: "diagnostic", desc: "Diseñar el calendario anual, segmentar audiencias, preparar comunicación y activar los primeros grupos.", tasks: ["Diagnóstico de madurez digital", "Priorización de áreas y referentes", "Diseño de calendario anual por olas", "Primeras olas con formación aplicada y quick wins", "Modelo de medición y governance de adopción"] },
+          { tag: "Trimestre 2 · Olas 3-5", title: "Escalamiento de hábitos digitales", date: formatDate(addMonths(start, 3)), icon: "training", desc: "Extender la adopción por áreas o perfiles, incorporando comunicación, acompañamiento y aprendizajes de las olas iniciales.", tasks: [`Comunicación y correo: ${inbox.toLowerCase()}`, `Colaboración y reuniones: ${meeting.toLowerCase()}`, "Refuerzo por líderes y champions", "Ajuste de contenidos, materiales y refuerzos por audiencia", "Seguimiento de adopción por ola"] },
+          { tag: "Trimestre 3 · Olas 6-8", title: "Consolidación y champions", date: formatDate(addMonths(start, 6)), icon: "communication", desc: "Sostener la adopción con referentes, comunicación y seguimiento de buenas prácticas.", tasks: ["Activación de champions o referentes", "Campañas de refuerzo y quick wins", "Office hours o espacios de consulta", "Historias de éxito y buenas prácticas", "Plan de soporte y continuidad interna"] },
+          { tag: "Trimestre 4 · Olas 9-10", title: "Medición anual y evolución", date: formatDate(addMonths(start, 9)), icon: "measurement", desc: "Cerrar el programa anual con medición ejecutiva y recomendación de evolución.", tasks: ["Reporte anual de adopción", "Encuesta de satisfacción y aprendizajes", "Cierre ejecutivo con sponsors", "Roadmap de continuidad o evolución a IA/Copilot", "Backlog priorizado para el siguiente ciclo"] }
         ];
       }
       if (planKey === "plan2") {
         if (state.userRange === "medium") {
           return [
-            { tag: "Mes 1 · Ola 1", title: "Preparación y primera ola Copilot", date: formatDate(start), icon: "diagnostic", desc: "Preparar entorno, comunicación y primeros grupos de Microsoft 365 Copilot.", tasks: ["Confirmar licencias, usuarios y fechas", "Revisar datos, permisos y seguridad", "Activar primera ola con casos por rol"] },
-            { tag: "Mes 2 · Olas 2 y 3", title: "Adopción Copilot por roles", date: formatDate(addMonths(start, 1)), icon: "training", desc: "Escalar formación práctica con nuevas audiencias, manteniendo medición por ola.", tasks: [`Reuniones: ${meeting.toLowerCase()} en ${state.meetingApp}`, `Creación/análisis: ${create.toLowerCase()}`, "Biblioteca de prompts y prácticas guiadas"] },
-            { tag: "Mes 3 · Olas 4 y 5", title: "Medición y expansión controlada", date: formatDate(addMonths(start, 2)), icon: "measurement", desc: "Medir uso, satisfacción y valor percibido antes de seguir ampliando grupos.", tasks: ["Revisión de Copilot Dashboard", "Encuestas por ola", "Ajuste de casos y blockers"] },
-            { tag: "Mes 4 · Olas 6 y 7", title: "Cierre de alcance y continuidad", date: formatDate(addMonths(start, 3)), icon: "spark", desc: "Cerrar despliegue de hasta 300 usuarios y definir continuidad o evolución.", tasks: [`Automatización: ${automate.toLowerCase()}`, "Reporte ejecutivo consolidado", "Recomendación de continuidad o evolución a Nivel 4"] }
+            { tag: "Mes 1 · Ola 1", title: "Preparación y primera ola Copilot", date: formatDate(start), icon: "diagnostic", desc: "Preparar entorno, comunicación y primeros grupos de Microsoft 365 Copilot.", tasks: ["Confirmar licencias, usuarios y fechas", "Revisar datos, permisos y seguridad", "Segmentar usuarios por rol o área", "Preparar comunicación y canal de adopción", "Activar primera ola con casos por rol"] },
+            { tag: "Mes 2 · Olas 2 y 3", title: "Adopción Copilot por roles", date: formatDate(addMonths(start, 1)), icon: "training", desc: "Escalar formación práctica con nuevas audiencias, manteniendo medición por ola.", tasks: [`Reuniones: ${meeting.toLowerCase()} en ${state.meetingApp}`, `Creación/análisis: ${create.toLowerCase()}`, "Biblioteca de prompts y prácticas guiadas", "Office hours para usuarios activados", "Feedback de champions y casos de valor"] },
+            { tag: "Mes 3 · Olas 4 y 5", title: "Medición y expansión controlada", date: formatDate(addMonths(start, 2)), icon: "measurement", desc: "Medir uso, satisfacción y valor percibido antes de seguir ampliando grupos.", tasks: ["Revisión de Copilot Dashboard", "Encuestas por ola", "Ajuste de casos y blockers", "Historias de éxito y comunicaciones de refuerzo", "Revisión de riesgos de adopción"] },
+            { tag: "Mes 4 · Olas 6 y 7", title: "Cierre de alcance y continuidad", date: formatDate(addMonths(start, 3)), icon: "spark", desc: "Cerrar despliegue de hasta 300 usuarios y definir continuidad o evolución.", tasks: [`Automatización: ${automate.toLowerCase()}`, "Reporte ejecutivo consolidado", "Backlog de agentes o casos avanzados", "Plan de escalado y ownership interno", "Recomendación de continuidad o evolución a Nivel 4"] }
           ];
         }
         if (state.userRange === "large") {
           return [
-            { tag: "Fase 1", title: "Diseño del programa Copilot a escala", date: formatDate(start), icon: "diagnostic", desc: "Validar alcance, audiencias, licencias y gobierno antes de comprometer calendario.", tasks: ["Segmentación de audiencias", "Revisión de gobierno y datos", "Definición de olas y responsables"] },
-            { tag: "Fase 2", title: "Piloto ampliado y primeros casos por rol", date: formatDate(addMonths(start, 1)), icon: "training", desc: "Activar grupos iniciales y ajustar el modelo antes de escalar masivamente.", tasks: [`Casos de comunicación: ${inbox.toLowerCase()}`, `Casos de reuniones: ${meeting.toLowerCase()}`, "Feedback de usuarios y champions"] },
-            { tag: "Fase 3", title: "Escalamiento progresivo", date: formatDate(addMonths(start, 3)), icon: "spark", desc: "Extender Copilot por audiencias, con medición y acompañamiento sostenido.", tasks: ["Olas por rol o área", "Dashboard y reporte ejecutivo", "Backlog de agentes o automatizaciones"] },
-            { tag: "Fase 4", title: "Decisión de continuidad", date: formatDate(addMonths(start, 6)), icon: "measurement", desc: "Cerrar aprendizajes y decidir continuidad como programa extendido o Nivel 4.", tasks: ["Reporte consolidado", "Riesgos y oportunidades", "Recomendación ejecutiva"] }
+            { tag: "Fase 1", title: "Diseño del programa Copilot a escala", date: formatDate(start), icon: "diagnostic", desc: "Validar alcance, audiencias, licencias y gobierno antes de comprometer calendario.", tasks: ["Segmentación de audiencias", "Revisión de gobierno y datos", "Definición de olas y responsables", "Modelo de champions y soporte", "Plan de comunicación ejecutiva"] },
+            { tag: "Fase 2", title: "Piloto ampliado y primeros casos por rol", date: formatDate(addMonths(start, 1)), icon: "training", desc: "Activar grupos iniciales y ajustar el modelo antes de escalar masivamente.", tasks: [`Casos de comunicación: ${inbox.toLowerCase()}`, `Casos de reuniones: ${meeting.toLowerCase()}`, "Prácticas guiadas por rol", "Feedback de usuarios y champions", "Ajuste de materiales por audiencia"] },
+            { tag: "Fase 3", title: "Escalamiento progresivo", date: formatDate(addMonths(start, 3)), icon: "spark", desc: "Extender Copilot por audiencias, con medición y acompañamiento sostenido.", tasks: ["Olas por rol o área", "Dashboard y reporte ejecutivo", "Office hours y campañas de refuerzo", "Backlog de agentes o automatizaciones", "Revisión de blockers y adopción real"] },
+            { tag: "Fase 4", title: "Decisión de continuidad", date: formatDate(addMonths(start, 6)), icon: "measurement", desc: "Cerrar aprendizajes y decidir continuidad como programa extendido o Nivel 4.", tasks: ["Reporte consolidado", "Riesgos y oportunidades", "Sesión ejecutiva de decisión", "Plan de continuidad y ownership interno", "Recomendación ejecutiva"] }
           ];
         }
         return [
-          { tag: "Semana 0", title: "Preparación técnica y funcional", date: formatDate(addDays(start, -7)), icon: "diagnostic", desc: "Preparar el entorno y los casos de uso para Microsoft 365 Copilot.", tasks: ["Confirmar licencias, usuarios y fechas", "Revisar datos, permisos, SharePoint y seguridad", "Preparar comunicación y canal de adopción"] },
-          { tag: "Semana 1", title: "Comunicación y lanzamiento", date: formatDate(start), icon: "communication", desc: "Activar a los usuarios con mensajes claros y primeros escenarios.", tasks: ["Mensaje de bienvenida", "Biblioteca inicial de prompts", `Primer caso: ${inbox.toLowerCase()}`] },
-          { tag: "Semana 2", title: "Formación práctica por rol", date: formatDate(addDays(start, 7)), icon: "training", desc: "Trabajar Copilot en Word, Excel, Outlook, Teams y casos reales.", tasks: [`Reuniones: ${meeting.toLowerCase()} en ${state.meetingApp}`, `Creación/análisis: ${create.toLowerCase()}`, "Prácticas guiadas con prompts por rol"] },
-          { tag: "Semana 3", title: "Medición y feedback", date: formatDate(addDays(start, 14)), icon: "measurement", desc: "Medir uso, satisfacción y valor percibido.", tasks: ["Revisión de Copilot Dashboard", "Encuesta de resultados", "Identificación de casos de valor y blockers"] },
-          { tag: "Semana 4", title: "Escalado y decisión", date: formatDate(addDays(start, 21)), icon: "spark", desc: "Preparar recomendación de continuidad y expansión.", tasks: [`Automatización: ${automate.toLowerCase()}`, "Plan de escalado y conversión de licencias", "Recomendación ejecutiva para día 31"] }
+          { tag: "Semana 0", title: "Preparación técnica y funcional", date: formatDate(addDays(start, -7)), icon: "diagnostic", desc: "Preparar el entorno y los casos de uso para Microsoft 365 Copilot.", tasks: ["Confirmar licencias, usuarios y fechas", "Revisar datos, permisos, SharePoint y seguridad", "Definir audiencia piloto y responsables", "Preparar comunicación y canal de adopción", "Alinear criterios de medición"] },
+          { tag: "Semana 1", title: "Comunicación y lanzamiento", date: formatDate(start), icon: "communication", desc: "Activar a los usuarios con mensajes claros y primeros escenarios.", tasks: ["Mensaje de bienvenida", "Sesión de lanzamiento con usuarios", "Biblioteca inicial de prompts", `Primer caso: ${inbox.toLowerCase()}`, "Registro de dudas y oportunidades"] },
+          { tag: "Semana 2", title: "Formación práctica por rol", date: formatDate(addDays(start, 7)), icon: "training", desc: "Trabajar Copilot en Word, Excel, Outlook, Teams y casos reales.", tasks: [`Reuniones: ${meeting.toLowerCase()} en ${state.meetingApp}`, `Creación/análisis: ${create.toLowerCase()}`, "Prácticas guiadas con prompts por rol", "Office hours para dudas operativas", "Ajuste de casos según feedback"] },
+          { tag: "Semana 3", title: "Medición y feedback", date: formatDate(addDays(start, 14)), icon: "measurement", desc: "Medir uso, satisfacción y valor percibido.", tasks: ["Revisión de Copilot Dashboard", "Encuesta de resultados", "Identificación de casos de valor y blockers", "Historias de éxito y comunicaciones de refuerzo", "Backlog de mejoras"] },
+          { tag: "Semana 4", title: "Escalado y decisión", date: formatDate(addDays(start, 21)), icon: "spark", desc: "Preparar recomendación de continuidad y expansión.", tasks: [`Automatización: ${automate.toLowerCase()}`, "Plan de escalado y conversión de licencias", "Cierre con sponsor y referentes", "Recomendación ejecutiva para día 31", "Definición de próximos casos avanzados"] }
         ];
       }
       return [
-        { tag: "Semana 1", title: "Diagnóstico y preparación", date: formatDate(start), icon: "diagnostic", desc: "Entender el potencial de IA y preparar el piloto de exploración.", tasks: ["Art of the Possible abierto", "Identificación de casos de uso por rol", "Revisión inicial de seguridad, SharePoint, Purview y oversharing"] },
-        { tag: "Semana 2", title: "Formación práctica con Copilot Chat", date: formatDate(addDays(start, 7)), icon: "training", desc: "Probar IA en escenarios reales sin requerir licencias Microsoft 365 Copilot.", tasks: [`Escenario de comunicación: ${inbox.toLowerCase()}`, `Escenario de reuniones: ${meeting.toLowerCase()}`, "Prompts y quick wins por rol"] },
-        { tag: "Semana 3", title: "Priorización de oportunidades", date: formatDate(addDays(start, 14)), icon: "spark", desc: "Ordenar casos de uso, valor esperado y requisitos para escalar.", tasks: [`Oportunidad de creación/análisis: ${create.toLowerCase()}`, `Oportunidad de automatización: ${automate.toLowerCase()}`, "Mapa de oportunidades y quick wins"] },
-        { tag: "Semana 4", title: "Business case y decisión", date: formatDate(addDays(start, 21)), icon: "measurement", desc: "Cerrar evidencia para decidir licenciamiento y siguiente plan.", tasks: ["Encuesta de resultados", "Business case y recomendación de licenciamiento", "Plan siguiente: Plan 1, 2 o 3"] }
+        { tag: "Semana 1", title: "Diagnóstico y preparación", date: formatDate(start), icon: "diagnostic", desc: "Entender el potencial de IA y preparar el piloto de exploración.", tasks: ["Art of the Possible abierto", "Entrevistas breves con referentes", "Identificación de casos de uso por rol", "Revisión inicial de seguridad, SharePoint, Purview y oversharing", "Definición de criterios de valor para el business case"] },
+        { tag: "Semana 2", title: "Formación práctica con Copilot Chat", date: formatDate(addDays(start, 7)), icon: "training", desc: "Probar IA en escenarios reales sin requerir licencias Microsoft 365 Copilot.", tasks: [`Escenario de comunicación: ${inbox.toLowerCase()}`, `Escenario de reuniones: ${meeting.toLowerCase()}`, "Prompts y quick wins por rol", "Práctica guiada con casos del cliente", "Registro de aprendizajes y límites detectados"] },
+        { tag: "Semana 3", title: "Priorización de oportunidades", date: formatDate(addDays(start, 14)), icon: "spark", desc: "Ordenar casos de uso, valor esperado y requisitos para escalar.", tasks: [`Oportunidad de creación/análisis: ${create.toLowerCase()}`, `Oportunidad de automatización: ${automate.toLowerCase()}`, "Mapa de oportunidades y quick wins", "Matriz de impacto, esfuerzo y dependencias", "Revisión de requisitos de licenciamiento y datos"] },
+        { tag: "Semana 4", title: "Business case y decisión", date: formatDate(addDays(start, 21)), icon: "measurement", desc: "Cerrar evidencia para decidir licenciamiento y siguiente plan.", tasks: ["Encuesta de resultados", "Business case y recomendación de licenciamiento", "Sesión de cierre con sponsor", "Plan siguiente: Plan 1, 2 o 3", "Backlog priorizado para adopción o piloto Copilot"] }
       ];
     }
     function normalizeRoadmapItems(items, planKey = recommendedPlanKey()) {
@@ -6915,7 +6915,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
               </summary>
               <div class="timeline-body">
                 <div style="grid-column:1 / -1">
-                  <strong>Actividades sugeridas</strong>
+            <strong>Plan de trabajo sugerido</strong>
                   ${week.tasks.map((task, ti) => {
             return `<div class="task"><span class="task-marker">${ti + 1}</span><span><strong>${escapeHtml(task)}</strong><p>${escapeHtml(taskPrompt(week.tag, task))}</p></span></div>`;
           }).join("")}
@@ -7801,7 +7801,7 @@ ${publicUrl}`);
         </section>` : ""}
         <section class="slide">
           <p class="eyebrow">Hoja de ruta propuesta${roadmapState.active ? ` · ${roadmapState.isAi ? "personalizada con IA" : "personalizada localmente"}` : ""}</p>
-          <h2>Actividades sugeridas para ${escapeHtml(plan.name)}</h2>
+          <h2>Plan de trabajo sugerido para ${escapeHtml(plan.name)}</h2>
           ${renderRoadmapVisual(roadmapItems)}
           <div class="timeline">${roadmapItems.map(item => `<div class="stage">
             <div><div class="stage-tag">${escapeHtml(item.tag)}</div><p>${escapeHtml(item.date)}</p></div>
@@ -7819,14 +7819,20 @@ ${publicUrl}`);
       </body></html>`;
     }
     function taskPrompt(tag, task) {
-      if (tag.includes("Ola") || tag.includes("Etapa")) return "Guía comercial: conectar esta actividad con un resultado medible de adopción, participación o eficiencia.";
-      if (tag === "Semana 0") return "Guía comercial: cerrar condiciones de arranque, sponsor, audiencia y comunicación inicial.";
-      if (tag === "Semana 1") return "Prompt sugerido: resume este hilo, identifica puntos abiertos y redacta una respuesta clara con próximos pasos.";
-      if (tag === "Semana 2") return "Prompt sugerido: desde estas notas, crea decisiones, acciones con responsables y un correo de seguimiento.";
-      if (tag === "Semana 3") return "Prompt sugerido: crea un primer borrador estructurado y marca supuestos que debo validar.";
-      if (tag === "Semana 4") return "Prompt sugerido: convierte esta tarea recurrente en un flujo reutilizable con entradas, pasos y salida esperada.";
-      if (tag === "Día 30") return "Prompt sugerido: resume resultados, adopción, historias de éxito y recomendación de próximos pasos.";
-      return "Acción de sponsor/admin para preparar el lanzamiento.";
+      const normalized = normalizeText(task);
+      if (/kickoff|sponsor|responsable|ownership|referente/.test(normalized)) return "Resultado esperado: responsables alineados, alcance confirmado y próximos pasos claros.";
+      if (/encuesta|medicion|dashboard|participacion|satisfaccion|kpi/.test(normalized)) return "Resultado esperado: contar con evidencia medible de adopción, avance y oportunidades de mejora.";
+      if (/quick win|historia|buenas practicas|refuerzo|material|ajuste|contenido/.test(normalized)) return "Resultado esperado: reforzar prácticas útiles y acelerar adopción con ejemplos simples.";
+      if (/entrevista|segmentacion|audiencia|roles|area|usuarios/.test(normalized)) return "Resultado esperado: priorizar audiencias y adaptar el recorrido a necesidades reales de cada grupo.";
+      if (/comunicacion|mensaje|campana|lanzamiento|bienvenida/.test(normalized)) return "Resultado esperado: activar a los usuarios con mensajes claros, calendario y foco de valor.";
+      if (/formacion|practica|ejercicio|caso|escenario|copilot chat|prompts|biblioteca/.test(normalized)) return "Resultado esperado: convertir el aprendizaje en hábitos aplicados sobre casos reales de trabajo.";
+      if (/reunion|teams|colaboracion|correo|outlook/.test(normalized)) return "Resultado esperado: mejorar coordinación, seguimiento y uso consistente de Microsoft 365.";
+      if (/archivo|documentacion|sharepoint|onedrive|datos|seguridad|purview|oversharing|gobierno/.test(normalized)) return "Resultado esperado: ordenar información, permisos y bases de trabajo para adopción segura.";
+      if (/office hours|consulta|duda|soporte|bloque|blocker/.test(normalized)) return "Resultado esperado: resolver dudas operativas y sostener la adopción durante la ejecución.";
+      if (/reporte|cierre|ejecutiv|aprendizaje|resultado/.test(normalized)) return "Resultado esperado: cerrar aprendizajes, resultados y decisiones para sponsors y referentes.";
+      if (/roadmap|continuidad|backlog|siguiente|evolucion|escalado|licenciamiento/.test(normalized)) return "Resultado esperado: dejar priorizado el siguiente paso comercial, técnico y de adopción.";
+      if (/automatizacion|agente|proceso/.test(normalized)) return "Resultado esperado: identificar procesos repetitivos candidatos a automatización o mejora con IA.";
+      return "Resultado esperado: avanzar la adopción con una actividad concreta, medible y alineada al plan.";
     }
     function renderDecisionHelp() {
       const plans = planCatalog();
