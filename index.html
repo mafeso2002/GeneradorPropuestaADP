@@ -2986,7 +2986,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.28 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.29 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -5586,7 +5586,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.28",
+          version: "MVP 0.10.29",
           createdAt: publishedAt,
           state: snapshot
         })
@@ -6247,7 +6247,6 @@
       if (!items.length) return "";
       return `<div class="addon-adjustment-notice progression-guidance">
         <strong>Lectura de progresión comercial</strong>
-        <p>Sirve como guardrail para ordenar la conversación y no prometer etapas avanzadas sin prerrequisitos.</p>
         <div class="progression-items">
           ${items.map((item) => `<div class="progression-item">
             <span class="badge">${escapeHtml(item.level)}</span>
