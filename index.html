@@ -2986,7 +2986,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.27 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.28 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -5586,7 +5586,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.27",
+          version: "MVP 0.10.28",
           createdAt: publishedAt,
           state: snapshot
         })
@@ -5884,6 +5884,33 @@
       date.setMonth(date.getMonth() + months);
       if (date.getDate() !== day) date.setDate(0);
       return date.toISOString().slice(0, 10);
+    }
+    function isoDate(year, monthIndex, day = 1) {
+      return `${year}-${String(monthIndex + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    }
+    function roadmapInstructionStartDate() {
+      const raw = state.aiRoadmapInstructions || "";
+      const normalized = normalizeText(raw);
+      if (!normalized || !/(empez|comenz|arranc|inici|desde)/.test(normalized)) return "";
+      const months = [
+        ["enero", 0], ["febrero", 1], ["marzo", 2], ["abril", 3], ["mayo", 4], ["junio", 5],
+        ["julio", 6], ["agosto", 7], ["septiembre", 8], ["setiembre", 8], ["octubre", 9],
+        ["noviembre", 10], ["diciembre", 11]
+      ];
+      const found = months.find(([name]) => normalized.includes(name));
+      if (!found) return "";
+      const [, monthIndex] = found;
+      const base = new Date(`${state.startDate || todayIso}T00:00:00`);
+      const explicitYear = normalized.match(/\b(20\d{2})\b/);
+      let year = explicitYear ? Number(explicitYear[1]) : base.getFullYear();
+      if (!explicitYear && monthIndex < base.getMonth()) year += 1;
+      const monthPattern = found[0];
+      const explicitDay = normalized.match(new RegExp(`\\b(\\d{1,2})\\s+(?:de\\s+)?${monthPattern}\\b`));
+      const day = explicitDay ? Math.min(31, Math.max(1, Number(explicitDay[1]))) : 1;
+      return isoDate(year, monthIndex, day);
+    }
+    function roadmapStartDate() {
+      return roadmapInstructionStartDate() || state.startDate || todayIso;
     }
     function planPriceId(key, userRange = state.userRange) {
       if (key === "plan0" || key === "plan3") return key;
@@ -6507,7 +6534,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       ];
     }
     function proposalRoadmap(planKey) {
-      const start = state.startDate || todayIso;
+      const start = roadmapStartDate();
       const inbox = find(inboxOptions(), state.inbox)[1];
       const meeting = find(data.meetings, state.meeting)[1];
       const create = find(createOptions(), state.create)[1];
@@ -6839,6 +6866,8 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           clientLocation: state.clientLocation || "Argentina",
           startDate: state.startDate,
           startDateFormatted: formatDate(state.startDate),
+          roadmapStartDate: roadmapStartDate(),
+          roadmapStartDateFormatted: formatDate(roadmapStartDate()),
           recommendedPlanKey: recommendedKey,
           recommendedPlanName: plans[recommendedKey].name,
           commercialStage: plans[recommendedKey].commercialStage || "",
@@ -7624,8 +7653,9 @@ ${publicUrl}`);
       const payload = buildAiRoadmapPayload(recommendedKey);
       const applyLocalRoadmap = (message) => {
         const items = fallbackPersonalizedRoadmap(recommendedKey);
+        const startOverride = roadmapInstructionStartDate();
         const changeSummary = state.aiRoadmapInstructions
-          ? `Qué cambió: se generó una versión local considerando la indicación "${state.aiRoadmapInstructions.trim()}"; revisar y ajustar manualmente si hace falta.`
+          ? `Qué cambió: se generó una versión local considerando la indicación "${state.aiRoadmapInstructions.trim()}"${startOverride ? ` y se movió el inicio del roadmap a ${formatDate(startOverride)}` : ""}; revisar y ajustar manualmente si hace falta.`
           : roadmapChangeSummary(proposalRoadmap(recommendedKey), items);
         state.aiRoadmap = {
           planKey: recommendedKey,

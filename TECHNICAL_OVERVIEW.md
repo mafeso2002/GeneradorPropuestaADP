@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.27**
+Versión documentada: **MVP 0.10.28**
 Última actualización funcional: **2026-09-08**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -263,6 +263,7 @@ Uso:
 
 - personaliza etapas del roadmap según diagnóstico, industria, área, modalidad, add-ons y fecha de inicio;
 - permite sumar indicaciones del comercial antes de generar la versión adaptada;
+- interpreta indicaciones simples de inicio de roadmap por mes (por ejemplo, "empezar en noviembre") para mover fechas sin cambiar la fecha comercial de la propuesta;
 - permite editar manualmente etapas, actividades, responsables, entregables y riesgos antes de enviar;
 - muestra un resumen "Qué cambió" para distinguir roadmap base, IA real, fallback local o edición manual;
 - devuelve etapas con actividades, responsable sugerido, entregable y riesgo;
