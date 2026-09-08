@@ -2986,7 +2986,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.31 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.32 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -3262,7 +3262,7 @@
       auth: {
         clientId: "1b7446c2-78b7-4478-a159-dc0588cde896",
         authority: "https://login.microsoftonline.com/ffc5d1e4-c896-4fc6-8fc8-577734894ffc",
-        redirectUri: `${location.origin}${location.pathname}`
+        redirectUri: location.origin
       },
       cache: {
         cacheLocation: "sessionStorage",
@@ -5583,7 +5583,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.31",
+          version: "MVP 0.10.32",
           createdAt: publishedAt,
           state: snapshot
         })
