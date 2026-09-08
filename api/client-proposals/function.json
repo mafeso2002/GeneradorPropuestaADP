@@ -5,15 +5,8 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "methods": ["get"],
+      "methods": ["get", "post"],
       "route": "client-proposals/{id}"
-    },
-    {
-      "type": "blob",
-      "direction": "in",
-      "name": "proposalBlob",
-      "path": "client-proposals/{id}.json",
-      "connection": "AzureWebJobsStorage"
     },
     {
       "type": "http",
