@@ -2914,7 +2914,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.13 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.14 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -3736,6 +3736,59 @@
         if (keep) kept.push(line);
       });
       return sawHeading ? kept.join("\n").trim() : String(value || "").trim();
+    }
+    function normalizeEmailText(value) {
+      return String(value || "")
+        .replace(/<br\s*\/?>/gi, "\n")
+        .replace(/<\/p>\s*<p[^>]*>/gi, "\n\n")
+        .replace(/<\/?(p|div|section|article|ul|ol|li|h[1-6])[^>]*>/gi, "\n")
+        .replace(/<[^>]+>/g, "")
+        .replace(/&nbsp;/g, " ")
+        .replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, "\"")
+        .replace(/&#039;/g, "'")
+        .replace(/^#{1,6}\s+/gm, "")
+        .replace(/\*\*([^*]+)\*\*/g, "$1")
+        .replace(/\*([^*]+)\*/g, "$1")
+        .replace(/\n{3,}/g, "\n\n")
+        .trim();
+    }
+    function handoffEmailBodyHtmlFromText(value) {
+      const lines = normalizeEmailText(value).split(/\r?\n/);
+      const blocks = [];
+      let paragraph = [];
+      const flushParagraph = () => {
+        if (!paragraph.length) return;
+        blocks.push(`<p style="margin:0 0 12px;line-height:1.48;">${paragraph.map((line) => escapeHtml(line)).join("<br>")}</p>`);
+        paragraph = [];
+      };
+      lines.forEach((line) => {
+        const trimmed = line.trim();
+        if (!trimmed) {
+          flushParagraph();
+          return;
+        }
+        if (/^[A-ZÁÉÍÓÚÑ][A-Za-zÁÉÍÓÚáéíóúÑñ ]{2,}:$/.test(trimmed)) {
+          flushParagraph();
+          blocks.push(`<h3 style="margin:22px 0 8px;font-size:16px;line-height:1.3;color:#2e2d31;">${escapeHtml(trimmed.replace(/:$/, ""))}</h3>`);
+          return;
+        }
+        paragraph.push(trimmed);
+      });
+      flushParagraph();
+      return `<div style="margin:0;padding:24px;background:#f6f7fb;font-family:Segoe UI,Aptos,Arial,sans-serif;color:#2e2d31;">
+  <div style="max-width:760px;margin:0 auto;background:#ffffff;border:1px solid #e5e7eb;border-radius:16px;overflow:hidden;">
+    <div style="background:#2e2d31;color:#ffffff;padding:22px 26px;">
+      <div style="font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#fcd702;">Possumus · Propuesta de adopción</div>
+      <h2 style="margin:8px 0 0;font-size:24px;line-height:1.2;color:#ffffff;">Nueva propuesta generada</h2>
+    </div>
+    <div style="padding:24px 26px;font-size:15px;line-height:1.48;">
+      ${blocks.join("\n")}
+    </div>
+  </div>
+</div>`;
     }
     function safeHostname(value) {
       try {
@@ -6802,7 +6855,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const directMode = state.proposalMode === "direct";
       const changed = !directMode && recommendedKey !== decision.recommendedKey;
       const aiSummary = state.aiSummary ? {
-        text: state.aiSummary.text || "",
+        text: normalizeEmailText(state.aiSummary.text || ""),
         generatedAt: state.aiSummary.generatedAt || "",
         source: state.aiSummary.source || "Power Automate AI"
       } : null;
@@ -6811,14 +6864,9 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         ? `\n\nResumen ejecutivo generado con IA:\n${aiSummary.text}`
         : "";
       const validationSection = state.aiValidation && state.aiValidation.summary
-        ? `\n\nDiagnóstico revisado con IA:\n${filterValidationSummaryForProposal(state.aiValidation.summary)}`
+        ? `\n\nDiagnóstico revisado con IA:\n${normalizeEmailText(filterValidationSummaryForProposal(state.aiValidation.summary))}`
         : "";
-      return {
-        from: "adopcion@possumus.tech",
-        to,
-        cc: "",
-        subject: `Propuesta adopción - ${state.company} - ${planMaturityTitle(recommended)} - ${recommended.shortName || recommended.name}`,
-        body: `Nueva propuesta de adopción
+      const bodyText = normalizeEmailText(`Nueva propuesta de adopción
 
 Cliente: ${state.company}
 ${state.clientContact ? `Referente del cliente: ${state.clientContact}` : ""}
@@ -6840,7 +6888,15 @@ Motivo de recomendación:
 ${recommendationReason(recommendedKey)}
 
 URL de la propuesta:
-${location.href}`
+${location.href}`);
+      return {
+        from: "adopcion@possumus.tech",
+        to,
+        cc: "",
+        subject: `Propuesta adopción - ${state.company} - ${planMaturityTitle(recommended)} - ${recommended.shortName || recommended.name}`,
+        body: handoffEmailBodyHtmlFromText(bodyText),
+        bodyText,
+        contentType: "html"
       };
     }
     function budgetCommercialMode(recommendedKey, addons, decision) {
@@ -6897,7 +6953,7 @@ ${location.href}`
       $("handoffTo").value = email.to;
       $("handoffCc").value = email.cc;
       $("handoffSubject").value = email.subject;
-      $("handoffBody").value = email.body;
+      $("handoffBody").value = email.bodyText || normalizeEmailText(email.body);
       if ($("handoffModalStatus")) {
         $("handoffModalStatus").className = "handoff-status";
         $("handoffModalStatus").textContent = "";
@@ -6909,12 +6965,15 @@ ${location.href}`
       $("handoffModal").classList.add("hidden");
     }
     function handoffEmailFromModal() {
+      const bodyText = normalizeEmailText($("handoffBody").value.trim());
       return {
         from: $("handoffFrom").value.trim(),
         to: $("handoffTo").value.trim(),
         cc: $("handoffCc").value.trim(),
         subject: $("handoffSubject").value.trim(),
-        body: $("handoffBody").value.trim()
+        body: handoffEmailBodyHtmlFromText(bodyText),
+        bodyText,
+        contentType: "html"
       };
     }
     function buildHandoffPayload(recommendedKey = selectedProposalPlanKey(), emailOverride = null) {

@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.13**
+Versión documentada: **MVP 0.10.14**
 Última actualización funcional: **2026-09-08**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -346,6 +346,8 @@ La propuesta enviada se construye en `buildHandoffPayload()` e incluye:
 - validación IA;
 - comparaciones de planes vigentes;
 - respuestas estructuradas del diagnóstico.
+
+El objeto `email` del handoff incluye `body` en HTML inline listo para Outlook (`contentType: "html"`) y `bodyText` como respaldo editable en el modal. Antes de construir el HTML se normalizan `<br>`, tags y headings markdown (`##`) para evitar correos con marcas visibles cuando el contenido proviene de IA o de una edición manual.
 
 ## 9. Botón Dynamics
 
