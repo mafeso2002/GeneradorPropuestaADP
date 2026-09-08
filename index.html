@@ -2986,7 +2986,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.29 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.30 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -3855,7 +3855,7 @@
         .replace(/\n{3,}/g, "\n\n")
         .trim();
     }
-    function handoffEmailBodyHtmlFromText(value) {
+    function handoffEmailBodyHtmlFromText(value, publicUrl = "") {
       const lines = normalizeEmailText(value).split(/\r?\n/);
       const blocks = [];
       let paragraph = [];
@@ -3886,6 +3886,7 @@
     </div>
     <div style="padding:24px 26px;font-size:15px;line-height:1.48;">
       ${blocks.join("\n")}
+      ${publicUrl ? `<p style="margin:22px 0 0;"><a href="${escapeHtml(publicUrl)}" style="display:inline-block;background:#fcd702;color:#2e2d31;text-decoration:none;font-weight:800;border-radius:999px;padding:12px 18px;">Abrir propuesta para cliente</a></p>` : ""}
     </div>
   </div>
 </div>`;
@@ -5586,7 +5587,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.29",
+          version: "MVP 0.10.30",
           createdAt: publishedAt,
           state: snapshot
         })
@@ -7239,6 +7240,10 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         ? `\n\nDiagnóstico revisado con IA:\n${normalizeEmailText(filterValidationSummaryForProposal(state.aiValidation.summary))}`
         : "";
       const publicUrl = state.clientProposalUrl || clientProposalUrl() || location.href;
+      const isLongClientDataUrl = /#\/client-data\//.test(publicUrl);
+      const clientUrlSection = isLongClientDataUrl
+        ? "Link para cliente: disponible como botón en el correo HTML. Si no aparece, copiarlo desde la propuesta en la app."
+        : `URL de la propuesta para el cliente:\n${publicUrl}`;
       const bodyText = normalizeEmailText(`Nueva propuesta de adopción
 
 Cliente: ${state.company}
@@ -7260,16 +7265,19 @@ Opcionales/adicionales: ${totalEstimate.addons}${aiSection}${validationSection}
 Motivo de recomendación:
 ${recommendationReason(recommendedKey)}
 
-URL de la propuesta para el cliente:
-${publicUrl}`);
+${clientUrlSection}`);
+      const bodyHtml = handoffEmailBodyHtmlFromText(bodyText, publicUrl);
       return {
         from: "adopcion@possumus.tech",
         to,
         cc: "",
         subject: `Propuesta adopción - ${state.company} - ${planMaturityTitle(recommended)} - ${recommended.shortName || recommended.name}`,
-        body: handoffEmailBodyHtmlFromText(bodyText),
+        body: bodyText,
         bodyText,
-        contentType: "html"
+        bodyHtml,
+        clientUrl: publicUrl,
+        contentType: "text",
+        preferredContentType: "html"
       };
     }
     function budgetCommercialMode(recommendedKey, addons, decision) {
@@ -7349,14 +7357,18 @@ ${publicUrl}`);
     }
     function handoffEmailFromModal() {
       const bodyText = normalizeEmailText($("handoffBody").value.trim());
+      const publicUrl = state.clientProposalUrl || clientProposalUrl() || "";
       return {
         from: $("handoffFrom").value.trim(),
         to: $("handoffTo").value.trim(),
         cc: $("handoffCc").value.trim(),
         subject: $("handoffSubject").value.trim(),
-        body: handoffEmailBodyHtmlFromText(bodyText),
+        body: bodyText,
         bodyText,
-        contentType: "html"
+        bodyHtml: handoffEmailBodyHtmlFromText(bodyText, publicUrl),
+        clientUrl: publicUrl,
+        contentType: "text",
+        preferredContentType: "html"
       };
     }
     function buildHandoffPayload(recommendedKey = selectedProposalPlanKey(), emailOverride = null) {

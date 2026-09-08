@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.29**
+Versión documentada: **MVP 0.10.30**
 Última actualización funcional: **2026-09-08**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -352,7 +352,7 @@ La propuesta enviada se construye en `buildHandoffPayload()` e incluye:
 - comparaciones de planes vigentes;
 - respuestas estructuradas del diagnóstico.
 
-El objeto `email` del handoff incluye `body` en HTML inline listo para Outlook (`contentType: "html"`) y `bodyText` como respaldo editable en el modal. Antes de construir el HTML se normalizan `<br>`, tags y headings markdown (`##`) para evitar correos con marcas visibles cuando el contenido proviene de IA o de una edición manual.
+El objeto `email` del handoff incluye `body` en texto plano limpio para compatibilidad con el Flow actual, más `bodyHtml`, `preferredContentType: "html"` y `clientUrl` para que el Flow pueda evolucionar a correo HTML con botón. Antes de construir ambos cuerpos se normalizan `<br>`, tags y headings markdown (`##`) para evitar marcas visibles cuando el contenido proviene de IA o de una edición manual. Si el link cliente es autocontenido (`#/client-data/...`), el texto plano no imprime la URL completa para no ensuciar el correo; `clientUrl` mantiene el enlace técnico completo.
 
 Antes de abrir el modal de envío, la app intenta publicar un snapshot persistente de solo lectura en `POST /api/client-proposals/{id}` y, si la persistencia está configurada, el correo incluye la URL corta `/#/client/{id}`. Esa ruta carga el snapshot desde `GET /api/client-proposals/{id}` y renderiza `renderPlan("client")`, ocultando acciones comerciales/internas: Dynamics, edición, envío, regeneración IA, personalización de roadmap, alternativas editables y criterios de scoring. La persistencia se delega a un Flow dedicado (`POWER_AUTOMATE_CLIENT_PROPOSAL_URL`) para guardar/leer el snapshot en Dataverse o Storage sin exponer credenciales al frontend.
 
