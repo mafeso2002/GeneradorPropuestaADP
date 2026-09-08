@@ -1597,6 +1597,35 @@
       line-height: 1.45;
     }
     .addon-adjustment-notice strong { display: block; margin-bottom: 4px; }
+    .progression-guidance {
+      padding: 14px 16px;
+    }
+    .progression-guidance > p {
+      margin: 4px 0 10px;
+      color: var(--cp-brand-dark);
+    }
+    .progression-items {
+      display: grid;
+      gap: 10px;
+    }
+    .progression-item {
+      display: grid;
+      grid-template-columns: minmax(120px, 170px) 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 12px;
+      border: 1px solid rgba(46, 45, 49, .12);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .72);
+    }
+    .progression-item .badge {
+      width: fit-content;
+      margin: 0;
+      background: #fff;
+    }
+    .progression-item strong { margin: 0 0 4px; }
+    .progression-item p { margin: 0; color: var(--cp-text-muted); }
+    .progression-action { margin-top: 4px !important; color: var(--cp-brand-dark) !important; }
     .manual-plan-actions {
       display: flex;
       flex-wrap: wrap;
@@ -2919,6 +2948,7 @@
       .proposal-note-row { text-align: left; }
       .cowork-toggle-card { grid-column: 1 / -1; width: fit-content; }
       .timeline-body { padding-left: 18px; }
+      .progression-item { grid-template-columns: 1fr; }
       .hero-card { padding: 32px 22px; }
       .side-nav { position: static; }
       .options { grid-template-columns: 1fr; }
@@ -2956,7 +2986,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.26 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.27 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -3733,6 +3763,13 @@
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+    }
+    function sentenceCase(value) {
+      const text = String(value || "").trim();
+      return text ? text.charAt(0).toUpperCase() + text.slice(1) : "";
+    }
+    function escapeSentence(value) {
+      return escapeHtml(sentenceCase(value));
     }
     function formatGeneratedText(value) {
       return escapeHtml(value).replace(/\n{2,}/g, "<br><br>").replace(/\n/g, "<br>");
@@ -5549,7 +5586,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.26",
+          version: "MVP 0.10.27",
           createdAt: publishedAt,
           state: snapshot
         })
@@ -6181,21 +6218,24 @@
     function renderProgressionGuidance(planKey = selectedProposalPlanKey()) {
       const items = progressionGuidance(planKey);
       if (!items.length) return "";
-      return `<div class="addon-adjustment-notice">
+      return `<div class="addon-adjustment-notice progression-guidance">
         <strong>Lectura de progresión comercial</strong>
-        <div class="decision-help-grid" style="margin-top:10px">
-          ${items.map((item) => `<div class="decision-plan-card">
-            <span>${escapeHtml(item.level)}</span>
-            <strong>${escapeHtml(item.title)}</strong>
-            <span>${escapeHtml(item.desc)}</span>
-            <span><b>Acción:</b> ${escapeHtml(item.action)}</span>
+        <p>Sirve como guardrail para ordenar la conversación y no prometer etapas avanzadas sin prerrequisitos.</p>
+        <div class="progression-items">
+          ${items.map((item) => `<div class="progression-item">
+            <span class="badge">${escapeHtml(item.level)}</span>
+            <div>
+              <strong>${escapeHtml(item.title)}</strong>
+              <p>${escapeHtml(item.desc)}</p>
+              <p class="progression-action"><b>Acción:</b> ${escapeHtml(item.action)}</p>
+            </div>
           </div>`).join("")}
         </div>
       </div>`;
     }
     function decisionEvidenceMarkup(decision) {
       if (!decision.reasons.length) return "";
-      return `<ul class="decision-evidence">${decision.reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>`;
+      return `<ul class="decision-evidence">${decision.reasons.map((reason) => `<li>${escapeSentence(reason)}</li>`).join("")}</ul>`;
     }
     function quoteDifference(primaryKey, alternativeKey) {
       const primary = quoteForPlan(primaryKey);
@@ -6409,7 +6449,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         <div class="alternative-grid">${alternativeItems.map((item) => `<div class="alternative-card">
           <h4>${planMaturityTitle(plans[item.key])}</h4>
           <p><strong>${escapeHtml(planReferenceLabel(plans[item.key]))}</strong></p>
-          <p>${item.reasons.slice(0, 2).map(escapeHtml).join(". ") || plans[item.key].bestFor}</p>
+          <p>${item.reasons.slice(0, 2).map(escapeSentence).join(". ") || plans[item.key].bestFor}</p>
           <div class="alternative-quote">
             <span><strong>Cotización:</strong> ${escapeHtml(quoteForPlan(item.key).main)}</span>
             <span><strong>Diferencia vs plan principal:</strong> ${escapeHtml(quoteDifference(selectedKey, item.key))}</span>
@@ -6433,7 +6473,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         <h4>${confidenceLabel(decision.level)} · ${decision.confidence}%</h4>
         <p>Plan ganador: <strong>${escapeHtml(plans[top.key].name)}</strong>. Diferencia contra el segundo: <strong>${margin} puntos</strong>.</p>
         <div class="confidence-score-list">${scoreRows}</div>
-        ${decision.reasons.length ? `<h4 style="margin-top:18px">Señales que más pesaron</h4><ul class="decision-evidence">${decision.reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>` : ""}
+        ${decision.reasons.length ? `<h4 style="margin-top:18px">Señales que más pesaron</h4><ul class="decision-evidence">${decision.reasons.map((reason) => `<li>${escapeSentence(reason)}</li>`).join("")}</ul>` : ""}
         ${decision.alternatives.length ? `<h4 style="margin-top:18px">Por qué hay alternativa</h4><p>El segundo plan quedó relativamente cerca o algunas respuestas apuntan a otro camino posible.</p>` : ""}
       </div>`;
     }
@@ -7923,7 +7963,7 @@ ${publicUrl}`);
           <p><strong>${planReferenceLabel(plan)}</strong></p>
           <div class="confidence">${directMode ? "Selección manual" : `${confidenceLabel(decision.level)} · ${decision.confidence}%`}</div>
           <p>${recommendationReason(recommendedKey)}</p>
-          ${!directMode && decision.reasons.length ? `<ul class="evidence">${decision.reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}</ul>` : ""}
+          ${!directMode && decision.reasons.length ? `<ul class="evidence">${decision.reasons.map((reason) => `<li>${escapeSentence(reason)}</li>`).join("")}</ul>` : ""}
           <div class="pdf-recommendation-grid">
             <div>
               <div class="pdf-compact-grid">
@@ -7954,7 +7994,7 @@ ${publicUrl}`);
         ${!directMode && decision.alternatives.length ? `<section class="slide">
           <p class="eyebrow">Alternativas posibles</p>
           <h2>Planes a validar si cambia el alcance.</h2>
-          <div class="grid-2">${decision.alternatives.map((item) => `<div class="card alternative"><strong>${planMaturityTitle(plans[item.key])}</strong><p>${planReferenceLabel(plans[item.key])}</p><p>${item.reasons.slice(0, 3).map(escapeHtml).join(". ") || plans[item.key].bestFor}</p><p><strong>Cotización:</strong> ${quoteForPlan(item.key).main}</p><p><strong>Diferencia:</strong> ${quoteDifference(decision.recommendedKey, item.key)}</p></div>`).join("")}</div>${footer}
+          <div class="grid-2">${decision.alternatives.map((item) => `<div class="card alternative"><strong>${planMaturityTitle(plans[item.key])}</strong><p>${planReferenceLabel(plans[item.key])}</p><p>${item.reasons.slice(0, 3).map(escapeSentence).join(". ") || plans[item.key].bestFor}</p><p><strong>Cotización:</strong> ${quoteForPlan(item.key).main}</p><p><strong>Diferencia:</strong> ${quoteDifference(decision.recommendedKey, item.key)}</p></div>`).join("")}</div>${footer}
         </section>` : ""}
         ${activeComparisons.length ? `<section class="slide">
           <p class="eyebrow">Comparación de planes</p>
