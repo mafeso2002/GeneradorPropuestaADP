@@ -3105,7 +3105,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.39 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.40 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -5706,7 +5706,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.39",
+          version: "MVP 0.10.40",
           createdAt: publishedAt,
           state: snapshot
         })
@@ -6541,17 +6541,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const original = plans[decision.recommendedKey];
       const selected = plans[selectedKey];
       const changed = selectedKey !== decision.recommendedKey;
-      if (!changed) {
-        return `<div class="plan-selection-panel">
-          <div class="plan-selection-card active current">
-            <div>
-            <span>Plan principal actual · recomendado por la app</span>
-            <strong>${escapeHtml(planMaturityTitle(selected))}</strong>
-            <p>${escapeHtml(planReferenceLabel(selected))} · ${confidenceLabel(decision.level)} · ${decision.confidence}% · ${escapeHtml(quoteForPlan(selectedKey).main)}</p>
-            </div>
-          </div>
-        </div>`;
-      }
+      if (!changed) return "";
       return `<div class="plan-selection-panel">
         <div class="plan-selection-card active current">
           <div>
