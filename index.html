@@ -2914,7 +2914,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.18 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.19 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -5443,6 +5443,7 @@
       return snapshot;
     }
     async function publishClientProposalSnapshot(recommendedKey = selectedProposalPlanKey()) {
+      const existingClientProposalId = state.clientProposalId;
       if (!state.clientProposalId) {
         state.clientProposalId = crypto.randomUUID ? crypto.randomUUID() : `client-${Date.now()}`;
       }
@@ -5453,13 +5454,16 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.18",
+          version: "MVP 0.10.19",
           createdAt: publishedAt,
           state: snapshot
         })
       });
       const result = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+      if (!response.ok) {
+        if (!existingClientProposalId) state.clientProposalId = "";
+        throw new Error(result.error || `Error HTTP ${response.status}`);
+      }
       state.clientProposalPublishedAt = publishedAt;
       if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
       return clientProposalUrl(state.clientProposalId);
@@ -7014,8 +7018,7 @@ ${publicUrl}`);
         await publishClientProposalSnapshot(recommendedKey);
       } catch (error) {
         console.error(error);
-        showToast(`No se pudo crear el link para cliente: ${error.message}`);
-        return;
+        showToast(`No se pudo crear el link para cliente; el envío queda disponible con el link interno actual. Detalle: ${error.message}`);
       } finally {
         hideThinking();
       }
@@ -7466,8 +7469,7 @@ ${publicUrl}`);
         try {
           await publishClientProposalSnapshot(recommendedKey);
         } catch (error) {
-          showToast(`No se pudo crear el link para cliente: ${error.message}`);
-          return;
+          console.warn(`No se pudo crear el link para cliente antes del envío: ${error.message}`);
         }
       }
       const payload = buildHandoffPayload(recommendedKey, emailOverride);
