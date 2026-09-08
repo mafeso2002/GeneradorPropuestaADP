@@ -2914,7 +2914,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.23 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.24 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -4492,8 +4492,8 @@
     function renderAddonPolicyNotice(planKey) {
       if (planKey === "plan1") {
         return `<div class="addon-adjustment-notice">
-          <strong>P1 mantiene add-ons simples</strong>
-          Productividad Digital ya incluye diagnóstico, comunicación, formación aplicada, acompañamiento básico y medición. Solo se pueden sumar Readiness técnico, Excel intermedio, Excel avanzado o un módulo puntual de herramienta. Si el cliente pide más alcance, conviene ampliar el programa o cambiar a P2/P3.
+          <strong>Qué estamos ofreciendo</strong>
+          Programa de adopción de Productividad Digital para ordenar hábitos de trabajo en Microsoft 365: comunicación, documentación, reuniones, seguimiento y medición. Incluye diagnóstico, formación aplicada, acompañamiento y cierre ejecutivo; los opcionales seleccionados se suman aparte al total.
         </div>`;
       }
       if (planKey === "plan2") {
@@ -5489,7 +5489,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.23",
+          version: "MVP 0.10.24",
           createdAt: publishedAt,
           state: snapshot
         })
