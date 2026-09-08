@@ -3105,7 +3105,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.38 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.39 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -5706,7 +5706,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.38",
+          version: "MVP 0.10.39",
           createdAt: publishedAt,
           state: snapshot
         })
@@ -7264,7 +7264,6 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                   ${renderProgressionGuidance(recommendedKey)}
                   <p><strong>Análisis comercial:</strong> ${recommendationReason(recommendedKey)}</p>
                   ${readOnlyMode ? "" : decisionEvidenceMarkup(decision)}
-                  ${decisionAlternativesMarkup(decision, plans, recommendedKey, mode)}
                   <p>${recommended.desc}</p>
                   <div class="plan-metric-row">
                     <div class="plan-metric"><strong>${durationLabel}</strong><span>Duración</span></div>
@@ -7273,6 +7272,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                   </div>
                   ${renderWavePlanPanel(recommendedKey)}
                   ${renderPlanAdoptionClarification(recommendedKey)}
+                  ${decisionAlternativesMarkup(decision, plans, recommendedKey, mode)}
                 </div>
               </div>
               ${state.cowork ? `<div class="cowork-selected-panel">
