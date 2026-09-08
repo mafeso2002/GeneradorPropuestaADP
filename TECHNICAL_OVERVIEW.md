@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.20**
+Versión documentada: **MVP 0.10.21**
 Última actualización funcional: **2026-09-08**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -352,7 +352,7 @@ El objeto `email` del handoff incluye `body` en HTML inline listo para Outlook (
 
 Antes de abrir el modal de envío, la app intenta publicar un snapshot persistente de solo lectura en `POST /api/client-proposals/{id}` y, si la persistencia está configurada, el correo incluye la URL corta `/#/client/{id}`. Esa ruta carga el snapshot desde `GET /api/client-proposals/{id}` y renderiza `renderPlan("client")`, ocultando acciones comerciales/internas: Dynamics, edición, envío, regeneración IA, personalización de roadmap, alternativas editables y criterios de scoring. La persistencia se delega a un Flow dedicado (`POWER_AUTOMATE_CLIENT_PROPOSAL_URL`) para guardar/leer el snapshot en Dataverse o Storage sin exponer credenciales al frontend.
 
-Si el Flow aún no está configurado, el envío sigue siendo funcional: la app genera una URL `/#/client-data/{snapshot}` con el snapshot público embebido y mantiene la misma vista de cliente solo lectura. Este fallback no depende del navegador del comercial ni de `localStorage`; el cliente puede abrirlo desde otro equipo, aunque la URL sea más larga que la versión persistente corta.
+Si el Flow aún no está configurado, el envío sigue siendo funcional: la app genera una URL `/#/client-data/{snapshot}` con el snapshot público embebido y mantiene la misma vista de cliente solo lectura. Este fallback no depende del navegador del comercial ni de `localStorage`; el cliente puede abrirlo desde otro equipo, aunque la URL sea más larga que la versión persistente corta. Para mantener el link razonable, el snapshot embebido no incluye `addonPrices`; la vista cliente vuelve a cargar precios vigentes desde `/api/addon-prices`.
 
 ## 9. Botón Dynamics
 

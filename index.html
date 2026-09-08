@@ -2914,7 +2914,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.20 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.21 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -5474,6 +5474,7 @@
       snapshot.commercialName = "";
       snapshot.commercialEmail = "";
       snapshot.clientProposalUrl = "";
+      snapshot.addonPrices = {};
       return snapshot;
     }
     async function publishClientProposalSnapshot(recommendedKey = selectedProposalPlanKey()) {
@@ -5488,7 +5489,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.20",
+          version: "MVP 0.10.21",
           createdAt: publishedAt,
           state: snapshot
         })
