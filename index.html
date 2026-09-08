@@ -3079,7 +3079,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.36 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.37 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -5680,7 +5680,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.36",
+          version: "MVP 0.10.37",
           createdAt: publishedAt,
           state: snapshot
         })
@@ -7158,6 +7158,31 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           </div>
         </div>
       </div>`;
+      const aiSummaryPanel = `<div class="ai-summary-panel ${aiSummaryText ? "" : "ai-summary-empty"}">
+        <div>
+          ${aiSummaryText ? `<div class="ai-summary-head">
+            <div>
+              <span class="ai-badge">Generado con IA</span>
+              <h3>Resumen ejecutivo comercial</h3>
+            </div>
+            ${readOnlyMode ? "" : `<button class="btn action-ai" id="aiSummaryBtn"><span class="btn-icon">${iconSvg("spark")}</span>Regenerar IA</button>`}
+          </div>
+          ${formatAiSummaryText(aiSummaryText)}
+          ${companyResearchMarkup}` : `<span class="ai-badge">Resumen con IA</span>
+          <h3>Resumen ejecutivo comercial</h3>
+          <p>Generá una síntesis comercial con contexto público, plan sugerido y argumentos para el cliente.</p>
+          <div class="ai-options">
+            <div class="switch-row">
+              <div>
+                <strong>Incluir estimación de presupuesto</strong>
+                <p>Agrega importe sugerido, modalidad comercial, supuestos y alertas para preventa/adopción.</p>
+              </div>
+              <button class="switch ${state.includeBudgetEstimate ? "on" : ""}" id="budgetEstimateSwitch" aria-label="Incluir estimación de presupuesto"></button>
+            </div>
+          </div>`}
+        </div>
+        ${aiSummaryText || readOnlyMode ? "" : `<button class="btn action-ai" id="aiSummaryBtn"><span class="btn-icon">${iconSvg("spark")}</span>Mejorar con IA</button>`}
+      </div>`;
       $("plan").innerHTML = `
         <div class="result-hero">
           <div class="result-top">
@@ -7223,31 +7248,6 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                   ${renderPlanAdoptionClarification(recommendedKey)}
                 </div>
               </div>
-              <div class="ai-summary-panel ${aiSummaryText ? "" : "ai-summary-empty"}">
-                <div>
-                  ${aiSummaryText ? `<div class="ai-summary-head">
-                <div>
-                  <span class="ai-badge">Generado con IA</span>
-                  <h3>Resumen ejecutivo comercial</h3>
-                </div>
-                ${readOnlyMode ? "" : `<button class="btn action-ai" id="aiSummaryBtn"><span class="btn-icon">${iconSvg("spark")}</span>Regenerar IA</button>`}
-              </div>
-              ${formatAiSummaryText(aiSummaryText)}
-              ${companyResearchMarkup}` : `<span class="ai-badge">Resumen con IA</span>
-              <h3>Resumen ejecutivo comercial</h3>
-              <p>Generá una síntesis comercial con contexto público, plan sugerido y argumentos para el cliente.</p>
-              <div class="ai-options">
-                <div class="switch-row">
-                  <div>
-                    <strong>Incluir estimación de presupuesto</strong>
-                    <p>Agrega importe sugerido, modalidad comercial, supuestos y alertas para preventa/adopción.</p>
-                  </div>
-                  <button class="switch ${state.includeBudgetEstimate ? "on" : ""}" id="budgetEstimateSwitch" aria-label="Incluir estimación de presupuesto"></button>
-                </div>
-              </div>`}
-                </div>
-                ${aiSummaryText || readOnlyMode ? "" : `<button class="btn action-ai" id="aiSummaryBtn"><span class="btn-icon">${iconSvg("spark")}</span>Mejorar con IA</button>`}
-              </div>
               ${state.cowork ? `<div class="cowork-selected-panel">
             <div class="recommendation-title">
               <div class="cowork-brand-icon"><img src="copilot-cowork-icon.webp" alt="Copilot Cowork"></div>
@@ -7283,6 +7283,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
             <div class="handoff-status" id="handoffStatus"></div>
           </div>
         </div>
+        ${aiSummaryPanel}
         <details class="proposal-accordion">
           <summary><div class="stage-icon">${iconSvg("training")}</div><div><h2>Metodología de adopción</h2><p>Cómo Possumus acompaña diagnóstico, formación, comunicación y medición.</p></div></summary>
           <div class="proposal-accordion-body">
