@@ -1,0 +1,10 @@
+{
+  "name": "generador-propuesta-adp-api",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "func start"
+  },
+  "dependencies": {}
+}
