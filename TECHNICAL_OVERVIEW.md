@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.14**
+Versión documentada: **MVP 0.10.15**
 Última actualización funcional: **2026-09-08**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -307,6 +307,7 @@ Endpoints implementados:
 | `/api/proposal-validation` | `POWER_AUTOMATE_AI_SUMMARY_URL` | Validar diagnóstico con IA |
 | `/api/ai-roadmap` | `POWER_AUTOMATE_AI_ROADMAP_URL` | Generar roadmap personalizado |
 | `/api/plan-comparison` | `POWER_AUTOMATE_PLAN_COMPARISON_URL` | Comparar planes |
+| `/api/client-proposals/{id}` | `AzureWebJobsStorage` | Guardar y leer snapshots persistentes para links de cliente solo lectura |
 
 Las utilidades comunes de las Functions (`fetchWithTimeout`, `findText`, `extractJsonObject`, `isPayloadTooLarge`) viven centralizadas en `api/shared/flow-utils.js` y se importan con `require("../shared/flow-utils")` para evitar copias divergentes. Todas las llamadas a Power Automate usan timeout (AbortController) y manejo de error. Las respuestas ya no exponen el objeto `raw` crudo del Flow al frontend.
 
@@ -348,6 +349,8 @@ La propuesta enviada se construye en `buildHandoffPayload()` e incluye:
 - respuestas estructuradas del diagnóstico.
 
 El objeto `email` del handoff incluye `body` en HTML inline listo para Outlook (`contentType: "html"`) y `bodyText` como respaldo editable en el modal. Antes de construir el HTML se normalizan `<br>`, tags y headings markdown (`##`) para evitar correos con marcas visibles cuando el contenido proviene de IA o de una edición manual.
+
+Antes de abrir el modal de envío, la app publica un snapshot persistente de solo lectura en `POST /api/client-proposals/{id}` y el correo incluye la URL `/#/client/{id}`. Esa ruta carga el snapshot desde `GET /api/client-proposals/{id}` y renderiza `renderPlan("client")`, ocultando acciones comerciales/internas: Dynamics, edición, envío, regeneración IA, personalización de roadmap, alternativas editables y criterios de scoring.
 
 ## 9. Botón Dynamics
 

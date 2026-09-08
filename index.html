@@ -2914,7 +2914,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.14 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.15 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -3624,6 +3624,8 @@
       directPlanKey: "",
       planId: "",
       userId: "",
+      clientProposalId: "",
+      clientProposalPublishedAt: "",
       commercialName: "",
       commercialEmail: "",
       includeBudgetEstimate: true,
@@ -3953,6 +3955,8 @@
       ["modeSelect", "onboarding", "directPlan", "wizard", "review", "plan"].forEach((id) => $(id).classList.add("hidden"));
       $(section).classList.remove("hidden");
       if ($("topDynamicsBtn")) $("topDynamicsBtn").classList.add("hidden");
+      if ($("decisionHelpBtn")) $("decisionHelpBtn").classList.remove("hidden");
+      if ($("resetBtn")) $("resetBtn").classList.remove("hidden");
       window.scrollTo(0, 0);
     }
     function showDynamicsPlaceholder() {
@@ -5370,6 +5374,8 @@
       state.directPlanKey = "";
       state.planId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
       state.userId = crypto.randomUUID ? crypto.randomUUID() : `user-${Date.now()}`;
+      state.clientProposalId = "";
+      state.clientProposalPublishedAt = "";
       localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
       localStorage.setItem(`copilot-user-${state.userId}`, state.planId);
       location.hash = `/admin/${state.planId}`;
@@ -5391,6 +5397,8 @@
       ensureLogisticsDefaults();
       state.planId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
       state.userId = crypto.randomUUID ? crypto.randomUUID() : `user-${Date.now()}`;
+      state.clientProposalId = "";
+      state.clientProposalPublishedAt = "";
       localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
       localStorage.setItem(`copilot-user-${state.userId}`, state.planId);
       location.hash = `/admin/${state.planId}`;
@@ -5418,6 +5426,56 @@
       const planId = localStorage.getItem(`copilot-user-${userId}`);
       if (!planId) return false;
       return loadPlan(planId);
+    }
+    function appBaseUrl() {
+      return `${location.origin}${location.pathname}`;
+    }
+    function clientProposalUrl(id = state.clientProposalId) {
+      return id ? `${appBaseUrl()}#/client/${encodeURIComponent(id)}` : "";
+    }
+    function publicClientStateSnapshot(recommendedKey = selectedProposalPlanKey()) {
+      const snapshot = JSON.parse(JSON.stringify(state));
+      snapshot.clientProposalId = state.clientProposalId;
+      snapshot.clientProposalPublishedAt = new Date().toISOString();
+      snapshot.overridePlanKey = recommendedKey !== planDecision().recommendedKey ? recommendedKey : "";
+      snapshot.commercialName = "";
+      snapshot.commercialEmail = "";
+      return snapshot;
+    }
+    async function publishClientProposalSnapshot(recommendedKey = selectedProposalPlanKey()) {
+      if (!state.clientProposalId) {
+        state.clientProposalId = crypto.randomUUID ? crypto.randomUUID() : `client-${Date.now()}`;
+      }
+      const publishedAt = new Date().toISOString();
+      const snapshot = publicClientStateSnapshot(recommendedKey);
+      snapshot.clientProposalPublishedAt = publishedAt;
+      const response = await fetch(`/api/client-proposals/${encodeURIComponent(state.clientProposalId)}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          version: "MVP 0.10.15",
+          createdAt: publishedAt,
+          state: snapshot
+        })
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || `Error HTTP ${response.status}`);
+      state.clientProposalPublishedAt = publishedAt;
+      if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
+      return clientProposalUrl(state.clientProposalId);
+    }
+    async function loadClientPlan(clientId) {
+      const response = await fetch(`/api/client-proposals/${encodeURIComponent(clientId)}`, {
+        headers: { "Accept": "application/json" }
+      });
+      if (!response.ok) return false;
+      const payload = await response.json();
+      if (!payload || !payload.state || typeof payload.state !== "object") return false;
+      const livePrices = state.addonPrices;
+      Object.assign(state, payload.state);
+      state.clientProposalId = clientId;
+      if (livePrices && Object.keys(livePrices).length) state.addonPrices = livePrices;
+      return true;
     }
     function planCatalog() {
       return {
@@ -6160,7 +6218,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       </div>`;
     }
     function renderPlanSelectionPanel(decision, plans, selectedKey, mode = "admin") {
-      if (mode === "user") return "";
+      if (mode !== "admin") return "";
       if (state.proposalMode === "direct") {
         const selected = plans[selectedKey];
         return `<div class="plan-selection-panel">
@@ -6219,7 +6277,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
     }
     function decisionAlternativesMarkup(decision, plans, selectedKey = selectedProposalPlanKey(), mode = "admin") {
       if (state.proposalMode === "direct") return "";
-      if (mode === "user") return "";
+      if (mode !== "admin") return "";
       const alternativeItems = decision.alternatives.filter((item) => item.key !== selectedKey);
       if (!alternativeItems.length) return "";
       return `<div class="alternative-panel">
@@ -6547,6 +6605,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       };
     }
     function renderPlan(mode = "admin") {
+      const readOnlyMode = mode === "user" || mode === "client";
       if (!state.planId) state.planId = "preview";
       const focus = [selectedLabel("inbox"), selectedLabel("meeting"), selectedLabel("create"), selectedLabel("automate")].filter(Boolean);
       const plans = planCatalog();
@@ -6587,7 +6646,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           <div class="result-top">
             <div>
               <p class="eyebrow">POSSUMUS · PROPUESTA INTEGRAL DE ADOPCIÓN</p>
-              <h2>${mode === "user" ? "Plan recomendado para la iniciativa" : directMode ? "Propuesta directa: " + planMaturityTitle(recommended) : "Propuesta versión final: " + planMaturityTitle(recommended)}</h2>
+              <h2>${readOnlyMode ? "Plan recomendado para la iniciativa" : directMode ? "Propuesta directa: " + planMaturityTitle(recommended) : "Propuesta versión final: " + planMaturityTitle(recommended)}</h2>
               <div class="client-highlight">${escapeHtml(state.company)}</div>
               ${state.clientContact ? `<p class="lead">Referente relevado: ${escapeHtml(state.clientContact)}</p>` : ""}
               ${state.clientLocation ? `<p class="lead">Ubicación: ${escapeHtml(state.clientLocation)}</p>` : ""}
@@ -6633,7 +6692,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                   ${renderPlanSelectionPanel(decision, plans, recommendedKey, mode)}
                   ${renderProgressionGuidance(recommendedKey)}
                   <p><strong>Análisis comercial:</strong> ${recommendationReason(recommendedKey)}</p>
-                  ${mode === "user" ? "" : decisionEvidenceMarkup(decision)}
+                  ${readOnlyMode ? "" : decisionEvidenceMarkup(decision)}
                   ${decisionAlternativesMarkup(decision, plans, recommendedKey, mode)}
                   <p>${recommended.desc}</p>
                   <div class="plan-metric-row">
@@ -6665,7 +6724,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                   <span class="ai-badge">Generado con IA</span>
                   <h3>Resumen ejecutivo comercial</h3>
                 </div>
-                <button class="btn action-ai" id="aiSummaryBtn"><span class="btn-icon">${iconSvg("spark")}</span>Regenerar IA</button>
+                ${readOnlyMode ? "" : `<button class="btn action-ai" id="aiSummaryBtn"><span class="btn-icon">${iconSvg("spark")}</span>Regenerar IA</button>`}
               </div>
               ${formatAiSummaryText(aiSummaryText)}
               ${companyResearchMarkup}` : `<span class="ai-badge">Resumen con IA</span>
@@ -6681,7 +6740,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                 </div>
               </div>`}
                 </div>
-                ${aiSummaryText ? "" : `<button class="btn action-ai" id="aiSummaryBtn"><span class="btn-icon">${iconSvg("spark")}</span>Mejorar con IA</button>`}
+                ${aiSummaryText || readOnlyMode ? "" : `<button class="btn action-ai" id="aiSummaryBtn"><span class="btn-icon">${iconSvg("spark")}</span>Mejorar con IA</button>`}
               </div>
               ${state.cowork ? `<div class="cowork-selected-panel">
             <div class="recommendation-title">
@@ -6706,10 +6765,10 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
             ${renderProposalPricePanel(recommendedKey)}
           </div>
           <div class="proposal-actions">
-            ${mode === "user" ? "" : `<button class="btn" id="editPlanBtn">Editar datos</button>`}
+            ${readOnlyMode ? "" : `<button class="btn" id="editPlanBtn">Editar datos</button>`}
             <div class="proposal-action-buttons">
-              <button class="btn action-pdf" id="printBtn">Generar PDF</button>
-              ${mode === "user" ? "" : `<button class="btn action-mail" id="handoffBtn"><span class="btn-icon">${iconSvg("mail")}</span>Enviar propuesta</button>`}
+              ${readOnlyMode ? "" : `<button class="btn action-pdf" id="printBtn">Generar PDF</button>`}
+              ${readOnlyMode ? "" : `<button class="btn action-mail" id="handoffBtn"><span class="btn-icon">${iconSvg("mail")}</span>Enviar propuesta</button>`}
             </div>
           </div>
           <div class="proposal-note-row">
@@ -6718,7 +6777,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
             <div class="handoff-status" id="handoffStatus"></div>
           </div>
         </div>
-        ${(directMode || mode === "user") ? "" : `<details class="proposal-accordion">
+        ${(directMode || readOnlyMode) ? "" : `<details class="proposal-accordion">
           <summary><div class="stage-icon">${iconSvg("diagnostic")}</div><div><h2>Criterios que definieron el plan</h2><p>Variables usadas por el scoring y señales principales.</p></div></summary>
           <div class="proposal-accordion-body">
             <p>La recomendación se calcula con scoring ponderado: objetivo, licenciamiento, uso real de Copilot, madurez M365, casos de uso, agentes, escala, gobierno/COE, sponsor y acompañamiento. Si la confianza baja, se muestran alternativas posibles.</p>
@@ -6775,9 +6834,9 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                 <div class="handoff-status" id="aiRoadmapStatus"></div>
               </div>
               <div class="roadmap-actions">
-                ${roadmapState.hasCustom ? `<button class="btn ${roadmapState.useCustom ? "ghost" : "action-mail"}" id="useOriginalRoadmapBtn" type="button">Usar original</button>
+                ${roadmapState.hasCustom && !readOnlyMode ? `<button class="btn ${roadmapState.useCustom ? "ghost" : "action-mail"}" id="useOriginalRoadmapBtn" type="button">Usar original</button>
                 <button class="btn ${roadmapState.useCustom ? "action-mail" : "ghost"}" id="useAiRoadmapBtn" type="button">${roadmapState.isAi ? "Usar IA" : "Usar personalizado"}</button>` : ""}
-                <button class="btn action-ai" id="aiRoadmapBtn" type="button"><span class="btn-icon">${iconSvg("roadmap")}</span>${roadmapState.button}</button>
+                ${readOnlyMode ? "" : `<button class="btn action-ai" id="aiRoadmapBtn" type="button"><span class="btn-icon">${iconSvg("roadmap")}</span>${roadmapState.button}</button>`}
               </div>
             </div>
             ${renderRoadmapVisual(roadmapItems)}
@@ -6805,7 +6864,9 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         </details>
         `;
       show("plan");
-      $("topDynamicsBtn").classList.toggle("hidden", mode === "user");
+      if ($("decisionHelpBtn")) $("decisionHelpBtn").classList.toggle("hidden", mode === "client");
+      if ($("resetBtn")) $("resetBtn").classList.toggle("hidden", mode === "client");
+      $("topDynamicsBtn").classList.toggle("hidden", readOnlyMode);
       if ($("editPlanBtn")) $("editPlanBtn").addEventListener("click", () => {
         if (directMode) {
           currentDirectStep = 0;
@@ -6825,8 +6886,8 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         button.addEventListener("click", () => promoteAlternativePlan(button.dataset.promotePlan, mode));
       });
       if ($("revertPlanBtn")) $("revertPlanBtn").addEventListener("click", () => revertToOriginalPlan(mode));
-      $("aiSummaryBtn").addEventListener("click", () => generateAiSummary(recommendedKey, mode));
-      $("aiRoadmapBtn").addEventListener("click", () => generateAiRoadmap(recommendedKey, mode));
+      if ($("aiSummaryBtn")) $("aiSummaryBtn").addEventListener("click", () => generateAiSummary(recommendedKey, mode));
+      if ($("aiRoadmapBtn")) $("aiRoadmapBtn").addEventListener("click", () => generateAiRoadmap(recommendedKey, mode));
       if ($("useOriginalRoadmapBtn")) $("useOriginalRoadmapBtn").addEventListener("click", () => {
         state.useAiRoadmap = false;
         if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
@@ -6842,7 +6903,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         state.includeBudgetEstimate = !state.includeBudgetEstimate;
         renderPlan(mode);
       });
-      $("printBtn").addEventListener("click", () => generateProposalPdf(recommendedKey));
+      if ($("printBtn")) $("printBtn").addEventListener("click", () => generateProposalPdf(recommendedKey));
       if ($("handoffBtn")) $("handoffBtn").addEventListener("click", () => openHandoffModal(recommendedKey));
     }
     function buildDefaultHandoffEmail(recommendedKey = selectedProposalPlanKey()) {
@@ -6866,6 +6927,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const validationSection = state.aiValidation && state.aiValidation.summary
         ? `\n\nDiagnóstico revisado con IA:\n${normalizeEmailText(filterValidationSummaryForProposal(state.aiValidation.summary))}`
         : "";
+      const publicUrl = clientProposalUrl() || location.href;
       const bodyText = normalizeEmailText(`Nueva propuesta de adopción
 
 Cliente: ${state.company}
@@ -6887,8 +6949,8 @@ Opcionales/adicionales: ${totalEstimate.addons}${aiSection}${validationSection}
 Motivo de recomendación:
 ${recommendationReason(recommendedKey)}
 
-URL de la propuesta:
-${location.href}`);
+URL de la propuesta para el cliente:
+${publicUrl}`);
       return {
         from: "adopcion@possumus.tech",
         to,
@@ -6946,7 +7008,17 @@ ${location.href}`);
         ].filter(Boolean)
       };
     }
-    function openHandoffModal(recommendedKey = selectedProposalPlanKey()) {
+    async function openHandoffModal(recommendedKey = selectedProposalPlanKey()) {
+      try {
+        showThinking("Preparando link para cliente", "Estoy publicando una copia de solo lectura antes de armar el correo.");
+        await publishClientProposalSnapshot(recommendedKey);
+      } catch (error) {
+        console.error(error);
+        showToast(`No se pudo crear el link para cliente: ${error.message}`);
+        return;
+      } finally {
+        hideThinking();
+      }
       const email = buildDefaultHandoffEmail(recommendedKey);
       $("handoffModal").dataset.recommendedKey = recommendedKey;
       $("handoffFrom").value = email.from;
@@ -7021,7 +7093,9 @@ ${location.href}`);
           startDate: state.startDate,
           startDateFormatted: formatDate(state.startDate),
           endDateFormatted: proposalEndDate(recommendedKey),
-          pageUrl: location.href,
+          pageUrl: clientProposalUrl() || location.href,
+          adminPageUrl: location.href,
+          clientProposalUrl: clientProposalUrl(),
           recommendedPlanKey: recommendedKey,
           selectedPlanKey: recommendedKey,
           selectedPlanName: recommended.name,
@@ -7388,6 +7462,14 @@ ${location.href}`);
           modalStatus.textContent = text;
         }
       };
+      if (!state.clientProposalId) {
+        try {
+          await publishClientProposalSnapshot(recommendedKey);
+        } catch (error) {
+          showToast(`No se pudo crear el link para cliente: ${error.message}`);
+          return;
+        }
+      }
       const payload = buildHandoffPayload(recommendedKey, emailOverride);
       if (!payload.email.from || !payload.email.to || !payload.email.subject || !payload.email.body) {
         showToast("Completa De, Para, Asunto y Cuerpo antes de enviar.");
@@ -8032,7 +8114,7 @@ ${location.href}`);
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, clientContact: "", clientLocation: "Argentina", industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: false, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, proposalMode: "guided", directPlanKey: "", planId: "", userId: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, addonPrices: {}, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, overridePlanKey: "", aiPlanComparisons: {} });
+      Object.assign(state, { company: "", startDate: todayIso, clientContact: "", clientLocation: "Argentina", industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: false, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, proposalMode: "guided", directPlanKey: "", planId: "", userId: "", clientProposalId: "", clientProposalPublishedAt: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, addonPrices: {}, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, overridePlanKey: "", aiPlanComparisons: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
       $("clientContact").value = "";
@@ -8043,15 +8125,32 @@ ${location.href}`);
       show("modeSelect");
     });
     window.addEventListener("hashchange", route);
-    function route() {
+    async function route() {
       const hash = location.hash.replace(/^#/, "");
       const [, routeName, id] = hash.split("/");
-      const notFound = () => {
+      const notFound = (message = "No encontramos esa propuesta en este navegador. Generá una nueva o abrila donde la creaste.") => {
         show("modeSelect");
-        showToast("No encontramos esa propuesta en este navegador. Generá una nueva o abrila donde la creaste.");
+        showToast(message);
       };
       if (routeName === "admin") { if (!loadPlan(id)) { notFound(); return; } renderPlan("admin"); return; }
       if (routeName === "user") { if (!loadUserPlan(id)) { notFound(); return; } renderPlan("user"); return; }
+      if (routeName === "client") {
+        showThinking("Abriendo propuesta", "Estoy cargando la propuesta de solo lectura para el cliente.");
+        try {
+          if (!await loadClientPlan(id)) {
+            notFound("No encontramos esta propuesta compartida. Verificá que el link sea correcto o pedí al comercial que la vuelva a enviar.");
+            return;
+          }
+          renderPlan("client");
+          return;
+        } catch (error) {
+          console.error(error);
+          notFound("No se pudo cargar la propuesta compartida. Intentá nuevamente en unos minutos.");
+          return;
+        } finally {
+          hideThinking();
+        }
+      }
       if (routeName === "done") { if (!loadPlan(id)) { notFound(); return; } renderPlan("admin"); return; }
       show("modeSelect");
     }
