@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.30**
+Versión documentada: **MVP 0.10.31**
 Última actualización funcional: **2026-09-08**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -155,6 +155,8 @@ Si hay alternativas, el comercial puede promover una alternativa con **Usar como
 La reversión se hace con **Volver al plan original**.
 
 En propuesta directa, `selectedProposalPlanKey()` devuelve `directPlanKey`; no se muestran controles de alternativas ni confianza algorítmica al cliente.
+
+El login Microsoft es opcional. Sin sesión, la app conserva el flujo de prueba y usa los valores fallback actuales. Si el comercial inicia sesión, MSAL lee el perfil Microsoft Graph (`displayName`, `mail`/`userPrincipalName`) y completa `commercialName` / `commercialEmail`; ese email se usa como destinatario por defecto del handoff interno y se conserva al reiniciar la propuesta.
 
 ## 5. Add-ons y precios
 
