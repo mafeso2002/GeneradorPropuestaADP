@@ -2914,7 +2914,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.19 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.20 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -3625,6 +3625,7 @@
       planId: "",
       userId: "",
       clientProposalId: "",
+      clientProposalUrl: "",
       clientProposalPublishedAt: "",
       commercialName: "",
       commercialEmail: "",
@@ -5375,6 +5376,7 @@
       state.planId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
       state.userId = crypto.randomUUID ? crypto.randomUUID() : `user-${Date.now()}`;
       state.clientProposalId = "";
+      state.clientProposalUrl = "";
       state.clientProposalPublishedAt = "";
       localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
       localStorage.setItem(`copilot-user-${state.userId}`, state.planId);
@@ -5398,6 +5400,7 @@
       state.planId = crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
       state.userId = crypto.randomUUID ? crypto.randomUUID() : `user-${Date.now()}`;
       state.clientProposalId = "";
+      state.clientProposalUrl = "";
       state.clientProposalPublishedAt = "";
       localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
       localStorage.setItem(`copilot-user-${state.userId}`, state.planId);
@@ -5433,13 +5436,44 @@
     function clientProposalUrl(id = state.clientProposalId) {
       return id ? `${appBaseUrl()}#/client/${encodeURIComponent(id)}` : "";
     }
+    function base64UrlEncodeUtf8(value) {
+      const bytes = new TextEncoder().encode(String(value || ""));
+      let binary = "";
+      for (let index = 0; index < bytes.length; index += 0x8000) {
+        binary += String.fromCharCode(...bytes.slice(index, index + 0x8000));
+      }
+      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    }
+    function base64UrlDecodeUtf8(value) {
+      const normalized = String(value || "").replace(/-/g, "+").replace(/_/g, "/");
+      const padded = normalized.padEnd(normalized.length + ((4 - normalized.length % 4) % 4), "=");
+      const binary = atob(padded);
+      const bytes = new Uint8Array(binary.length);
+      for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+      return new TextDecoder().decode(bytes);
+    }
+    function clientProposalDataUrl(snapshot) {
+      return `${appBaseUrl()}#/client-data/${base64UrlEncodeUtf8(JSON.stringify(snapshot))}`;
+    }
+    function decodeClientProposalData(encoded) {
+      try {
+        const snapshot = JSON.parse(base64UrlDecodeUtf8(encoded));
+        return snapshot && typeof snapshot === "object" ? snapshot : null;
+      } catch (error) {
+        console.warn("No se pudo decodificar el snapshot de cliente.", error);
+        return null;
+      }
+    }
     function publicClientStateSnapshot(recommendedKey = selectedProposalPlanKey()) {
       const snapshot = JSON.parse(JSON.stringify(state));
       snapshot.clientProposalId = state.clientProposalId;
       snapshot.clientProposalPublishedAt = new Date().toISOString();
       snapshot.overridePlanKey = recommendedKey !== planDecision().recommendedKey ? recommendedKey : "";
+      snapshot.planId = snapshot.planId || snapshot.clientProposalId || "client";
+      snapshot.userId = "";
       snapshot.commercialName = "";
       snapshot.commercialEmail = "";
+      snapshot.clientProposalUrl = "";
       return snapshot;
     }
     async function publishClientProposalSnapshot(recommendedKey = selectedProposalPlanKey()) {
@@ -5454,7 +5488,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.19",
+          version: "MVP 0.10.20",
           createdAt: publishedAt,
           state: snapshot
         })
@@ -5465,8 +5499,24 @@
         throw new Error(result.error || `Error HTTP ${response.status}`);
       }
       state.clientProposalPublishedAt = publishedAt;
+      state.clientProposalUrl = clientProposalUrl(state.clientProposalId);
       if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
-      return clientProposalUrl(state.clientProposalId);
+      return state.clientProposalUrl;
+    }
+    async function ensureClientProposalLink(recommendedKey = selectedProposalPlanKey()) {
+      try {
+        return await publishClientProposalSnapshot(recommendedKey);
+      } catch (error) {
+        const snapshot = publicClientStateSnapshot(recommendedKey);
+        snapshot.clientProposalId = "";
+        snapshot.clientProposalPublishedAt = new Date().toISOString();
+        state.clientProposalId = "";
+        state.clientProposalPublishedAt = snapshot.clientProposalPublishedAt;
+        state.clientProposalUrl = clientProposalDataUrl(snapshot);
+        if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
+        console.warn(`Usando link cliente autocontenido porque no se pudo persistir el snapshot: ${error.message}`);
+        return state.clientProposalUrl;
+      }
     }
     async function loadClientPlan(clientId) {
       const response = await fetch(`/api/client-proposals/${encodeURIComponent(clientId)}`, {
@@ -5478,6 +5528,14 @@
       const livePrices = state.addonPrices;
       Object.assign(state, payload.state);
       state.clientProposalId = clientId;
+      if (livePrices && Object.keys(livePrices).length) state.addonPrices = livePrices;
+      return true;
+    }
+    function loadClientDataPlan(encoded) {
+      const snapshot = decodeClientProposalData(encoded);
+      if (!snapshot) return false;
+      const livePrices = state.addonPrices;
+      Object.assign(state, snapshot);
       if (livePrices && Object.keys(livePrices).length) state.addonPrices = livePrices;
       return true;
     }
@@ -6931,7 +6989,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const validationSection = state.aiValidation && state.aiValidation.summary
         ? `\n\nDiagnóstico revisado con IA:\n${normalizeEmailText(filterValidationSummaryForProposal(state.aiValidation.summary))}`
         : "";
-      const publicUrl = clientProposalUrl() || location.href;
+      const publicUrl = state.clientProposalUrl || clientProposalUrl() || location.href;
       const bodyText = normalizeEmailText(`Nueva propuesta de adopción
 
 Cliente: ${state.company}
@@ -7015,10 +7073,11 @@ ${publicUrl}`);
     async function openHandoffModal(recommendedKey = selectedProposalPlanKey()) {
       try {
         showThinking("Preparando link para cliente", "Estoy publicando una copia de solo lectura antes de armar el correo.");
-        await publishClientProposalSnapshot(recommendedKey);
+        await ensureClientProposalLink(recommendedKey);
       } catch (error) {
         console.error(error);
-        showToast(`No se pudo crear el link para cliente; el envío queda disponible con el link interno actual. Detalle: ${error.message}`);
+        showToast(`No se pudo preparar el link para cliente: ${error.message}`);
+        return;
       } finally {
         hideThinking();
       }
@@ -7467,7 +7526,7 @@ ${publicUrl}`);
       };
       if (!state.clientProposalId) {
         try {
-          await publishClientProposalSnapshot(recommendedKey);
+          await ensureClientProposalLink(recommendedKey);
         } catch (error) {
           console.warn(`No se pudo crear el link para cliente antes del envío: ${error.message}`);
         }
@@ -8116,7 +8175,7 @@ ${publicUrl}`);
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, clientContact: "", clientLocation: "Argentina", industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: false, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, proposalMode: "guided", directPlanKey: "", planId: "", userId: "", clientProposalId: "", clientProposalPublishedAt: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, addonPrices: {}, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, overridePlanKey: "", aiPlanComparisons: {} });
+      Object.assign(state, { company: "", startDate: todayIso, clientContact: "", clientLocation: "Argentina", industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: false, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, proposalMode: "guided", directPlanKey: "", planId: "", userId: "", clientProposalId: "", clientProposalUrl: "", clientProposalPublishedAt: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, addonPrices: {}, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, overridePlanKey: "", aiPlanComparisons: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
       $("clientContact").value = "";
@@ -8152,6 +8211,14 @@ ${publicUrl}`);
         } finally {
           hideThinking();
         }
+      }
+      if (routeName === "client-data") {
+        if (!loadClientDataPlan(id || "")) {
+          notFound("No se pudo abrir esta propuesta compartida. Verificá que el link esté completo.");
+          return;
+        }
+        renderPlan("client");
+        return;
       }
       if (routeName === "done") { if (!loadPlan(id)) { notFound(); return; } renderPlan("admin"); return; }
       show("modeSelect");
