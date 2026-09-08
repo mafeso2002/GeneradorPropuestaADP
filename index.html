@@ -1736,6 +1736,27 @@
       background: var(--cp-surface-soft);
     }
     .roadmap-toolbar .btn { white-space: nowrap; }
+    .roadmap-instructions {
+      margin: 12px 0 0;
+    }
+    .roadmap-instructions label {
+      font-size: 12px;
+      color: var(--cp-text-muted);
+    }
+    .roadmap-instructions textarea {
+      min-height: 78px;
+      margin-top: 6px;
+      font-size: 13px;
+    }
+    .roadmap-change-summary {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border: 1px solid rgba(252, 215, 2, 0.55);
+      border-radius: 12px;
+      background: var(--cp-brand-yellow-soft);
+      color: var(--cp-text);
+      font-size: 13px;
+    }
     .roadmap-actions {
       display: flex;
       flex-wrap: wrap;
@@ -2629,6 +2650,27 @@
       margin-top: 18px;
     }
     .modal-card textarea { min-height: 190px; }
+    .roadmap-edit-card { max-width: 980px; }
+    .roadmap-edit-list {
+      display: grid;
+      gap: 14px;
+      max-height: 58vh;
+      overflow: auto;
+      padding-right: 4px;
+    }
+    .roadmap-edit-item {
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      padding: 14px;
+      background: var(--cp-surface-soft);
+    }
+    .roadmap-edit-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .roadmap-edit-grid .full { grid-column: 1 / -1; }
+    .roadmap-edit-item textarea { min-height: 90px; }
     .confirm-modal-card {
       width: min(560px, 100%);
     }
@@ -2854,7 +2896,7 @@
     .hidden { display: none !important; }
     @media (max-width: 860px) {
       .hero, .layout, .form-row, .review-grid, .roadmap, .links, .mode-grid, .direct-plan-grid { grid-template-columns: 1fr; }
-      .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-selection-panel, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .wave-plan-grid, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option { grid-template-columns: 1fr; }
+      .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-selection-panel, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-metric-row, .wave-plan-grid, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option, .roadmap-edit-grid { grid-template-columns: 1fr; }
       .proposal-price-panel { position: static; }
       .addon-pricing { border-left: 0; border-top: 1px solid var(--cp-border); padding-left: 0; padding-top: 10px; }
       .topbar, .top-actions { align-items: flex-start; flex-direction: column; }
@@ -2914,7 +2956,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.25 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.26 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -3163,6 +3205,23 @@
         <button class="btn primary" id="confirmHandoffBtn">Enviar propuesta</button>
       </div>
       <div class="handoff-status" id="handoffModalStatus"></div>
+    </div>
+  </div>
+  <div id="roadmapEditorModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="roadmapEditorTitle">
+    <div class="modal-card roadmap-edit-card">
+      <div class="modal-header">
+        <div>
+          <span class="ai-badge">Hoja de ruta editable</span>
+          <h3 id="roadmapEditorTitle">Editar roadmap manualmente</h3>
+          <p>Modificá etapas, actividades, responsables, entregables y riesgos antes de enviar la propuesta.</p>
+        </div>
+        <button class="btn ghost" id="closeRoadmapEditorBtn">Cerrar</button>
+      </div>
+      <div id="roadmapEditorBody" class="roadmap-edit-list"></div>
+      <div class="modal-actions">
+        <button class="btn" id="cancelRoadmapEditorBtn">Cancelar</button>
+        <button class="btn primary" id="saveRoadmapEditorBtn">Guardar cambios</button>
+      </div>
     </div>
   </div>
 
@@ -3635,6 +3694,7 @@
       aiValidation: null,
       aiSummary: null,
       aiRoadmap: null,
+      aiRoadmapInstructions: "",
       useAiRoadmap: true,
       overridePlanKey: "",
       aiPlanComparisons: {}
@@ -5489,7 +5549,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.25",
+          version: "MVP 0.10.26",
           createdAt: publishedAt,
           state: snapshot
         })
@@ -6562,7 +6622,8 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       if (!hasCustom) {
         return { active: false, hasCustom: false, useCustom: false, isAi: false, label: "", title: "Hoja de ruta base del plan", note: "Podés personalizarla con IA para adaptar etapas, actividades y entregables al cliente.", button: "Personalizar roadmap con IA" };
       }
-      const isAi = roadmap.source !== "Fallback local";
+      const isManual = roadmap.source === "Edición manual";
+      const isAi = !isManual && roadmap.source !== "Fallback local";
       const useCustom = state.useAiRoadmap !== false;
       if (!useCustom) {
         return {
@@ -6573,7 +6634,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
           label: "Roadmap original",
           title: "Hoja de ruta original del plan",
           note: "Estás usando el roadmap base. Podés volver al roadmap personalizado sin regenerarlo.",
-          button: isAi ? "Regenerar roadmap con IA" : "Reintentar con IA"
+          button: isAi ? "Regenerar roadmap con IA" : "Generar versión adaptada con IA"
         };
       }
       return {
@@ -6581,11 +6642,114 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         hasCustom: true,
         useCustom,
         isAi,
-        label: isAi ? "Roadmap personalizado con IA" : "Roadmap personalizado local",
-        title: isAi ? "Hoja de ruta adaptada con IA" : "Hoja de ruta adaptada localmente",
-        note: isAi ? "La IA ajustó etapas, foco, actividades y riesgos según el diagnóstico." : "El Flow IA todavía no devolvió etapas válidas; la app dejó una versión personalizada local para no frenar la propuesta.",
-        button: isAi ? "Regenerar roadmap con IA" : "Reintentar con IA"
+        label: isManual ? "Roadmap editado manualmente" : isAi ? "Roadmap personalizado con IA" : "Roadmap personalizado local",
+        title: isManual ? "Hoja de ruta editada por el comercial" : isAi ? "Hoja de ruta adaptada con IA" : "Hoja de ruta adaptada localmente",
+        note: isManual ? "El comercial ajustó manualmente etapas, actividades o entregables." : isAi ? "La IA ajustó etapas, foco, actividades y riesgos según el diagnóstico." : "El Flow IA todavía no devolvió etapas válidas; la app dejó una versión personalizada local para no frenar la propuesta.",
+        button: isAi ? "Regenerar roadmap con IA" : "Generar versión adaptada con IA"
       };
+    }
+    function roadmapChangeSummary(baseItems, customItems) {
+      if (!Array.isArray(baseItems) || !Array.isArray(customItems) || !customItems.length) return "";
+      const changes = [];
+      const stageDiff = customItems.length - baseItems.length;
+      if (stageDiff > 0) changes.push(`sumó ${stageDiff} etapa${stageDiff === 1 ? "" : "s"}`);
+      if (stageDiff < 0) changes.push(`simplificó ${Math.abs(stageDiff)} etapa${Math.abs(stageDiff) === 1 ? "" : "s"}`);
+      const renamed = customItems.filter((item, index) => baseItems[index] && item.title !== baseItems[index].title).length;
+      if (renamed) changes.push(`ajustó ${renamed} título${renamed === 1 ? "" : "s"} de etapa`);
+      const taskDiff = customItems.reduce((total, item, index) => total + ((item.tasks || []).length - ((baseItems[index] && baseItems[index].tasks) || []).length), 0);
+      if (taskDiff > 0) changes.push(`agregó ${taskDiff} actividad${taskDiff === 1 ? "" : "es"}`);
+      const enriched = customItems.filter((item) => item.owner || item.deliverable || item.risk).length;
+      if (enriched) changes.push(`incorporó responsable, entregable o riesgo en ${enriched} etapa${enriched === 1 ? "" : "s"}`);
+      return changes.length ? `Qué cambió: ${changes.slice(0, 4).join("; ")}.` : "Qué cambió: mantuvo la estructura base y ajustó redacción al contexto del cliente.";
+    }
+    function activeRoadmapItemsForEditing(recommendedKey = selectedProposalPlanKey()) {
+      return roadmapForPlan(recommendedKey).map((item) => ({
+        ...item,
+        tasks: Array.isArray(item.tasks) ? [...item.tasks] : []
+      }));
+    }
+    function roadmapItemsFromEditor() {
+      return Array.from(document.querySelectorAll(".roadmap-edit-item")).map((item, index) => ({
+        tag: item.querySelector("[data-roadmap-field='tag']").value.trim() || `Etapa ${index + 1}`,
+        date: item.querySelector("[data-roadmap-field='date']").value.trim(),
+        title: item.querySelector("[data-roadmap-field='title']").value.trim() || `Etapa ${index + 1}`,
+        desc: item.querySelector("[data-roadmap-field='desc']").value.trim(),
+        tasks: item.querySelector("[data-roadmap-field='tasks']").value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean).slice(0, 7),
+        owner: item.querySelector("[data-roadmap-field='owner']").value.trim(),
+        deliverable: item.querySelector("[data-roadmap-field='deliverable']").value.trim(),
+        risk: item.querySelector("[data-roadmap-field='risk']").value.trim(),
+        icon: item.dataset.icon || "roadmap"
+      })).filter((item) => item.title && item.desc && item.tasks.length);
+    }
+    function openRoadmapEditor(recommendedKey = selectedProposalPlanKey(), mode = "admin") {
+      const items = activeRoadmapItemsForEditing(recommendedKey);
+      $("roadmapEditorModal").dataset.recommendedKey = recommendedKey;
+      $("roadmapEditorModal").dataset.mode = mode;
+      $("roadmapEditorBody").innerHTML = items.map((item, index) => `<section class="roadmap-edit-item" data-index="${index}" data-icon="${escapeHtml(item.icon || "roadmap")}">
+        <div class="roadmap-edit-grid">
+          <div>
+            <label>Etiqueta / etapa</label>
+            <input data-roadmap-field="tag" value="${escapeHtml(item.tag || "")}">
+          </div>
+          <div>
+            <label>Fecha o momento</label>
+            <input data-roadmap-field="date" value="${escapeHtml(item.date || "")}">
+          </div>
+          <div class="full">
+            <label>Título</label>
+            <input data-roadmap-field="title" value="${escapeHtml(item.title || "")}">
+          </div>
+          <div class="full">
+            <label>Descripción</label>
+            <textarea data-roadmap-field="desc">${escapeHtml(item.desc || "")}</textarea>
+          </div>
+          <div class="full">
+            <label>Actividades (una por línea)</label>
+            <textarea data-roadmap-field="tasks">${escapeHtml((item.tasks || []).join("\n"))}</textarea>
+          </div>
+          <div>
+            <label>Responsable sugerido</label>
+            <input data-roadmap-field="owner" value="${escapeHtml(item.owner || "")}">
+          </div>
+          <div>
+            <label>Entregable</label>
+            <input data-roadmap-field="deliverable" value="${escapeHtml(item.deliverable || "")}">
+          </div>
+          <div class="full">
+            <label>Riesgo a cuidar</label>
+            <input data-roadmap-field="risk" value="${escapeHtml(item.risk || "")}">
+          </div>
+        </div>
+      </section>`).join("");
+      $("roadmapEditorModal").classList.remove("hidden");
+      const firstInput = $("roadmapEditorBody").querySelector("input, textarea");
+      if (firstInput) firstInput.focus();
+    }
+    function closeRoadmapEditor() {
+      $("roadmapEditorModal").classList.add("hidden");
+    }
+    function saveRoadmapEditor() {
+      const recommendedKey = $("roadmapEditorModal").dataset.recommendedKey || selectedProposalPlanKey();
+      const mode = $("roadmapEditorModal").dataset.mode || "admin";
+      const items = roadmapItemsFromEditor();
+      if (!items.length) {
+        showToast("El roadmap necesita al menos una etapa con descripción y actividades.");
+        return;
+      }
+      const base = proposalRoadmap(recommendedKey);
+      state.aiRoadmap = {
+        planKey: recommendedKey,
+        items,
+        summary: roadmapChangeSummary(base, items),
+        changeSummary: roadmapChangeSummary(base, items),
+        generatedAt: new Date().toISOString(),
+        source: "Edición manual"
+      };
+      state.useAiRoadmap = true;
+      if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
+      closeRoadmapEditor();
+      showToast("Roadmap actualizado manualmente.");
+      renderPlan(mode);
     }
     function fallbackPersonalizedRoadmap(planKey = selectedProposalPlanKey()) {
       const base = proposalRoadmap(planKey);
@@ -6593,6 +6757,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const departmentsText = selectedDepartments().join(", ") || state.department || "el área prioritaria";
       const hasCopilot = hasCopilotLicense();
       const addons = selectedAddonItems().map((item) => item.title);
+      const customInstruction = normalizeEmailText(state.aiRoadmapInstructions || "");
       return base.map((item, index) => {
         const tasks = item.tasks.slice(0, 3);
         if (index === 0) {
@@ -6606,6 +6771,9 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         }
         if (addons.length && index === Math.min(2, base.length - 1)) {
           tasks.push(`Incorporar opcionales seleccionados: ${addons.slice(0, 2).join(", ")}`);
+        }
+        if (customInstruction && index === 0) {
+          tasks.push(`Ajustar la hoja de ruta según indicación comercial: ${customInstruction}`);
         }
         return {
           ...item,
@@ -6660,10 +6828,11 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         },
         aiInstructions: {
           task: "Personalizar la hoja de ruta comercial y de adopcion para este cliente.",
+          commercialInstructions: state.aiRoadmapInstructions || "",
           timelineRules: wave
             ? `Este plan usa modelo de olas: ${wave.title}, ${wave.groups}, duracion ${wave.duration}. La hoja de ruta debe respetar ese calendario, sus olas y el templateRoadmap enviado; no volver a un roadmap generico.`
             : "La hoja de ruta debe respetar la duracion, alcance y templateRoadmap enviados para el plan seleccionado.",
-          responseFormat: "Responder JSON valido con { summary, items }. items debe tener 4 a 6 etapas con tag, title, date, desc, tasks (3 a 5 bullets), owner, deliverable, risk e icon. Usar los datos del relevamiento; no inventar informacion externa. Mantener fechas, olas, duracion y alcance exactamente consistentes con proposal.recommendedPlanDuration, proposal.recommendedPlanScope, proposal.adoptionWaveModel y proposal.templateRoadmap. Respetar proposal.progressionGuidance: si hay prerrequisitos, atajos o escalones posteriores, ordenarlos en el roadmap. Si el plan es P1/Productividad Digital, no reducirlo a capacitacion: cada hoja de ruta debe incluir diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion."
+          responseFormat: "Responder JSON valido con { summary, items }. summary debe explicar brevemente que cambio respecto del roadmap base. items debe tener 4 a 6 etapas con tag, title, date, desc, tasks (3 a 5 bullets), owner, deliverable, risk e icon. Usar los datos del relevamiento; no inventar informacion externa. Mantener fechas, olas, duracion y alcance exactamente consistentes con proposal.recommendedPlanDuration, proposal.recommendedPlanScope, proposal.adoptionWaveModel y proposal.templateRoadmap. Respetar proposal.progressionGuidance: si hay prerrequisitos, atajos o escalones posteriores, ordenarlos en el roadmap. Si el plan es P1/Productividad Digital, no reducirlo a capacitacion: cada hoja de ruta debe incluir diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion."
         }
       };
     }
@@ -6894,12 +7063,18 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                 ${roadmapState.active ? `<span class="roadmap-ai-badge ${roadmapState.isAi ? "" : "local"}">${iconSvg(roadmapState.isAi ? "spark" : "roadmap")} ${roadmapState.label}</span>` : ""}
                 <strong>${roadmapState.title}</strong>
                 <p>${roadmapState.note}</p>
+                ${roadmapState.hasCustom && (state.aiRoadmap.changeSummary || state.aiRoadmap.summary) ? `<div class="roadmap-change-summary">${escapeHtml(state.aiRoadmap.changeSummary || state.aiRoadmap.summary)}</div>` : ""}
+                ${readOnlyMode ? "" : `<div class="roadmap-instructions">
+                  <label for="aiRoadmapInstructions">Indicaciones para personalizar la hoja de ruta</label>
+                  <textarea id="aiRoadmapInstructions" placeholder="Ej.: hacerlo más ejecutivo, priorizar operación, sumar foco en Teams/SharePoint, evitar Copilot por ahora...">${escapeHtml(state.aiRoadmapInstructions || "")}</textarea>
+                </div>`}
                 <div class="handoff-status" id="aiRoadmapStatus"></div>
               </div>
               <div class="roadmap-actions">
                 ${roadmapState.hasCustom && !readOnlyMode ? `<button class="btn ${roadmapState.useCustom ? "ghost" : "action-mail"}" id="useOriginalRoadmapBtn" type="button">Usar original</button>
                 <button class="btn ${roadmapState.useCustom ? "action-mail" : "ghost"}" id="useAiRoadmapBtn" type="button">${roadmapState.isAi ? "Usar IA" : "Usar personalizado"}</button>` : ""}
-                ${readOnlyMode ? "" : `<button class="btn action-ai" id="aiRoadmapBtn" type="button"><span class="btn-icon">${iconSvg("roadmap")}</span>${roadmapState.button}</button>`}
+                ${readOnlyMode ? "" : `<button class="btn action-ai" id="aiRoadmapBtn" type="button"><span class="btn-icon">${iconSvg("roadmap")}</span>${roadmapState.button}</button>
+                <button class="btn ghost" id="editRoadmapBtn" type="button">Editar manualmente</button>`}
               </div>
             </div>
             ${renderRoadmapVisual(roadmapItems)}
@@ -6951,6 +7126,11 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       if ($("revertPlanBtn")) $("revertPlanBtn").addEventListener("click", () => revertToOriginalPlan(mode));
       if ($("aiSummaryBtn")) $("aiSummaryBtn").addEventListener("click", () => generateAiSummary(recommendedKey, mode));
       if ($("aiRoadmapBtn")) $("aiRoadmapBtn").addEventListener("click", () => generateAiRoadmap(recommendedKey, mode));
+      if ($("editRoadmapBtn")) $("editRoadmapBtn").addEventListener("click", () => openRoadmapEditor(recommendedKey, mode));
+      if ($("aiRoadmapInstructions")) $("aiRoadmapInstructions").addEventListener("input", (event) => {
+        state.aiRoadmapInstructions = event.target.value;
+        if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
+      });
       if ($("useOriginalRoadmapBtn")) $("useOriginalRoadmapBtn").addEventListener("click", () => {
         state.useAiRoadmap = false;
         if (state.planId) localStorage.setItem(`copilot-plan-${state.planId}`, JSON.stringify(state));
@@ -7209,6 +7389,8 @@ ${publicUrl}`);
           } : null,
           aiRoadmap: state.aiRoadmap ? {
             summary: state.aiRoadmap.summary || "",
+            changeSummary: state.aiRoadmap.changeSummary || "",
+            instructions: state.aiRoadmapInstructions || "",
             generatedAt: state.aiRoadmap.generatedAt || "",
             source: state.aiRoadmap.source || "Power Automate AI",
             planKey: state.aiRoadmap.planKey || "",
@@ -7401,10 +7583,15 @@ ${publicUrl}`);
       const status = $("aiRoadmapStatus");
       const payload = buildAiRoadmapPayload(recommendedKey);
       const applyLocalRoadmap = (message) => {
+        const items = fallbackPersonalizedRoadmap(recommendedKey);
+        const changeSummary = state.aiRoadmapInstructions
+          ? `Qué cambió: se generó una versión local considerando la indicación "${state.aiRoadmapInstructions.trim()}"; revisar y ajustar manualmente si hace falta.`
+          : roadmapChangeSummary(proposalRoadmap(recommendedKey), items);
         state.aiRoadmap = {
           planKey: recommendedKey,
-          items: fallbackPersonalizedRoadmap(recommendedKey),
+          items,
           summary: message,
+          changeSummary,
           generatedAt: new Date().toISOString(),
           source: "Fallback local"
         };
@@ -7437,6 +7624,7 @@ ${publicUrl}`);
           planKey: recommendedKey,
           items,
           summary: result.summary || "",
+          changeSummary: result.summary || roadmapChangeSummary(proposalRoadmap(recommendedKey), items),
           generatedAt: new Date().toISOString(),
           source: result.source || "Power Automate AI"
         };
@@ -8041,6 +8229,12 @@ ${publicUrl}`);
     $("confidenceModal").addEventListener("click", (event) => {
       if (event.target === $("confidenceModal")) closeConfidenceModal();
     });
+    $("closeRoadmapEditorBtn").addEventListener("click", closeRoadmapEditor);
+    $("cancelRoadmapEditorBtn").addEventListener("click", closeRoadmapEditor);
+    $("saveRoadmapEditorBtn").addEventListener("click", saveRoadmapEditor);
+    $("roadmapEditorModal").addEventListener("click", (event) => {
+      if (event.target === $("roadmapEditorModal")) closeRoadmapEditor();
+    });
     function activateCardWithKeyboard(element) {
       element.addEventListener("keydown", (event) => {
         if (event.key !== "Enter" && event.key !== " ") return;
@@ -8055,6 +8249,7 @@ ${publicUrl}`);
     function closeTopModal() {
       if (!$("confirmProposalModal").classList.contains("hidden")) { closeConfirmProposalModal(); return true; }
       if (!$("handoffModal").classList.contains("hidden")) { closeHandoffModal(); return true; }
+      if (!$("roadmapEditorModal").classList.contains("hidden")) { closeRoadmapEditor(); return true; }
       if (!$("confidenceModal").classList.contains("hidden")) { closeConfidenceModal(); return true; }
       if (!$("decisionHelpModal").classList.contains("hidden")) { closeDecisionHelpModal(); return true; }
       return false;
@@ -8182,7 +8377,7 @@ ${publicUrl}`);
     $("resetBtn").addEventListener("click", () => {
       const currentCommercialName = state.commercialName;
       const currentCommercialEmail = state.commercialEmail;
-      Object.assign(state, { company: "", startDate: todayIso, clientContact: "", clientLocation: "Argentina", industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: false, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, proposalMode: "guided", directPlanKey: "", planId: "", userId: "", clientProposalId: "", clientProposalUrl: "", clientProposalPublishedAt: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, addonPrices: {}, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, useAiRoadmap: true, overridePlanKey: "", aiPlanComparisons: {} });
+      Object.assign(state, { company: "", startDate: todayIso, clientContact: "", clientLocation: "Argentina", industry: "", usersMode: "department", department: "RR. HH.", departments: ["RR. HH."], userRange: "", m365Maturity: "low", copilotLicenses: "", copilotUsage: "not-applicable", concreteUseCases: "none", agentNeed: "no", projectStage: "", sponsor: "", governance: "", iaGovernanceNeed: "none", accompaniment: "", primaryObjective: "", m365Tools: "", informationLocation: "", teamsSharepointStructure: "", taskManagement: "", firstChange: "", deliveryMode: "remote", sessionFrequency: "weekly", groupModel: "by-area", successMetric: "satisfaction", inbox: "", meeting: "", meetingApp: "Teams", create: "", automate: "", cowork: false, coworkReviewed: false, selectedAddons: [], addonsReviewed: false, proposalMode: "guided", directPlanKey: "", planId: "", userId: "", clientProposalId: "", clientProposalUrl: "", clientProposalPublishedAt: "", commercialName: currentCommercialName, commercialEmail: currentCommercialEmail, includeBudgetEstimate: true, addonPrices: {}, validationNotes: "", aiValidation: null, aiSummary: null, aiRoadmap: null, aiRoadmapInstructions: "", useAiRoadmap: true, overridePlanKey: "", aiPlanComparisons: {} });
       $("company").value = "";
       $("startDate").value = todayIso;
       $("clientContact").value = "";

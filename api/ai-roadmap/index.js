@@ -52,9 +52,9 @@ module.exports = async function (context, req) {
     ...payload,
     aiInstructions: {
       ...(payload.aiInstructions || {}),
-      task: "Personalizar la hoja de ruta comercial y de adopcion para este cliente. No generar resumen ejecutivo ni comparar planes.",
+      task: "Personalizar la hoja de ruta comercial y de adopcion para este cliente. No generar resumen ejecutivo ni comparar planes. Si payload.aiInstructions.commercialInstructions trae indicaciones del comercial, aplicarlas siempre que no contradigan duracion, alcance, olas, progresion ni el plan seleccionado.",
       timelineRules: "Respetar estrictamente proposal.recommendedPlanDuration, proposal.recommendedPlanScope, proposal.adoptionWaveModel, proposal.progressionGuidance y proposal.templateRoadmap. Si existe adoptionWaveModel, el roadmap debe mantener ese esquema de olas, cantidad de olas, duracion y segmentacion; no reemplazarlo por un calendario generico. Si existe progressionGuidance, ordenar el roadmap para cubrir prerrequisitos o escalones previos antes de actividades avanzadas.",
-      responseFormat: "Responder un JSON valido con { summary, items }. items debe ser un array de 4 a 6 etapas. Cada etapa debe incluir tag, title, date, desc, tasks (3 a 5 bullets), owner, deliverable, risk e icon. Usar solamente los datos del relevamiento y el roadmap base; no inventar informacion externa. Las fechas, tags y descripciones deben quedar alineadas con las olas, alcance y progresion enviados. Si el plan es P1/Productividad Digital, no reducirlo a capacitacion: incluir diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion."
+      responseFormat: "Responder un JSON valido con { summary, items }. summary debe explicar en 1 o 2 frases que cambio respecto del roadmap base y, si hubo commercialInstructions, como se aplicaron. items debe ser un array de 4 a 6 etapas. Cada etapa debe incluir tag, title, date, desc, tasks (3 a 5 bullets), owner, deliverable, risk e icon. Usar solamente los datos del relevamiento y el roadmap base; no inventar informacion externa. Las fechas, tags y descripciones deben quedar alineadas con las olas, alcance y progresion enviados. Si el plan es P1/Productividad Digital, no reducirlo a capacitacion: incluir diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion."
     }
   };
 
