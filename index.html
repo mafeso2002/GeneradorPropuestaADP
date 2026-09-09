@@ -3283,7 +3283,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.55 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.56 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -5950,7 +5950,7 @@
     function planCatalog() {
       return {
         plan0: {
-          name: "Plan 0 · Envisioning IA",
+          name: "Plan 1 · Envisioning IA",
           shortName: "Envisioning IA (P0)",
           commercialStage: "Etapa 1",
           journeyStageName: "Exploración",
@@ -5976,7 +5976,7 @@
           deliverables: ["Mapa de oportunidades por área", "Casos de uso priorizados", "Quick wins", "Business case", "Recomendación de licenciamiento y próximo plan"]
         },
         plan1: {
-          name: "Plan 1 · Productividad Digital",
+          name: "Plan 0 · Productividad Digital",
           shortName: "Productividad Digital (P1)",
           commercialStage: "Etapa 0",
           journeyStageName: "Productividad Digital",
@@ -6255,7 +6255,7 @@
       };
     }
     function fallbackQuoteForPlan(key, userRange = state.userRange) {
-      if (key === "plan0") return { main: "USD 3.500 + IVA", detail: "Precio base del Plan 0." };
+      if (key === "plan0") return { main: "USD 3.500 + IVA", detail: "Precio base del Plan 1." };
       if (key === "plan2") {
         if (userRange === "medium") return { main: "USD 5.900 + IVA por ola", detail: "Copilot por olas: hasta 7 olas de 45 usuarios para cubrir hasta 300 personas." };
         if (userRange === "large") return { main: "USD 5.900 + IVA por ola", detail: "Referencia por ola para despliegues de más de 300 usuarios; total final depende de cantidad de olas." };
@@ -6834,8 +6834,8 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         : `hay un área prioritaria (${selectedDepartments()[0] || state.department})`;
       const license = qualificationValue("copilotLicenses").toLowerCase();
       const maturity = qualificationValue("m365Maturity").toLowerCase();
-      if (key === "plan0") return `Recomendamos Plan 0 porque ${areaText}, el cliente está en etapa de exploración o sin licencias Copilot consolidadas (${license}) y necesita construir evidencia antes de avanzar.`;
-      if (key === "plan1") return `Recomendamos Plan 1 porque ${areaText}, la madurez Microsoft 365 es ${maturity}, ${discoveryValue(operationalFields, "teamsSharepointStructure").toLowerCase()} y la prioridad es ordenar colaboración, documentación y hábitos digitales antes de acelerar Copilot.`;
+      if (key === "plan0") return `Recomendamos Plan 1 porque ${areaText}, el cliente está en etapa de exploración o sin licencias Copilot consolidadas (${license}) y necesita construir evidencia antes de avanzar.`;
+      if (key === "plan1") return `Recomendamos Plan 0 porque ${areaText}, la madurez Microsoft 365 es ${maturity}, ${discoveryValue(operationalFields, "teamsSharepointStructure").toLowerCase()} y la prioridad es ordenar colaboración, documentación y hábitos digitales antes de acelerar Copilot.`;
       if (key === "plan2") return `Recomendamos Plan 2 porque ${areaText}, el cliente ya tiene Copilot o trial (${license}) y puede demostrar valor real con casos por rol, prompts y medición en 30 días.`;
       return `Recomendamos Plan 3 porque ${areaText}, hay escala, complejidad o necesidad de gestión del cambio integral para trabajar Microsoft 365 y Copilot en una misma iniciativa.`;
     }
@@ -7077,7 +7077,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         { tag: "Semana 1", title: "Diagnóstico y preparación", date: formatDate(start), icon: "diagnostic", desc: "Entender el potencial de IA y preparar el piloto de exploración.", tasks: ["Art of the Possible abierto", "Entrevistas breves con referentes", "Identificación de casos de uso por rol", "Revisión inicial de seguridad, SharePoint, Purview y oversharing", "Definición de criterios de valor para el business case"] },
         { tag: "Semana 2", title: "Formación práctica con Copilot Chat", date: formatDate(addDays(start, 7)), icon: "training", desc: "Probar IA en escenarios reales sin requerir licencias Microsoft 365 Copilot.", tasks: [`Escenario de comunicación: ${inbox.toLowerCase()}`, `Escenario de reuniones: ${meeting.toLowerCase()}`, "Prompts y quick wins por rol", "Práctica guiada con casos del cliente", "Registro de aprendizajes y límites detectados"] },
         { tag: "Semana 3", title: "Priorización de oportunidades", date: formatDate(addDays(start, 14)), icon: "spark", desc: "Ordenar casos de uso, valor esperado y requisitos para escalar.", tasks: [`Oportunidad de creación/análisis: ${create.toLowerCase()}`, `Oportunidad de automatización: ${automate.toLowerCase()}`, "Mapa de oportunidades y quick wins", "Matriz de impacto, esfuerzo y dependencias", "Revisión de requisitos de licenciamiento y datos"] },
-        { tag: "Semana 4", title: "Business case y decisión", date: formatDate(addDays(start, 21)), icon: "measurement", desc: "Cerrar evidencia para decidir licenciamiento y siguiente plan.", tasks: ["Encuesta de resultados", "Business case y recomendación de licenciamiento", "Sesión de cierre con sponsor", "Plan siguiente: Plan 1, 2 o 3", "Backlog priorizado para adopción o piloto Copilot"] }
+        { tag: "Semana 4", title: "Business case y decisión", date: formatDate(addDays(start, 21)), icon: "measurement", desc: "Cerrar evidencia para decidir licenciamiento y siguiente plan.", tasks: ["Encuesta de resultados", "Business case y recomendación de licenciamiento", "Sesión de cierre con sponsor", "Plan siguiente: Plan 0, 2 o 3", "Backlog priorizado para adopción o piloto Copilot"] }
       ];
     }
     function normalizeRoadmapItems(items, planKey = recommendedPlanKey()) {
@@ -8648,24 +8648,24 @@ ${clientUrlSection}`);
       const scoringImpacts = {
         m365Tools: [
           ["Office básico", "refuerza Productividad Digital porque todavía hay hábitos base de Microsoft 365 por instalar."],
-          ["Colaboración parcial", "mantiene peso en Plan 1 y puede sumar add-ons de Teams/SharePoint si hay dispersión."],
+          ["Colaboración parcial", "mantiene peso en Plan 0 y puede sumar add-ons de Teams/SharePoint si hay dispersión."],
           ["Teams + OneDrive + SharePoint instalados", "reduce la necesidad de ordenar base y permite orientar más la propuesta a casos de uso o Copilot."],
           ["Ecosistema avanzado", "favorece planes con IA aplicada porque la base operativa está más preparada."]
         ],
         informationLocation: [
-          ["Bajo orden", "suma señal fuerte a Plan 1 y a add-ons de orden documental/gobierno."],
+          ["Bajo orden", "suma señal fuerte a Plan 0 y a add-ons de orden documental/gobierno."],
           ["Orden medio/bajo", "suma señal moderada a Productividad Digital porque hay que ordenar prácticas antes de escalar IA."],
           ["Orden medio/alto", "reduce riesgo operativo y habilita avanzar con adopción aplicada o Copilot."],
           ["Orden alto", "mejora confianza y permite focalizar la propuesta en valor, no en ordenamiento."]
         ],
         teamsSharepointStructure: [
-          ["No existe o abandonada", "refuerza Plan 1 y add-on de arquitectura Teams + SharePoint."],
+          ["No existe o abandonada", "refuerza Plan 0 y add-on de arquitectura Teams + SharePoint."],
           ["Informal", "suma desorden operativo; si además hay acompañamiento o métricas de documentos, sugiere add-ons de gobierno."],
           ["Parcial", "mantiene necesidad de buenas prácticas, pero con menor peso que un escenario sin estructura."],
           ["Gobernada", "baja el peso de ordenamiento y favorece adopción avanzada."]
         ],
         taskManagement: [
-          ["Bajo/manual", "suma señal de desorden operativo y hace más probable Plan 1 o add-ons de trazabilidad."],
+          ["Bajo/manual", "suma señal de desorden operativo y hace más probable Plan 0 o add-ons de trazabilidad."],
           ["Medio/bajo", "suma señal moderada: hay herramientas, pero falta adopción consistente."],
           ["Sistema externo definido", "reduce necesidad de Planner/To Do, pero puede orientar ejemplos e integraciones."],
           ["Alto/formal", "aumenta confianza para planes de Copilot, medición y casos avanzados."]
