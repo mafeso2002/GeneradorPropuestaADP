@@ -22,7 +22,7 @@ jobs:
       - name: Prepare static app
         run: |
           mkdir -p swa-app
-          cp index.html README.md copilot-cowork-icon.webp swa-app/
+          cp index.html README.md TECHNICAL_OVERVIEW.md copilot-cowork-icon.webp swa-app/
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
