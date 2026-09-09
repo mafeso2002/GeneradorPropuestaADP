@@ -1488,13 +1488,7 @@
       box-shadow: 0 18px 42px rgba(37, 99, 235, .22);
     }
     .ai-maturity-step.active .ai-maturity-dot {
-      border-color: #2563eb;
-      background: #2563eb;
-      color: #ffffff;
-      width: 36px;
-      height: 36px;
-      top: -21px;
-      box-shadow: 0 12px 24px rgba(37, 99, 235, .26);
+      display: none;
     }
     .ai-maturity-dot::after {
       content: "";
@@ -1504,12 +1498,7 @@
       background: currentColor;
       opacity: .58;
     }
-    .ai-maturity-step.active .ai-maturity-dot::after {
-      width: 12px;
-      height: 12px;
-      background: #ffffff;
-      opacity: 1;
-    }
+    .ai-maturity-step.active .ai-maturity-dot::after { display: none; }
     .ai-maturity-step small {
       display: block;
       min-height: 14px;
@@ -3294,7 +3283,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.45 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.46 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -8421,8 +8410,8 @@ ${clientUrlSection}`);
           .ai-maturity-dot-pdf { position: absolute; left: 4mm; top: -5mm; z-index: 1; display: grid; place-items: center; width: 9mm; height: 9mm; border-radius: 99px; border: .7mm solid #dedede; background: #ffffff; color: #73757d; box-shadow: 0 1.5mm 4mm rgba(46,45,49,.08); }
           .ai-maturity-dot-pdf::after { content: ""; width: 2.6mm; height: 2.6mm; border-radius: 99px; background: currentColor; opacity: .58; }
           .ai-maturity-step-pdf.done .ai-maturity-dot-pdf { border-color: #00a351; background: #e8f8ef; color: #00a351; }
-          .ai-maturity-step-pdf.active .ai-maturity-dot-pdf { width: 11mm; height: 11mm; top: -6mm; border-color: #2563eb; background: #2563eb; color: #ffffff; box-shadow: 0 2mm 5mm rgba(37,99,235,.24); }
-          .ai-maturity-step-pdf.active .ai-maturity-dot-pdf::after { width: 3.5mm; height: 3.5mm; background: #ffffff; opacity: 1; }
+          .ai-maturity-step-pdf.active .ai-maturity-dot-pdf { display: none; }
+          .ai-maturity-step-pdf.active .ai-maturity-dot-pdf::after { display: none; }
           .ai-maturity-step-pdf span { display: block; min-height: 4mm; color: #2563eb; font-size: 7.5pt; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; }
           .ai-maturity-step-pdf strong { display: block; margin: 1.5mm 0; font-size: 11.5pt; line-height: 1.1; }
           .ai-maturity-step-pdf p { margin: 0; font-size: 8.8pt; line-height: 1.28; }
