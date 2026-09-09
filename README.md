@@ -8,7 +8,7 @@ Ver `TECHNICAL_OVERVIEW.md` para una descripción técnica del MVP: arquitectura
 
 ## Uso
 
-Abrir `index.html` en el navegador. El flujo guía la selección de contexto, alcance, readiness, dolores, add-ons y genera una propuesta exportable a PDF.
+Abrir `index.html` en el navegador. El flujo guía la selección de contexto, alcance, readiness, dolores, add-ons y genera una propuesta exportable a PDF. La propuesta incluye una lectura visual de **madurez actual en el camino hacia IA escalable** para mostrar dónde está parado el cliente y cuál es el siguiente salto lógico.
 
 ## Envío de propuesta con Power Automate
 

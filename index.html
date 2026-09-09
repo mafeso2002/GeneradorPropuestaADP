@@ -1353,6 +1353,126 @@
       color: #6d28d9;
     }
     .maturity-speech p { margin: 2px 0 0; }
+    .ai-maturity-panel {
+      margin-top: 18px;
+      background:
+        linear-gradient(90deg, #2563eb 0 7px, transparent 7px),
+        radial-gradient(circle at right top, rgba(37, 99, 235, .12), transparent 16rem),
+        var(--cp-surface);
+    }
+    .ai-maturity-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(220px, .5fr);
+      gap: 18px;
+      align-items: start;
+    }
+    .ai-maturity-head p { margin: 6px 0 0; color: var(--cp-text-muted); }
+    .ai-maturity-now {
+      border: 1px solid rgba(37, 99, 235, .22);
+      border-radius: 16px;
+      padding: 14px;
+      background: #eff6ff;
+    }
+    .ai-maturity-now span {
+      display: block;
+      color: #2563eb;
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .ai-maturity-now strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 18px;
+    }
+    .ai-maturity-track {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(118px, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+      overflow-x: auto;
+      padding: 12px 0 4px;
+    }
+    .ai-maturity-track::before {
+      content: "";
+      position: absolute;
+      left: 44px;
+      right: 44px;
+      top: 31px;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--cp-brand-yellow), #00a351, #2563eb);
+      opacity: .35;
+    }
+    .ai-maturity-step {
+      position: relative;
+      min-width: 118px;
+      border: 1px solid var(--cp-border);
+      border-radius: 16px;
+      padding: 10px;
+      background: rgba(255,255,255,.9);
+      box-shadow: 0 10px 24px rgba(46,45,49,.06);
+    }
+    .ai-maturity-dot {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      margin-bottom: 10px;
+      border-radius: 999px;
+      border: 2px solid var(--cp-border);
+      background: var(--cp-surface);
+      color: var(--cp-text-muted);
+      font-weight: 900;
+    }
+    .ai-maturity-step.done .ai-maturity-dot {
+      border-color: rgba(0, 163, 81, .45);
+      background: var(--cp-cowork-soft);
+      color: var(--cp-cowork);
+    }
+    .ai-maturity-step.active {
+      border-color: #2563eb;
+      background:
+        linear-gradient(180deg, #eff6ff, #ffffff);
+      box-shadow: 0 16px 36px rgba(37, 99, 235, .16);
+    }
+    .ai-maturity-step.active .ai-maturity-dot {
+      border-color: #2563eb;
+      background: #2563eb;
+      color: #ffffff;
+    }
+    .ai-maturity-step small {
+      display: block;
+      min-height: 14px;
+      color: #2563eb;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .ai-maturity-step strong {
+      display: block;
+      margin-top: 4px;
+      font-size: 14px;
+      line-height: 1.15;
+    }
+    .ai-maturity-step p {
+      margin: 6px 0 0;
+      color: var(--cp-text-muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+    .ai-maturity-note {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border: 1px solid rgba(252, 215, 2, .7);
+      border-radius: 14px;
+      background: #fffdf0;
+      color: var(--cp-text-muted);
+      font-size: 13px;
+    }
     .priority-matrix {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3044,7 +3164,8 @@
     .hidden { display: none !important; }
     @media (max-width: 860px) {
       .hero, .layout, .form-row, .review-grid, .roadmap, .links, .mode-grid, .direct-plan-grid { grid-template-columns: 1fr; }
-      .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-selection-panel, .plan-selection-card.current, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-includes-wide .execution-grid, .plan-metric-row, .wave-plan-grid, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .alternative-card, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option, .roadmap-edit-grid, .priority-matrix { grid-template-columns: 1fr; }
+      .proposal-grid, .proposal-commercial-grid, .proposal-addon-functional-grid, .plan-selection-panel, .plan-selection-card.current, .plan-option-grid, .method-grid, .value-strip, .timeline-body, .qualification-grid, .execution-grid, .plan-includes-wide .execution-grid, .plan-metric-row, .wave-plan-grid, .proposal-meta, .addons-grid, .cowork-points, .addon-option-grid, .alternative-grid, .alternative-card, .addon-plan-context, .plan-context-grid, .decision-help-grid, .addon-price-summary, .addon-option, .roadmap-edit-grid, .priority-matrix, .ai-maturity-head { grid-template-columns: 1fr; }
+      .ai-maturity-track { grid-template-columns: repeat(6, minmax(150px, 1fr)); }
       .proposal-price-panel { position: static; }
       .addon-pricing { border-left: 0; border-top: 1px solid var(--cp-border); padding-left: 0; padding-top: 10px; }
       .topbar, .top-actions { align-items: flex-start; flex-direction: column; }
@@ -3105,7 +3226,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.41 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.42 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -6729,6 +6850,96 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         </div>`).join("")}</div>
       </div>`;
     }
+    function aiMaturityJourneySteps() {
+      return [
+        {
+          id: "digital-base",
+          title: "Productividad digital base",
+          desc: "Ordenar colaboración, documentos, tareas, reuniones y hábitos Microsoft 365.",
+          planKeys: ["plan1"]
+        },
+        {
+          id: "ai-discovery",
+          title: "Exploración IA",
+          desc: "Identificar oportunidad, casos de uso, sponsor y business case antes de escalar.",
+          planKeys: ["plan0"]
+        },
+        {
+          id: "copilot-applied",
+          title: "Copilot aplicado",
+          desc: "Activar Microsoft 365 Copilot con casos por rol, prompts y medición de valor.",
+          planKeys: ["plan2"]
+        },
+        {
+          id: "governed-ai",
+          title: "IA gobernada",
+          desc: "Alinear datos, seguridad, ownership, criterios de aprobación y uso responsable.",
+          planKeys: ["plan3"]
+        },
+        {
+          id: "agents-processes",
+          title: "Agentes y procesos",
+          desc: "Priorizar PEATs, Copilot Studio, automatizaciones y soluciones con datos.",
+          planKeys: ["plan3"]
+        },
+        {
+          id: "scale",
+          title: "Escalamiento",
+          desc: "Replicar aprendizajes, ampliar áreas, medir impacto y evolucionar el modelo operativo.",
+          planKeys: ["plan3"]
+        }
+      ];
+    }
+    function currentAiMaturityIndex(planKey = selectedProposalPlanKey()) {
+      if (planKey === "plan1") return 0;
+      if (planKey === "plan0") return 1;
+      if (planKey === "plan2") return 2;
+      return 3;
+    }
+    function aiMaturitySummary(planKey = selectedProposalPlanKey()) {
+      const plan = planCatalog()[planKey];
+      const index = currentAiMaturityIndex(planKey);
+      const steps = aiMaturityJourneySteps();
+      const activeStep = steps[index];
+      const nextStep = steps[Math.min(index + 1, steps.length - 1)];
+      const current = `Hoy la organización se ubica en ${activeStep.title.toLowerCase()}: ${plan.maturityDesc}`;
+      if (planKey === "plan3") {
+        return `${current} Desde este punto puede avanzar hacia gobierno, PEATs, agentes, Foundry/Fabric y escalamiento por olas sin tratarlos como atajos aislados.`;
+      }
+      return `${current} El siguiente salto recomendado es ${nextStep.title.toLowerCase()}, cuando estén cubiertos los prerrequisitos comerciales, técnicos y de adopción.`;
+    }
+    function renderAiMaturityRoadmap(planKey = selectedProposalPlanKey()) {
+      const steps = aiMaturityJourneySteps();
+      const activeIndex = currentAiMaturityIndex(planKey);
+      const plans = planCatalog();
+      return `<div class="proposal-panel ai-maturity-panel">
+        <div class="ai-maturity-head">
+          <div>
+            <span class="ai-badge">Madurez estratégica</span>
+            <h3>Madurez actual en el camino hacia IA escalable</h3>
+            <p>Esta lectura muestra dónde está parada la organización y cuál es el próximo salto lógico para escalar IA con base, gobierno y adopción.</p>
+          </div>
+          <div class="ai-maturity-now">
+            <span>Hoy está acá</span>
+            <strong>${escapeHtml(planMaturityTitle(plans[planKey]))}</strong>
+            <p>${escapeHtml(plans[planKey].shortName || plans[planKey].name)}</p>
+          </div>
+        </div>
+        <div class="ai-maturity-track">
+          ${steps.map((step, index) => {
+            const stateClass = index < activeIndex ? "done" : index === activeIndex ? "active" : "future";
+            const planLabels = step.planKeys.map((key) => plans[key]?.commercialStage || "").filter(Boolean).join(" / ");
+            return `<div class="ai-maturity-step ${stateClass}">
+              <div class="ai-maturity-dot">${index + 1}</div>
+              <small>${escapeHtml(planLabels || "Evolución")}</small>
+              <strong>${escapeHtml(step.title)}</strong>
+              <p>${escapeHtml(step.desc)}</p>
+            </div>`;
+          }).join("")}
+        </div>
+        <div class="ai-maturity-note">${escapeHtml(aiMaturitySummary(planKey))}</div>
+      </div>`;
+    }
     function proposalRoadmap(planKey) {
       const start = roadmapStartDate();
       const inbox = find(inboxOptions(), state.inbox)[1];
@@ -7324,6 +7535,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
             ${renderAdoptionMethodPanel(recommendedKey)}
           </div>
         </details>
+        ${renderAiMaturityRoadmap(recommendedKey)}
         <details class="proposal-accordion">
           <summary><div class="stage-icon">${iconSvg("roadmap")}</div><div><h2>Hoja de ruta recomendada</h2><p>Etapas sugeridas para presentar y ejecutar la propuesta.</p></div></summary>
           <div class="proposal-accordion-body">
@@ -8128,6 +8340,18 @@ ${clientUrlSection}`);
           .priority-cell-pdf span { display: block; margin-bottom: 1.5mm; color: #73757d; font-size: 8.5pt; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; }
           .priority-cell-pdf strong { display: block; margin: 0 0 1.5mm; font-size: 13pt; }
           .priority-cell-pdf ul { margin: 0; padding-left: 4mm; color: #5f6168; font-size: 9.5pt; line-height: 1.35; }
+          .ai-maturity-track-pdf { position: relative; display: grid; grid-template-columns: repeat(6, 1fr); gap: 3mm; margin-top: 9mm; }
+          .ai-maturity-track-pdf::before { content: ""; position: absolute; left: 12mm; right: 12mm; top: 7mm; height: 1.2mm; border-radius: 99px; background: linear-gradient(90deg, #fcd702, #00a351, #2563eb); opacity: .38; }
+          .ai-maturity-step-pdf { position: relative; min-height: 47mm; border: 1px solid #dedede; border-radius: 4mm; padding: 4mm; background: #ffffff; }
+          .ai-maturity-step-pdf.done { border-color: #9fd9b8; background: #effbf4; }
+          .ai-maturity-step-pdf.active { border-color: #2563eb; background: #eff6ff; box-shadow: 0 3mm 10mm rgba(37,99,235,.14); }
+          .ai-maturity-dot-pdf { display: grid; place-items: center; width: 13mm; height: 13mm; margin-bottom: 4mm; border-radius: 99px; border: 1mm solid #dedede; background: #ffffff; color: #73757d; font-size: 12pt; font-weight: 900; }
+          .ai-maturity-step-pdf.done .ai-maturity-dot-pdf { border-color: #00a351; background: #e8f8ef; color: #00a351; }
+          .ai-maturity-step-pdf.active .ai-maturity-dot-pdf { border-color: #2563eb; background: #2563eb; color: #ffffff; }
+          .ai-maturity-step-pdf span { display: block; min-height: 4mm; color: #2563eb; font-size: 7.5pt; font-weight: 900; text-transform: uppercase; letter-spacing: .04em; }
+          .ai-maturity-step-pdf strong { display: block; margin: 1.5mm 0; font-size: 11.5pt; line-height: 1.1; }
+          .ai-maturity-step-pdf p { margin: 0; font-size: 8.8pt; line-height: 1.28; }
+          .ai-maturity-note-pdf { margin-top: 7mm; border: 1px solid #fcd702; border-radius: 4mm; padding: 4mm 5mm; background: #fffdf0; font-size: 12pt; color: #5f6168; }
           .wave-card { border-color: #fcd702; background: #fffdf0; }
           .wave-card .wave-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-top: 4mm; }
           .wave-card .wave-meta div { border: 1px solid #eadf9a; border-radius: 3mm; padding: 3mm; background: #ffffff; }
@@ -8288,6 +8512,25 @@ ${clientUrlSection}`);
           <p>Estos módulos están fuera del alcance base del plan. Sus importes ya están consolidados en el resumen económico.</p>
           <div class="grid-2">${addons.map(([title, desc]) => `<div class="card ${title.includes("Cowork") ? "cowork-pdf" : ""}"><strong>${title}</strong><p>${desc}</p></div>`).join("")}</div>${footer}
         </section>` : ""}
+        <section class="slide">
+          <p class="eyebrow">Madurez estratégica</p>
+          <h2>Madurez actual en el camino hacia IA escalable</h2>
+          <p>Esta lectura ubica a la organización en una progresión de madurez: primero base digital y adopción, luego IA aplicada, gobierno, agentes y escalamiento.</p>
+          <div class="ai-maturity-track-pdf">
+            ${aiMaturityJourneySteps().map((step, index) => {
+              const activeIndex = currentAiMaturityIndex(recommendedKey);
+              const stateClass = index < activeIndex ? "done" : index === activeIndex ? "active" : "future";
+              const planLabels = step.planKeys.map((key) => plans[key]?.commercialStage || "").filter(Boolean).join(" / ");
+              return `<div class="ai-maturity-step-pdf ${stateClass}">
+                <div class="ai-maturity-dot-pdf">${index + 1}</div>
+                <span>${escapeHtml(planLabels || "Evolución")}</span>
+                <strong>${escapeHtml(step.title)}</strong>
+                <p>${escapeHtml(step.desc)}</p>
+              </div>`;
+            }).join("")}
+          </div>
+          <div class="ai-maturity-note-pdf"><strong>Hoy está acá:</strong> ${escapeHtml(planMaturityTitle(plan))}. ${escapeHtml(aiMaturitySummary(recommendedKey))}</div>${footer}
+        </section>
         <section class="slide">
           <p class="eyebrow">Hoja de ruta propuesta${roadmapState.active ? ` · ${roadmapState.isAi ? "personalizada con IA" : "personalizada localmente"}` : ""}</p>
           <h2>Plan de trabajo sugerido para ${escapeHtml(plan.name)}</h2>
