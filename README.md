@@ -49,7 +49,7 @@ La UI muestra una escalera comercial de progresión con lenguaje de madurez, man
 
 | Lectura visible | Referencia comercial |
 | --- | --- |
-| Base digital | Productividad Digital (P1) |
+| Productividad Digital | Productividad Digital (P1) |
 | Exploración | Envisioning IA (P0) |
 | Adopción IA | IA aplicada al trabajo (P2) |
 | Gobierno y escala | Productividad Digital + Microsoft 365 Copilot (P3) |

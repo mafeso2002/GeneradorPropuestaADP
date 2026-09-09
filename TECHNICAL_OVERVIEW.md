@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.50**
+Versión documentada: **MVP 0.10.51**
 Última actualización funcional: **2026-09-09**
 Aplicación publicada: <https://ambitious-bay-044b6a010.3.azurestaticapps.net/>
 
@@ -92,7 +92,7 @@ Planes disponibles por escalera de progresión comercial:
 
 | Lectura visible | Nombre visible | Referencia comercial vigente | Enfoque |
 | --- | --- | --- | --- |
-| Base digital | Productividad Digital | Productividad Digital (P1) | Programa de adopción Microsoft 365: diagnóstico, comunicación, formación aplicada, acompañamiento y medición |
+| Productividad Digital | Productividad Digital | Productividad Digital (P1) | Programa de adopción Microsoft 365: diagnóstico, comunicación, formación aplicada, acompañamiento y medición |
 | Exploración | Envisioning IA | Envisioning IA (P0) | Exploración, business case y primeros casos de IA sin Microsoft 365 Copilot completo |
 | Adopción IA | IA aplicada al trabajo | IA aplicada al trabajo (P2) | Activar uso y ROI de Microsoft 365 Copilot |
 | Gobierno y escala | Productividad Digital + IA | Productividad Digital + Microsoft 365 Copilot (P3) | Programa integral con cambio, adopción, gobierno e IA |

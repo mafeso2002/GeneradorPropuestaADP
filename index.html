@@ -3283,7 +3283,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.50 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.51 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -5979,7 +5979,7 @@
           name: "Plan 1 · Productividad Digital",
           shortName: "Productividad Digital (P1)",
           commercialStage: "Etapa 0",
-          journeyStageName: "Base digital",
+          journeyStageName: "Productividad Digital",
           commercialStageName: "Productividad Digital",
           maturityOrder: 1,
           maturityLevel: "Nivel 1",
@@ -6526,7 +6526,7 @@
         items.push({
           level: "Atajo a revisar",
           title: "La base Microsoft 365 todavía no parece consolidada",
-          desc: "Antes de avanzar solo con IA, conviene considerar Base digital · Productividad Digital o incluir una primera ola de hábitos Microsoft 365.",
+          desc: "Antes de avanzar solo con IA, conviene considerar Productividad Digital o incluir una primera ola de hábitos Microsoft 365.",
           action: "Validar si el cliente ya adoptó Outlook, Teams, OneDrive, SharePoint y seguimiento de tareas."
         });
       }
@@ -6915,7 +6915,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       return [
         {
           id: "digital-base",
-          label: "Base digital",
+          label: "Productividad Digital",
           title: "Productividad digital base",
           desc: "Ordenar colaboración, documentos, tareas, reuniones y hábitos Microsoft 365.",
           planKeys: ["plan1"]
@@ -8739,16 +8739,16 @@ ${clientUrlSection}`);
       $("decisionHelpContent").innerHTML = `
         <section class="decision-help-section">
           <h4>1. Planes disponibles</h4>
-          <p>La app muestra una escalera de progresión para orientar la conversación. Las claves técnicas internas no cambian, pero la UI ordena comercialmente desde Base digital hasta Gobierno y escala.</p>
+          <p>La app muestra una escalera de progresión para orientar la conversación. Las claves técnicas internas no cambian, pero la UI ordena comercialmente desde Productividad Digital hasta Gobierno y escala.</p>
           <div class="decision-help-grid">${planCards}</div>
         </section>
         <section class="decision-help-section">
           <h4>2. Árbol de decisión simplificado</h4>
           <p>El scoring suma señales. Si varias señales apuntan al mismo plan, la confianza sube; si se mezclan caminos, aparecen alternativas.</p>
           <ol class="decision-flow">
-            <li><b>1</b><div><strong>Objetivo principal</strong><span>Productividad M365 empuja Base digital; explorar IA empuja Exploración; ROI de Copilot empuja Adopción IA; estrategia, COE o escalamiento empuja Gobierno y escala.</span></div></li>
-            <li><b>2</b><div><strong>Licenciamiento y uso real</strong><span>Sin M365 Copilot se prioriza Base digital o Exploración. Con licencias y bajo uso semanal, se prioriza Adopción IA. Con uso alto, escala, agentes o COE, puede subir a Gobierno y escala.</span></div></li>
-            <li><b>3</b><div><strong>Madurez Microsoft 365</strong><span>Madurez baja/media, información dispersa o Teams/SharePoint desordenado refuerzan Base digital y add-ons de orden digital.</span></div></li>
+            <li><b>1</b><div><strong>Objetivo principal</strong><span>Productividad M365 empuja Productividad Digital; explorar IA empuja Exploración; ROI de Copilot empuja Adopción IA; estrategia, COE o escalamiento empuja Gobierno y escala.</span></div></li>
+            <li><b>2</b><div><strong>Licenciamiento y uso real</strong><span>Sin M365 Copilot se prioriza Productividad Digital o Exploración. Con licencias y bajo uso semanal, se prioriza Adopción IA. Con uso alto, escala, agentes o COE, puede subir a Gobierno y escala.</span></div></li>
+            <li><b>3</b><div><strong>Madurez Microsoft 365</strong><span>Madurez baja/media, información dispersa o Teams/SharePoint desordenado refuerzan Productividad Digital y add-ons de orden digital.</span></div></li>
             <li><b>4</b><div><strong>Casos de uso, agentes y gobierno</strong><span>Casos concretos, agentes activos, gobierno de IA, seguridad, datos o COE suman peso a Plan 3 o a add-ons específicos.</span></div></li>
             <li><b>5</b><div><strong>Escala y cambio</strong><span>Más usuarios, varias áreas, sponsor, despliegue escalado o gestión del cambio integral aumentan la necesidad de programa completo.</span></div></li>
           </ol>
