@@ -3283,7 +3283,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.51 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.52 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -6056,7 +6056,10 @@
       };
     }
     function planMaturityTitle(plan) {
-      return plan.journeyStageName || plan.commercialStageName || plan.maturityName || plan.name;
+      const journeyName = plan.journeyStageName || plan.commercialStage || plan.maturityLevel;
+      const planName = plan.commercialStageName || plan.maturityName;
+      if (!journeyName || !planName || normalizeText(journeyName) === normalizeText(planName)) return planName || journeyName || plan.name;
+      return `${journeyName} · ${planName}`;
     }
     function planReferenceLabel(plan) {
       return `Referencia comercial: ${plan.shortName || plan.name}`;
