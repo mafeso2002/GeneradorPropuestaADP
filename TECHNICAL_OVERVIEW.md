@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.48**
+Versión documentada: **MVP 0.10.49**
 Última actualización funcional: **2026-09-09**
 Aplicación publicada: <https://ambitious-bay-044b6a010.3.azurestaticapps.net/>
 
@@ -90,14 +90,14 @@ La recomendación del plan se calcula en `planDecision()` con un scoring pondera
 
 Planes disponibles por escalera de progresión comercial:
 
-| Etapa comercial | Nombre visible | Referencia comercial vigente | Enfoque |
+| Lectura visible | Nombre visible | Referencia comercial vigente | Enfoque |
 | --- | --- | --- | --- |
-| Etapa 0 | Productividad Digital | Productividad Digital (P1) | Programa de adopción Microsoft 365: diagnóstico, comunicación, formación aplicada, acompañamiento y medición |
-| Etapa 1 | Envisioning IA | Envisioning IA (P0) | Exploración, business case y primeros casos de IA sin Microsoft 365 Copilot completo |
-| Etapa 2 | IA aplicada al trabajo | IA aplicada al trabajo (P2) | Activar uso y ROI de Microsoft 365 Copilot |
-| Etapa 3 | Productividad Digital + IA | Productividad Digital + Microsoft 365 Copilot (P3) | Programa integral con cambio, adopción, gobierno e IA |
+| Base digital | Productividad Digital | Productividad Digital (P1) | Programa de adopción Microsoft 365: diagnóstico, comunicación, formación aplicada, acompañamiento y medición |
+| Exploración | Envisioning IA | Envisioning IA (P0) | Exploración, business case y primeros casos de IA sin Microsoft 365 Copilot completo |
+| Adopción IA | IA aplicada al trabajo | IA aplicada al trabajo (P2) | Activar uso y ROI de Microsoft 365 Copilot |
+| Gobierno y escala | Productividad Digital + IA | Productividad Digital + Microsoft 365 Copilot (P3) | Programa integral con cambio, adopción, gobierno e IA |
 
-La lógica interna conserva las claves `plan0`, `plan1`, `plan2`, `plan3` para no romper referencias técnicas ni la presentación comercial existente. La UI muestra primero la etapa comercial y debajo la referencia vigente.
+La lógica interna conserva las claves `plan0`, `plan1`, `plan2`, `plan3` y el orden de scoring por etapas para no romper referencias técnicas. La UI muestra primero la lectura de madurez y debajo la referencia comercial vigente.
 
 P1 se trata como iniciativa de adopción, no como training aislado. El catálogo, la propuesta final, el PDF, el roadmap y las instrucciones de IA deben presentarlo por pilares: diagnóstico de madurez, comunicación y convocatoria, formación aplicada al trabajo real, acompañamiento/refuerzos y medición ejecutiva por ola.
 

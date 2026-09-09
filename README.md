@@ -45,14 +45,14 @@ Productividad Digital (P1) se posiciona como **programa de adopción Microsoft 3
 
 El inicio del flujo permite cargar un **referente del cliente** opcional (por ejemplo, `Sergio · Operaciones`) y una **ubicación del cliente** opcional. La ubicación parte de `Argentina` por defecto y puede afinarse con provincia/localidad (`San Rafael, Mendoza, Argentina`) para acotar la búsqueda pública usada por la IA.
 
-La UI muestra una escalera comercial de progresión, manteniendo las claves técnicas internas existentes:
+La UI muestra una escalera comercial de progresión con lenguaje de madurez, manteniendo las claves técnicas internas existentes:
 
-| Etapa | Referencia comercial |
+| Lectura visible | Referencia comercial |
 | --- | --- |
-| Etapa 0 | Productividad Digital (P1) |
-| Etapa 1 | Envisioning IA (P0) |
-| Etapa 2 | IA aplicada al trabajo (P2) |
-| Etapa 3 | Productividad Digital + Microsoft 365 Copilot (P3) |
+| Base digital | Productividad Digital (P1) |
+| Exploración | Envisioning IA (P0) |
+| Adopción IA | IA aplicada al trabajo (P2) |
+| Gobierno y escala | Productividad Digital + Microsoft 365 Copilot (P3) |
 
 La propuesta incluye guardrails cuando el cliente intenta saltar escalones, por ejemplo pedir Cowork/agentes sin adopción Copilot o pedir Copilot con baja madurez Microsoft 365. La app no bloquea la oportunidad, pero muestra el prerrequisito y el siguiente paso recomendado.
 
