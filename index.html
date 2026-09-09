@@ -3105,7 +3105,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.40 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.41 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -4384,6 +4384,10 @@
         { id: "leaders", title: "Casos para líderes", category: "IA aplicada", desc: "Escenarios de Copilot para dirección, seguimiento, decisiones y reporting.", icon: "leadership", price: "USD 750 + IVA", requirement: "Disponible para todos" },
         { id: "copilot-excel", title: "Copilot en Excel y análisis de datos", category: "IA aplicada", desc: "Escenarios de análisis con Copilot sobre datos corporativos.", icon: "measurement", price: "USD 1.200 + IVA", requiresCopilot: true },
         { id: "copilot-studio", title: "Agentes a medida con Copilot Studio", category: "IA aplicada", desc: "Diseño de agentes y automatizaciones avanzadas sobre procesos específicos.", icon: "automation", price: "USD 5.500 + IVA", requiresCopilot: true },
+        { id: "peat-discovery", title: "PEAT Discovery", category: "IA avanzada y PEATs", desc: "Evaluación técnica y funcional de un caso complejo: datos, seguridad, arquitectura, herramienta adecuada, esfuerzo y viabilidad de PoC.", icon: "diagnostic", price: "USD 2.500 + IVA", requirement: "Recomendado para P2/P3 cuando hay casos de IA complejos" },
+        { id: "peat-build", title: "PEAT Build", category: "IA avanzada y PEATs", desc: "Equipo multidisciplinario para prototipar o desarrollar casos priorizados junto al equipo interno, con validación de usuarios y documentación.", icon: "automation", price: "USD 8.500 + IVA", requirement: "Requiere caso priorizado y sponsor; alcance a validar" },
+        { id: "ai-governance", title: "Gobierno de IA y agentes", category: "IA avanzada y PEATs", desc: "Roles, criterios de aprobación, ownership, ciclo de vida, inventario, seguridad y uso responsable para agentes y soluciones de IA.", icon: "shield", price: "USD 3.500 + IVA", requirement: "Recomendado para escalamiento de IA, agentes o COE" },
+        { id: "foundry-fabric-readiness", title: "Foundry / Fabric / Data Readiness", category: "IA avanzada y PEATs", desc: "Evaluación de datos, arquitectura, RAG, Microsoft Fabric, Azure AI Foundry e integraciones para soluciones de IA más a medida.", icon: "spark", price: "USD 4.500 + IVA", requirement: "Para casos que exceden Copilot/Copilot Studio estándar" },
         { id: "copilot-intro-webinar", title: "Webinar introductorio: Copilot en 30 minutos", category: "Activación y cambio", desc: "Entrada comercial liviana y masiva para sensibilizar sobre Copilot: ejemplos generales, moderación y Q&A. No requiere licencias Microsoft 365 Copilot.", icon: "communication", price: "USD 600 + IVA", requirement: "Disponible para todos; ideal para exploración inicial" },
         { id: "webinar", title: "Webinar / kickoff ejecutivo", category: "Activación y cambio", desc: "Evento de lanzamiento, alineación o cierre ejecutivo para un programa de adopción ya definido.", icon: "communication", price: "USD 600 + IVA", requirement: "Disponible para todos" },
         { id: "webinar-agents", title: "Webinar especializado: agentes", category: "Webinars especializados", desc: "Sesión puntual para explicar qué son los agentes, cuándo aplican y cómo evaluar oportunidades reales sin convertirlo en un programa completo.", icon: "automation", price: "USD 750 + IVA", requirement: "Disponible para exploración o profundización temática" },
@@ -4439,7 +4443,7 @@
       }
       if (planKey === "plan3") {
         selectableAddonCatalog()
-          .filter((addon) => !["cowork", "copilot-studio"].includes(addon.id))
+          .filter((addon) => !["cowork", "copilot-studio", "peat-discovery", "peat-build", "ai-governance", "foundry-fabric-readiness"].includes(addon.id))
           .forEach((addon) => included.add(addon.id));
       }
       return included;
@@ -4447,8 +4451,8 @@
     function allowedAddonIdsForPlan(planKey = selectedProposalPlanKey()) {
       if (planKey === "plan0") return new Set(["leaders", "readiness", "copilot-intro-webinar"]);
       if (planKey === "plan1") return new Set(["readiness", "excel-intermediate", "excel-advanced", "tool-module"]);
-      if (planKey === "plan2") return new Set(["cowork", "agents-cowork", "copilot-studio", "webinar-agents", "webinar-sharepoint-agents", "webinar-notebooks"]);
-      if (planKey === "plan3") return new Set(["cowork", "copilot-studio"]);
+      if (planKey === "plan2") return new Set(["cowork", "agents-cowork", "copilot-studio", "webinar-agents", "webinar-sharepoint-agents", "webinar-notebooks", "peat-discovery", "peat-build", "ai-governance", "foundry-fabric-readiness"]);
+      if (planKey === "plan3") return new Set(["cowork", "copilot-studio", "peat-discovery", "peat-build", "ai-governance", "foundry-fabric-readiness"]);
       return null;
     }
     function isAddonAllowedForPlan(addon, planKey = selectedProposalPlanKey()) {
@@ -4465,7 +4469,11 @@
         addIfExtra("webinar-agents");
         addIfExtra("agents-cowork");
         addIfExtra("copilot-studio");
+        addIfExtra("peat-discovery");
       }
+      if (state.agentNeed === "active" || state.primaryObjective === "agent-automation" || (planKey === "plan3" && state.concreteUseCases === "many")) addIfExtra("peat-build");
+      if (state.primaryObjective === "ia-strategy" || state.primaryObjective === "integral-transformation" || state.iaGovernanceNeed === "coe" || state.iaGovernanceNeed === "corporate") addIfExtra("foundry-fabric-readiness");
+      if (state.iaGovernanceNeed === "governance" || state.iaGovernanceNeed === "coe" || state.iaGovernanceNeed === "corporate" || state.governance === "low") addIfExtra("ai-governance");
       if ((state.agentNeed === "explore" || state.agentNeed === "active" || state.primaryObjective === "agent-automation") && (state.teamsSharepointStructure === "partial" || state.teamsSharepointStructure === "governed" || state.informationLocation === "structured")) addIfExtra("webinar-sharepoint-agents");
       if (state.primaryObjective === "explore-ai" || state.concreteUseCases === "some" || state.concreteUseCases === "many") addIfExtra("webinar-notebooks");
       const excelNeed = ["data-analysis", "sales-analysis", "student-analysis", "operations-analysis"].includes(state.create) || state.successMetric === "task-traceability";
@@ -4510,9 +4518,13 @@
           "webinar-agents": 40,
           "webinar-sharepoint-agents": 45,
           "webinar-notebooks": 50,
-          cowork: 60,
+          "peat-discovery": 55,
+          "ai-governance": 58,
+          "foundry-fabric-readiness": 62,
+          cowork: 65,
           "agents-cowork": 70,
-          "copilot-studio": 80
+          "copilot-studio": 80,
+          "peat-build": 90
         };
       return priorities[addon.id] || 100;
     }
@@ -4645,8 +4657,8 @@
       if (!isAddonAllowedForPlan(addon, planKey)) {
         if (planKey === "plan0") return "P0 se mantiene acotado. Si necesitás este módulo, conviene cambiar a P1, P2 o P3.";
         if (planKey === "plan1") return "P1 ya cubre adopción base. Si necesitás este módulo, conviene ampliar alcance o cambiar a P2/P3.";
-        if (planKey === "plan2") return "P2 ya incluye activación Copilot, casos por rol, prompts y medición. Si necesitás este módulo, conviene revisar P1/P3 o tratarlo fuera del alcance.";
-        if (planKey === "plan3") return "P3 es el programa integral. Este módulo ya queda contemplado en el alcance base o no se cotiza por separado.";
+        if (planKey === "plan2") return "P2 ya incluye activación Copilot, casos por rol, prompts y medición. Los módulos fuera de alcance requieren revisar P3 o un add-on avanzado.";
+        if (planKey === "plan3") return "P3 contempla el programa integral base. Este módulo queda incluido, no aplica o requiere cotización avanzada aparte.";
         return "No disponible para este plan.";
       }
       if (addon.id === "cowork") return coworkEligibility(planKey).reason;
@@ -4715,14 +4727,14 @@
       }
       if (planKey === "plan2") {
         return `<div class="addon-adjustment-notice">
-          <strong>P2 solo suma profundizaciones Copilot</strong>
-          IA aplicada al trabajo ya incluye casos por rol, Prompt Library, Copilot en Excel y medición. Solo se pueden sumar Cowork, Agents & Cowork, Copilot Studio o webinars especializados de agentes, agentes en SharePoint y notebooks/funcionalidades Copilot.
+          <strong>P2 suma profundizaciones Copilot e IA avanzada</strong>
+          IA aplicada al trabajo ya incluye casos por rol, Prompt Library, Copilot en Excel y medición de adopción/valor. Se pueden sumar Cowork, agentes, PEATs, gobierno de IA, Foundry/Fabric readiness o webinars especializados cuando el caso lo justifica.
         </div>`;
       }
       if (planKey === "plan3") {
         return `<div class="addon-adjustment-notice">
           <strong>P3 ya incluye el programa integral</strong>
-          Productividad Digital + IA contempla adopción Microsoft 365, Copilot, casos por rol, prompts, medición, comunicación, champions, cambio y webinars. Los módulos marcados como incluidos forman parte del recorrido integral (incluye la activación de Microsoft 365 Copilot), aunque el cliente todavía no tenga licencias hoy. Solo se pueden cotizar aparte Cowork y Agentes a medida con Copilot Studio.
+          Productividad Digital + IA contempla adopción Microsoft 365, Copilot, casos por rol, prompts, medición de valor, comunicación, champions, cambio y webinars. Los módulos avanzados como Cowork, PEATs, gobierno de IA, agentes a medida y Foundry/Fabric readiness se cotizan aparte según alcance.
         </div>`;
       }
       if (planKey !== "plan0") return "";
@@ -5706,7 +5718,7 @@
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          version: "MVP 0.10.40",
+          version: "MVP 0.10.41",
           createdAt: publishedAt,
           state: snapshot
         })
@@ -5829,10 +5841,10 @@
           customerCase: "Ya tiene licencias de Microsoft 365 Copilot.",
           aiLevel: "Microsoft 365 Copilot",
           aiLevelDetail: "con licencia",
-          desc: "Acelera el uso efectivo de Microsoft 365 Copilot con datos corporativos, casos por rol, prompts y medición.",
-          bestFor: "Cuando el cliente ya tiene licencias o trial de Copilot, Microsoft 365 está consolidado y busca demostrar ROI rápido.",
-          execution: ["Preparación técnica y funcional", "Casos por rol con datos corporativos", "Copilot en Word, Excel, Outlook y Teams", "Medición con Copilot Dashboard"],
-          deliverables: ["Casos de uso por rol", "Biblioteca de prompts", "Encuesta de resultados", "Plan de escalado", "Recomendación de conversión o expansión de licencias"]
+          desc: "Acelera el uso efectivo de Microsoft 365 Copilot con datos corporativos, casos por rol, prompts y medición de adopción, valor e impacto.",
+          bestFor: "Cuando el cliente ya tiene licencias o trial de Copilot, Microsoft 365 está consolidado y busca demostrar ROI rápido con medición incluida.",
+          execution: ["Preparación técnica y funcional", "Casos por rol con datos corporativos", "Copilot en Word, Excel, Outlook y Teams", "Medición de uso, adopción, valor percibido y oportunidades de ROI"],
+          deliverables: ["Casos de uso por rol", "Biblioteca de prompts", "Encuesta de resultados", "Reporte de adopción y valor", "Plan de escalado", "Recomendación de conversión o expansión de licencias"]
         },
         plan3: {
           name: "Plan 3 · Productividad Digital + Microsoft 365 Copilot",
@@ -5854,10 +5866,10 @@
           customerCase: "Quiere herramientas Microsoft 365 y Copilot en un mismo recorrido.",
           aiLevel: "M365 + Microsoft 365 Copilot",
           aiLevelDetail: "con licencia",
-          desc: "Integra adopción de Microsoft 365 y Microsoft 365 Copilot en un único programa con gestión del cambio y medición.",
-          bestFor: "Cuando el cliente necesita transformación integral, varias áreas, escala organizacional, agentes como add-on y acompañamiento sostenido.",
-          execution: ["2 olas de 3 meses", "Hasta 20 grupos de 15 personas", "Recorrido Microsoft 365 + recorrido Copilot", "Agentes/Copilot Studio como add-on o piloto avanzado", "Champions, webinars, comunicación y medición"],
-          deliverables: ["Diagnóstico inicial", "Formación integral Microsoft 365", "Formación integral Copilot", "Mapa de agentes y automatizaciones", "Reportes de avance por ola", "Plan de mejora continua"]
+          desc: "Integra adopción de Microsoft 365 y Microsoft 365 Copilot en un único programa con gestión del cambio, gobierno, medición de valor y roadmap de escalamiento.",
+          bestFor: "Cuando el cliente necesita transformación integral, varias áreas, escala organizacional, gobierno, agentes como add-on y acompañamiento sostenido.",
+          execution: ["2 olas de 3 meses", "Hasta 20 grupos de 15 personas", "Recorrido Microsoft 365 + recorrido Copilot", "Medición de adopción, valor e impacto por ola", "Agentes/PEATs/Foundry-Fabric como add-ons o pilotos avanzados", "Champions, webinars, comunicación y gobierno"],
+          deliverables: ["Diagnóstico inicial", "Formación integral Microsoft 365", "Formación integral Copilot", "Mapa de agentes, datos y automatizaciones", "Reportes de avance, adopción y valor por ola", "Plan de mejora continua"]
         }
       };
     }
@@ -7584,7 +7596,7 @@ ${clientUrlSection}`);
             "## Lectura comercial",
             "Madurez, dolores principales, confianza del algoritmo y oportunidad detectada.",
             "## Recomendacion Possumus",
-            "Plan recomendado, por que aplica, alternativas si la confianza es media/baja y como se relaciona con la realidad del cliente. Respetar progressionGuidance: si hay atajos o prerrequisitos, explicarlos como secuencia comercial sin invalidar la oportunidad. Para P0/Envisioning IA, mantener add-ons acotados a Casos para lideres, Readiness tecnico y Webinar introductorio Copilot en 30 minutos; si el cliente necesita mas, sugerir cambio de plan. Para P1/Productividad Digital, no presentarlo como capacitacion puntual: describirlo como programa de adopcion con diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion. En P1 solo permitir como add-ons Readiness tecnico, Excel intermedio, Excel avanzado y Modulo a medida de herramienta puntual; si hace falta mas, sugerir ampliar alcance o cambiar a P2/P3. En P2/IA aplicada al trabajo, solo permitir add-ons de profundizacion Copilot: Cowork, Agents & Cowork, Copilot Studio y webinars especializados de agentes, agentes en SharePoint o notebooks/funcionalidades Copilot. En P3/Productividad Digital + IA, presentar el plan como programa integral con casi todo incluido; solo Cowork y Agentes a medida con Copilot Studio se cotizan aparte. Si aparece Cowork, tratarlo como add-on con prerrequisito de Microsoft 365 Copilot activo/trial y 3 a 5 sesiones; si aparecen webinars especializados, presentarlos como consumo puntual por tecnologia, no como programa de adopcion.",
+            "Plan recomendado, por que aplica, alternativas si la confianza es media/baja y como se relaciona con la realidad del cliente. Respetar progressionGuidance: si hay atajos o prerrequisitos, explicarlos como secuencia comercial sin invalidar la oportunidad. Para P0/Envisioning IA, mantener add-ons acotados a Casos para lideres, Readiness tecnico y Webinar introductorio Copilot en 30 minutos; si el cliente necesita mas, sugerir cambio de plan. Para P1/Productividad Digital, no presentarlo como capacitacion puntual: describirlo como programa de adopcion con diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion. En P1 solo permitir como add-ons Readiness tecnico, Excel intermedio, Excel avanzado y Modulo a medida de herramienta puntual; si hace falta mas, sugerir ampliar alcance o cambiar a P2/P3. En P2/IA aplicada al trabajo, la medicion de adopcion/valor/ROI ya esta incluida; los add-ons posibles son profundizaciones Copilot, Cowork, Agents & Cowork, Copilot Studio, PEAT Discovery/Build, Gobierno de IA y agentes, Foundry/Fabric/Data Readiness o webinars especializados. En P3/Productividad Digital + IA, presentar el plan como programa integral con medicion de valor incluida; Cowork, PEATs, gobierno avanzado de IA, agentes a medida y Foundry/Fabric readiness se cotizan aparte segun alcance. Si aparece Cowork, tratarlo como add-on con prerrequisito de Microsoft 365 Copilot activo/trial y 3 a 5 sesiones; si aparecen webinars especializados, presentarlos como consumo puntual por tecnologia, no como programa de adopcion.",
             ...(state.includeBudgetEstimate !== false ? [
               "## Estimacion asistida de presupuesto",
               "Importe recomendado, modalidad comercial sugerida, supuestos y alertas. Si la confianza es baja, no cerrar presupuesto y pedir validacion con preventa/adopcion."

@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.40**
+Versión documentada: **MVP 0.10.41**
 Última actualización funcional: **2026-09-08**
 Aplicación publicada: <https://proud-stone-0a0431210.3.azurestaticapps.net/>
 
@@ -104,9 +104,9 @@ P0 / Envisioning IA queda deliberadamente acotado para preservar su función exp
 
 P1 / Productividad Digital también usa add-ons acotados para no duplicar lo que ya cubre el programa base. Solo quedan seleccionables **Readiness técnico**, **Excel intermedio**, **Excel avanzado** y **Módulo a medida de herramienta puntual**. El resto queda no disponible por alcance o como señal para ampliar el programa/cambiar a P2 o P3.
 
-P2 / IA aplicada al trabajo permite solo add-ons de profundización Copilot: **Cowork y Copilot**, **Agents & Cowork**, **Agentes a medida con Copilot Studio**, **Webinar especializado: agentes**, **Webinar especializado: agentes en SharePoint** y **Webinar especializado: notebooks y funcionalidades Copilot**. Casos por rol, Prompt Library, Copilot en Excel y Dashboard se consideran incluidos en el plan base.
+P2 / IA aplicada al trabajo permite add-ons de profundización Copilot e IA avanzada: **Cowork y Copilot**, **Agents & Cowork**, **Agentes a medida con Copilot Studio**, **PEAT Discovery**, **PEAT Build**, **Gobierno de IA y agentes**, **Foundry / Fabric / Data Readiness** y webinars especializados. Casos por rol, Prompt Library, Copilot en Excel, Dashboard y medición de adopción/valor se consideran incluidos en el plan base.
 
-P3 / Productividad Digital + IA se modela como programa integral. Todo el catálogo de add-ons queda incluido o absorbido por el alcance base salvo **Cowork y Copilot** y **Agentes a medida con Copilot Studio**, que son los únicos módulos seleccionables/cotizables aparte.
+P3 / Productividad Digital + IA se modela como programa integral. El recorrido base absorbe adopción Microsoft 365, Copilot, casos por rol, prompts, comunicación, champions, cambio, webinars y medición de valor; quedan seleccionables/cotizables aparte **Cowork y Copilot**, **Agentes a medida con Copilot Studio** y los módulos de **IA avanzada y PEATs** cuando hay discovery, prototipado/desarrollo o arquitectura a medida.
 
 La modalidad **virtual** no genera cargo adicional. Si el comercial selecciona **presencial** o **mixta**, `deliveryChargeItem()` suma automáticamente un cargo operativo de modalidad usando los IDs del catálogo `delivery-onsite` o `delivery-hybrid`. Estos ítems viven en la misma fuente de precios de add-ons para poder administrarlos desde Dataverse, pero no se muestran como módulos funcionales seleccionables.
 
@@ -175,6 +175,10 @@ Cowork tiene una regla especial: no se ofrece suelto ni reemplaza el plan base. 
 
 También existe la categoría **Webinars especializados** para consumos puntuales por tecnología: agentes, agentes en SharePoint, notebooks y funcionalidades específicas de Copilot. Estos webinars no reemplazan un plan de adopción; ayudan a profundizar un tema cuando el cliente pide mayor detalle sin iniciar un programa completo.
 
+Se incorporó la categoría **IA avanzada y PEATs** para separar adopción de construcción/prototipado de soluciones de IA. Incluye `peat-discovery`, `peat-build`, `ai-governance` y `foundry-fabric-readiness`. Estos módulos aplican principalmente sobre P2/P3 y se cotizan aparte según alcance; no reemplazan los planes base ni convierten a P1 en un proyecto de desarrollo.
+
+La **medición de adopción, valor e impacto/ROI** no se vende como add-on independiente en esta versión: queda incluida en P2 y P3 como parte del plan base avanzado.
+
 En escenarios de Productividad Digital o baja madurez Microsoft 365, los add-ons se priorizan para mostrar primero ordenamiento y adopción base: Arquitectura Teams + SharePoint, Orden documental y trazabilidad, Office Hours, Readiness y Champions. Los webinars quedan disponibles, pero no desplazan los módulos core de adopción.
 
 Los precios pueden venir de Dataverse mediante Power Automate o usar fallback local. El modelo comercial usa **precio único**: cada plan, add-on o adicional tiene un `precio_texto` visible y un `precio_usd` numérico para sumar el total.
@@ -200,6 +204,15 @@ IDs especiales para cargos automáticos de modalidad:
 | --- | --- |
 | `delivery-onsite` | Se suma cuando la modalidad elegida es presencial |
 | `delivery-hybrid` | Se suma cuando la modalidad elegida es mixta |
+
+IDs de add-ons avanzados:
+
+| ID | Uso |
+| --- | --- |
+| `peat-discovery` | Evaluación técnica/funcional de 1 caso complejo para definir datos, arquitectura, seguridad, esfuerzo y viabilidad de PoC |
+| `peat-build` | Prototipado/desarrollo de casos priorizados con equipo multidisciplinario y validación de usuarios |
+| `ai-governance` | Gobierno de IA y agentes: roles, aprobación, ownership, ciclo de vida, seguridad e inventario |
+| `foundry-fabric-readiness` | Evaluación de datos, Microsoft Fabric, Azure AI Foundry, RAG e integraciones para IA a medida |
 
 Tabla Dataverse esperada:
 

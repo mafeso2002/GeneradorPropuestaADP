@@ -60,9 +60,11 @@ En **P0 / Envisioning IA** los add-ons quedan intencionalmente acotados para no 
 
 En **P1 / Productividad Digital** los add-ons también quedan simplificados: solo **Readiness técnico**, **Excel intermedio**, **Excel avanzado** y **Módulo a medida de herramienta puntual**. El resto se considera incluido en el programa base, innecesario para este nivel, o señal de que conviene ampliar alcance/cambiar a P2 o P3.
 
-En **P2 / IA aplicada al trabajo** los add-ons se limitan a profundizaciones de Copilot: **Cowork y Copilot**, **Agents & Cowork**, **Agentes a medida con Copilot Studio**, **Webinar especializado: agentes**, **Webinar especializado: agentes en SharePoint** y **Webinar especializado: notebooks y funcionalidades Copilot**. Casos por rol, Prompt Library, Copilot en Excel y Dashboard ya quedan incluidos en el plan base.
+En **P2 / IA aplicada al trabajo** los add-ons se limitan a profundizaciones de Copilot o IA avanzada: **Cowork y Copilot**, **Agents & Cowork**, **Agentes a medida con Copilot Studio**, **PEAT Discovery**, **PEAT Build**, **Gobierno de IA y agentes**, **Foundry / Fabric / Data Readiness** y webinars especializados. Casos por rol, Prompt Library, Copilot en Excel y Dashboard ya quedan incluidos en el plan base.
 
-En **P3 / Productividad Digital + IA** el programa se considera integral. Todo el catálogo queda incluido o absorbido por el alcance base salvo **Cowork y Copilot** y **Agentes a medida con Copilot Studio**, que son los únicos add-ons cotizables aparte.
+En **P3 / Productividad Digital + IA** el programa se considera integral. El recorrido base absorbe adopción, comunicación, champions, cambio, webinars, casos por rol, prompts y medición; quedan cotizables aparte **Cowork y Copilot**, **Agentes a medida con Copilot Studio** y los módulos de **IA avanzada y PEATs** cuando el alcance requiere discovery/prototipado/desarrollo o arquitectura a medida.
+
+La categoría **IA avanzada y PEATs** agrega módulos cotizables para P2/P3 cuando la conversación deja de ser solo adopción y pasa a evaluación/prototipado/desarrollo de soluciones: **PEAT Discovery**, **PEAT Build**, **Gobierno de IA y agentes** y **Foundry / Fabric / Data Readiness**. La medición de adopción, valor e impacto/ROI queda incluida en P2/P3, no como add-on separado.
 
 La app incluye una industria específica para **Energía, servicios eléctricos y construcción**, pensada para casos con obras, servicios técnicos, oficina técnica, compras, depósito y documentación operativa.
 
