@@ -3283,7 +3283,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.46 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.47 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -7507,6 +7507,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
             <div class="proposal-meta-card"><strong>${formatDate(state.startDate)}</strong><span>Inicio estimado</span></div>
             <div class="proposal-meta-card"><strong>${endDate}</strong><span>Fin estimado</span></div>
           </div>
+          ${renderAiMaturityRoadmap(recommendedKey)}
           ${decisionCriteriaAccordion}
           ${planIncludesPanel}
           <div class="proposal-commercial-grid">
@@ -7593,7 +7594,6 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
             ${renderAdoptionMethodPanel(recommendedKey)}
           </div>
         </details>
-        ${renderAiMaturityRoadmap(recommendedKey)}
         <details class="proposal-accordion">
           <summary><div class="stage-icon">${iconSvg("roadmap")}</div><div><h2>Hoja de ruta recomendada</h2><p>Etapas sugeridas para presentar y ejecutar la propuesta.</p></div></summary>
           <div class="proposal-accordion-body">
@@ -8540,6 +8540,25 @@ ${clientUrlSection}`);
             </div>
           </div>${footer}
         </section>
+        <section class="slide">
+          <p class="eyebrow">Madurez estratégica</p>
+          <h2>Madurez actual en el camino hacia IA escalable</h2>
+          <p>Esta lectura ubica a la organización en una progresión de madurez: primero base digital y adopción, luego IA aplicada, gobierno, agentes y escalamiento.</p>
+          <div class="ai-maturity-track-pdf">
+            ${aiMaturityJourneySteps().map((step, index) => {
+              const activeIndex = currentAiMaturityIndex(recommendedKey);
+              const stateClass = index < activeIndex ? "done" : index === activeIndex ? "active" : "future";
+              return `<div class="ai-maturity-step-pdf ${stateClass}">
+                ${index === activeIndex ? `<div class="ai-maturity-pin-pdf"><span>Hoy está acá</span></div>` : ""}
+                <div class="ai-maturity-dot-pdf"></div>
+                <span>${escapeHtml(step.label)}</span>
+                <strong>${escapeHtml(step.title)}</strong>
+                <p>${escapeHtml(step.desc)}</p>
+              </div>`;
+            }).join("")}
+          </div>
+          <div class="ai-maturity-note-pdf"><strong>Hoy está acá:</strong> ${escapeHtml(planMaturityTitle(plan))}. ${escapeHtml(aiMaturitySummary(recommendedKey))}</div>${footer}
+        </section>
         ${!directMode && decision.alternatives.length ? `<section class="slide">
           <p class="eyebrow">Alternativas posibles</p>
           <h2>Planes a validar si cambia el alcance.</h2>
@@ -8576,25 +8595,6 @@ ${clientUrlSection}`);
           <p>Estos módulos están fuera del alcance base del plan. Sus importes ya están consolidados en el resumen económico.</p>
           <div class="grid-2">${addons.map(([title, desc]) => `<div class="card ${title.includes("Cowork") ? "cowork-pdf" : ""}"><strong>${title}</strong><p>${desc}</p></div>`).join("")}</div>${footer}
         </section>` : ""}
-        <section class="slide">
-          <p class="eyebrow">Madurez estratégica</p>
-          <h2>Madurez actual en el camino hacia IA escalable</h2>
-          <p>Esta lectura ubica a la organización en una progresión de madurez: primero base digital y adopción, luego IA aplicada, gobierno, agentes y escalamiento.</p>
-          <div class="ai-maturity-track-pdf">
-            ${aiMaturityJourneySteps().map((step, index) => {
-              const activeIndex = currentAiMaturityIndex(recommendedKey);
-              const stateClass = index < activeIndex ? "done" : index === activeIndex ? "active" : "future";
-              return `<div class="ai-maturity-step-pdf ${stateClass}">
-                ${index === activeIndex ? `<div class="ai-maturity-pin-pdf"><span>Hoy está acá</span></div>` : ""}
-                <div class="ai-maturity-dot-pdf"></div>
-                <span>${escapeHtml(step.label)}</span>
-                <strong>${escapeHtml(step.title)}</strong>
-                <p>${escapeHtml(step.desc)}</p>
-              </div>`;
-            }).join("")}
-          </div>
-          <div class="ai-maturity-note-pdf"><strong>Hoy está acá:</strong> ${escapeHtml(planMaturityTitle(plan))}. ${escapeHtml(aiMaturitySummary(recommendedKey))}</div>${footer}
-        </section>
         <section class="slide">
           <p class="eyebrow">Hoja de ruta propuesta${roadmapState.active ? ` · ${roadmapState.isAi ? "personalizada con IA" : "personalizada localmente"}` : ""}</p>
           <h2>Plan de trabajo sugerido para ${escapeHtml(plan.name)}</h2>

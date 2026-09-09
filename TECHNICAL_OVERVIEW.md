@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.46**
+Versión documentada: **MVP 0.10.47**
 Última actualización funcional: **2026-09-09**
 Aplicación publicada: <https://ambitious-bay-044b6a010.3.azurestaticapps.net/>
 
@@ -56,15 +56,15 @@ No hay framework frontend ni build step obligatorio. La app corre como HTML/CSS/
    - selección manual de plan principal cuando hay alternativas;
    - razones de recomendación;
    - confianza;
+   - madurez actual en el camino hacia IA escalable;
    - resumen económico;
    - add-ons y adicionales de modalidad;
-   - madurez actual en el camino hacia IA escalable;
    - roadmap visual;
    - resumen IA;
    - comparación IA contra alternativas, si existen.
 8. La propuesta puede exportarse a PDF o enviarse a Power Automate.
 
-La propuesta final incluye una sección visual **Madurez actual en el camino hacia IA escalable**. Es una línea horizontal que ubica al cliente en una progresión estratégica: productividad digital base, exploración IA, Copilot aplicado, IA gobernada, agentes/procesos y escalamiento. El marcador activo se deriva del plan principal seleccionado (P1, P0, P2 o P3) y se muestra como pin "Hoy está acá" sobre el punto actual; los demás puntos quedan como marcadores discretos sin numeración para evitar repetir etapas.
+La propuesta final incluye una sección visual **Madurez actual en el camino hacia IA escalable** inmediatamente después de las fechas de inicio/fin y antes del detalle de alcance del plan. Es una línea horizontal que ubica al cliente en una progresión estratégica: productividad digital base, exploración IA, Copilot aplicado, IA gobernada, agentes/procesos y escalamiento. El marcador activo se deriva del plan principal seleccionado (P1, P0, P2 o P3) y se muestra como pin "Hoy está acá" sobre el punto actual; los demás puntos quedan como marcadores discretos sin numeración para evitar repetir etapas.
 
 ## 3.1 Modos de trabajo
 
