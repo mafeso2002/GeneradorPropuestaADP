@@ -3283,7 +3283,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.54 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.55 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -6965,6 +6965,9 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       if (planKey === "plan1") return 0;
       if (planKey === "plan0") return 1;
       if (planKey === "plan2") return 2;
+      const selectedIds = new Set(selectedAddonItems(planKey).map((addon) => addon.id));
+      if (planKey === "plan3" && ["peat-build", "foundry-fabric-readiness"].some((id) => selectedIds.has(id))) return 5;
+      if (planKey === "plan3" && ["copilot-studio", "peat-discovery"].some((id) => selectedIds.has(id))) return 4;
       return 3;
     }
     function aiMaturitySummary(planKey = selectedProposalPlanKey()) {
@@ -6973,9 +6976,12 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const steps = aiMaturityJourneySteps();
       const activeStep = steps[index];
       const nextStep = steps[Math.min(index + 1, steps.length - 1)];
-      const current = `Hoy la organización se ubica en ${activeStep.title.toLowerCase()}: ${plan.maturityDesc}`;
+      const activeDesc = planKey === "plan3" && index > 3 ? activeStep.desc : plan.maturityDesc;
+      const current = `Hoy la organización se ubica en ${activeStep.title.toLowerCase()}: ${activeDesc}`;
       if (planKey === "plan3") {
-        return `${current} Desde este punto puede avanzar hacia gobierno, PEATs, agentes, Foundry/Fabric y escalamiento por olas sin tratarlos como atajos aislados.`;
+        if (index === 5) return `${current} El alcance ya incluye habilitadores de escalamiento como PEAT Build, Foundry/Fabric o readiness de datos; conviene presentarlo como evolución avanzada dentro del programa integral.`;
+        if (index === 4) return `${current} El alcance ya incorpora trabajo sobre Copilot Studio, agentes o discovery avanzado; conviene presentarlo como una evolución dentro del programa integral, no como un plan separado.`;
+        return `${current} Desde este punto puede avanzar hacia PEATs, agentes, Foundry/Fabric y escalamiento por olas sin tratarlos como atajos aislados.`;
       }
       return `${current} El siguiente salto recomendado es ${nextStep.title.toLowerCase()}, cuando estén cubiertos los prerrequisitos comerciales, técnicos y de adopción.`;
     }
