@@ -3322,7 +3322,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.58 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.59 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -4195,9 +4195,14 @@
       const lines = normalizeEmailText(value).split(/\r?\n/);
       const blocks = [];
       let paragraph = [];
+      const formatEmailLine = (line) => {
+        const match = line.match(/^([^:]{2,48}):\s*(.*)$/);
+        if (!match) return escapeHtml(line);
+        return `<strong style="color:#2e2d31;">${escapeHtml(match[1])}:</strong> ${escapeHtml(match[2])}`;
+      };
       const flushParagraph = () => {
         if (!paragraph.length) return;
-        blocks.push(`<p style="margin:0 0 12px;line-height:1.48;">${paragraph.map((line) => escapeHtml(line)).join("<br>")}</p>`);
+        blocks.push(`<p style="margin:0 0 12px;line-height:1.48;">${paragraph.map(formatEmailLine).join("<br>")}</p>`);
         paragraph = [];
       };
       lines.forEach((line) => {
@@ -7751,11 +7756,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
       const recommended = planCatalog()[recommendedKey];
       const quote = quoteForPlan(recommendedKey);
       const totalEstimate = proposalTotalEstimate(recommendedKey);
-      const decision = planDecision();
-      const original = planCatalog()[decision.recommendedKey];
       const wave = adoptionWaveModel(recommendedKey);
-      const directMode = state.proposalMode === "direct";
-      const changed = !directMode && recommendedKey !== decision.recommendedKey;
       const aiSummary = state.aiSummary ? {
         text: normalizeEmailText(state.aiSummary.text || ""),
         generatedAt: state.aiSummary.generatedAt || "",
@@ -7769,32 +7770,19 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
         ? `\n\nDiagnóstico revisado con IA:\n${normalizeEmailText(filterValidationSummaryForProposal(state.aiValidation.summary))}`
         : "";
       const publicUrl = state.clientProposalUrl || clientProposalUrl() || location.href;
-      const isLongClientDataUrl = /#\/client-data\//.test(publicUrl);
-      const clientUrlSection = isLongClientDataUrl
-        ? "Link para cliente: disponible como botón en el correo HTML. Si no aparece, copiarlo desde la propuesta en la app."
-        : `URL de la propuesta para el cliente:\n${publicUrl}`;
       const bodyText = normalizeEmailText(`Nueva propuesta de adopción
 
 Cliente: ${state.company}
 ${state.clientContact ? `Referente del cliente: ${state.clientContact}` : ""}
-Ubicación priorizada para búsqueda IA: ${state.clientLocation || "Argentina"}
-Plan principal seleccionado (Versión 1): ${planMaturityTitle(recommended)}
-Referencia comercial: ${recommended.shortName || recommended.name}
-${directMode ? "Modo: Propuesta directa seleccionada por el comercial." : `Plan original sugerido por la app: ${original.name}
-${changed ? "Cambio manual: Sí, el comercial promovió una alternativa como plan principal." : "Cambio manual: No, coincide con el plan original."}
-Confianza: ${confidenceLabel(decision.level)} · ${decision.confidence}%`}
+Plan seleccionado: ${planMaturityTitle(recommended)}
 Duración: ${proposalDurationLabel(recommendedKey)}
 Alcance: ${proposalScopeDetail(recommendedKey)}
 ${wave ? `Modelo de olas: ${wave.title} · ${wave.groups} · ${wave.note}` : ""}
+
 Cotización: ${quote.main}
 Total estimado: ${totalEstimate.label}
 Detalle: ${quote.detail}
-Opcionales/adicionales: ${totalEstimate.addons}${aiSection}${validationSection}
-
-Motivo de recomendación:
-${recommendationReason(recommendedKey)}
-
-${clientUrlSection}`);
+Opcionales/adicionales: ${totalEstimate.addons}${aiSection}${validationSection}`);
       const bodyHtml = handoffEmailBodyHtmlFromText(bodyText, publicUrl);
       return {
         from: "adopcion@possumus.tech",
