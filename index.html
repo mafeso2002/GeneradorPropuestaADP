@@ -1894,34 +1894,73 @@
     }
     .addon-adjustment-notice strong { display: block; margin-bottom: 4px; }
     .progression-guidance {
+      margin: 14px 0;
+      border: 1px dashed rgba(46, 45, 49, .22);
+      border-left: 4px solid var(--cp-brand-yellow);
+      border-radius: 14px;
       padding: 14px 16px;
-    }
-    .progression-guidance > p {
-      margin: 4px 0 10px;
+      background: #fffdf0;
       color: var(--cp-brand-dark);
+      box-shadow: none;
+    }
+    .progression-guidance-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+    .progression-guidance-head strong {
+      margin: 0 0 2px;
+      font-size: 14px;
+    }
+    .progression-guidance-head p {
+      margin: 0;
+      color: var(--cp-text-muted);
+      font-size: 12px;
+    }
+    .progression-internal-badge {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(46, 45, 49, .14);
+      border-radius: 999px;
+      padding: 4px 8px;
+      background: #ffffff;
+      color: var(--cp-text-muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      white-space: nowrap;
     }
     .progression-items {
       display: grid;
-      gap: 10px;
+      gap: 8px;
     }
     .progression-item {
-      display: grid;
-      grid-template-columns: minmax(120px, 170px) 1fr;
-      gap: 12px;
-      align-items: start;
-      padding: 12px;
+      display: block;
+      padding: 10px 12px;
       border: 1px solid rgba(46, 45, 49, .12);
-      border-radius: 12px;
-      background: rgba(255, 255, 255, .72);
+      border-radius: 10px;
+      background: #ffffff;
+    }
+    .progression-item-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 4px;
     }
     .progression-item .badge {
-      width: fit-content;
+      flex: 0 0 auto;
       margin: 0;
-      background: #fff;
+      border-color: rgba(46, 45, 49, .12);
+      background: var(--cp-surface-soft);
+      color: var(--cp-text-muted);
+      font-size: 11px;
     }
-    .progression-item strong { margin: 0 0 4px; }
+    .progression-item strong { margin: 0; font-size: 13px; }
     .progression-item p { margin: 0; color: var(--cp-text-muted); }
-    .progression-action { margin-top: 4px !important; color: var(--cp-brand-dark) !important; }
+    .progression-action { margin-top: 4px !important; color: var(--cp-brand-dark) !important; font-size: 12px; }
     .manual-plan-actions {
       display: flex;
       flex-wrap: wrap;
@@ -3283,7 +3322,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.56 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.57 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -6528,7 +6567,7 @@
       const usageIsNotAdopted = state.copilotUsage === "not-applicable" || state.copilotUsage === "under-20" || !state.copilotUsage;
       if (lowM365Base && ["plan0", "plan2"].includes(planKey)) {
         items.push({
-          level: "Atajo a revisar",
+          level: "Validar secuencia",
           title: "La base Microsoft 365 todavía no parece consolidada",
           desc: "Antes de avanzar solo con IA, conviene considerar Productividad Digital o incluir una primera ola de hábitos Microsoft 365.",
           action: "Validar si el cliente ya adoptó Outlook, Teams, OneDrive, SharePoint y seguimiento de tareas."
@@ -6536,7 +6575,7 @@
       }
       if (planKey === "plan3" && lowM365Base) {
         items.push({
-          level: "Secuencia recomendada",
+          level: "Secuencia de trabajo",
           title: "El programa integral debe empezar por productividad digital",
           desc: "Gobierno y escala puede aplicar, pero la primera ola debería ordenar herramientas y hábitos antes de profundizar Copilot.",
           action: "Presentar el roadmap como progresión: productividad digital primero, Copilot después."
@@ -6544,7 +6583,7 @@
       }
       if (noCopilotLicense && (planKey === "plan2" || planKey === "plan3" || wantsCopilot)) {
         items.push({
-          level: "Prerrequisito",
+          level: "Confirmar requisito",
           title: "No hay Microsoft 365 Copilot activo/trial",
           desc: "Para IA aplicada al trabajo se necesita licencia. Si todavía no existe, el paso natural es Envisioning IA o definición de licenciamiento.",
           action: "No prometer adopción Copilot con datos corporativos sin confirmar licencias."
@@ -6552,7 +6591,7 @@
       }
       if (wantsAdvanced && (noCopilotLicense || usageIsNotAdopted)) {
         items.push({
-          level: "Escalón posterior",
+          level: "Siguiente paso",
           title: "Agentes, automatización y Cowork vienen después de adoptar Copilot",
           desc: "Si el cliente pide automatización avanzada pero aún no adoptó Copilot, la propuesta debe ordenar primero el escalón de IA aplicada.",
           action: "Ofrecer P2 como paso previo y dejar Cowork/agentes como add-on posterior o módulo focalizado."
@@ -6563,16 +6602,22 @@
     function renderProgressionGuidance(planKey = selectedProposalPlanKey()) {
       const items = progressionGuidance(planKey);
       if (!items.length) return "";
-      return `<div class="addon-adjustment-notice progression-guidance">
-        <strong>Lectura de progresión comercial</strong>
+      return `<div class="progression-guidance">
+        <div class="progression-guidance-head">
+          <div>
+            <strong>Guía interna para preventa</strong>
+            <p>Usala antes de cerrar alcance o enviar la propuesta; no se muestra al cliente.</p>
+          </div>
+          <span class="progression-internal-badge">Interno</span>
+        </div>
         <div class="progression-items">
           ${items.map((item) => `<div class="progression-item">
-            <span class="badge">${escapeHtml(item.level)}</span>
-            <div>
+            <div class="progression-item-header">
+              <span class="badge">${escapeHtml(item.level)}</span>
               <strong>${escapeHtml(item.title)}</strong>
-              <p>${escapeHtml(item.desc)}</p>
-              <p class="progression-action"><b>Acción:</b> ${escapeHtml(item.action)}</p>
             </div>
+            <p>${escapeHtml(item.desc)}</p>
+            <p class="progression-action"><b>Antes de enviar:</b> ${escapeHtml(item.action)}</p>
           </div>`).join("")}
         </div>
       </div>`;
@@ -7546,7 +7591,7 @@ Usar ${primary.name} como propuesta principal y presentar ${alternative.name} so
                     </div>
                   </div>
                   ${renderPlanSelectionPanel(decision, plans, recommendedKey, mode)}
-                  ${renderProgressionGuidance(recommendedKey)}
+                  ${readOnlyMode ? "" : renderProgressionGuidance(recommendedKey)}
                   <p><strong>Análisis comercial:</strong> ${recommendationReason(recommendedKey)}</p>
                   ${readOnlyMode ? "" : decisionEvidenceMarkup(decision)}
                   <p>${recommended.desc}</p>
@@ -7866,7 +7911,6 @@ ${clientUrlSection}`);
       const directMode = state.proposalMode === "direct";
       const planChangedByCommercial = !directMode && recommendedKey !== algorithmRecommendedKey;
       const wave = adoptionWaveModel(recommendedKey);
-      const progressionItems = progressionGuidance(recommendedKey);
       return {
         source: "GeneradorPropuestaADP",
         createdAt: new Date().toISOString(),
@@ -7879,7 +7923,7 @@ ${clientUrlSection}`);
             "## Lectura comercial",
             "Madurez, dolores principales, confianza del algoritmo y oportunidad detectada.",
             "## Recomendacion Possumus",
-            "Plan recomendado, por que aplica, alternativas si la confianza es media/baja y como se relaciona con la realidad del cliente. Respetar progressionGuidance: si hay atajos o prerrequisitos, explicarlos como secuencia comercial sin invalidar la oportunidad. Para P0/Envisioning IA, mantener add-ons acotados a Casos para lideres, Readiness tecnico y Webinar introductorio Copilot en 30 minutos; si el cliente necesita mas, sugerir cambio de plan. Para P1/Productividad Digital, no presentarlo como capacitacion puntual: describirlo como programa de adopcion con diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion. En P1 solo permitir como add-ons Readiness tecnico, Excel intermedio, Excel avanzado y Modulo a medida de herramienta puntual; si hace falta mas, sugerir ampliar alcance o cambiar a P2/P3. En P2/IA aplicada al trabajo, la medicion de adopcion/valor/ROI ya esta incluida; los add-ons posibles son profundizaciones Copilot, Cowork, Agents & Cowork, Copilot Studio, PEAT Discovery/Build, Gobierno de IA y agentes, Foundry/Fabric/Data Readiness o webinars especializados. En P3/Productividad Digital + IA, presentar el plan como programa integral con medicion de valor incluida; Cowork, PEATs, gobierno avanzado de IA, agentes a medida y Foundry/Fabric readiness se cotizan aparte segun alcance. Si aparece Cowork, tratarlo como add-on con prerrequisito de Microsoft 365 Copilot activo/trial y 3 a 5 sesiones; si aparecen webinars especializados, presentarlos como consumo puntual por tecnologia, no como programa de adopcion.",
+            "Plan recomendado, por que aplica, alternativas si la confianza es media/baja y como se relaciona con la realidad del cliente. Para P0/Envisioning IA, mantener add-ons acotados a Casos para lideres, Readiness tecnico y Webinar introductorio Copilot en 30 minutos; si el cliente necesita mas, sugerir cambio de plan. Para P1/Productividad Digital, no presentarlo como capacitacion puntual: describirlo como programa de adopcion con diagnostico, comunicacion, formacion aplicada, acompanamiento y medicion. En P1 solo permitir como add-ons Readiness tecnico, Excel intermedio, Excel avanzado y Modulo a medida de herramienta puntual; si hace falta mas, sugerir ampliar alcance o cambiar a P2/P3. En P2/IA aplicada al trabajo, la medicion de adopcion/valor/ROI ya esta incluida; los add-ons posibles son profundizaciones Copilot, Cowork, Agents & Cowork, Copilot Studio, PEAT Discovery/Build, Gobierno de IA y agentes, Foundry/Fabric/Data Readiness o webinars especializados. En P3/Productividad Digital + IA, presentar el plan como programa integral con medicion de valor incluida; Cowork, PEATs, gobierno avanzado de IA, agentes a medida y Foundry/Fabric readiness se cotizan aparte segun alcance. Si aparece Cowork, tratarlo como add-on con prerrequisito de Microsoft 365 Copilot activo/trial y 3 a 5 sesiones; si aparecen webinars especializados, presentarlos como consumo puntual por tecnologia, no como programa de adopcion.",
             ...(state.includeBudgetEstimate !== false ? [
               "## Estimacion asistida de presupuesto",
               "Importe recomendado, modalidad comercial sugerida, supuestos y alertas. Si la confianza es baja, no cerrar presupuesto y pedir validacion con preventa/adopcion."
@@ -7920,7 +7964,6 @@ ${clientUrlSection}`);
           recommendedPlanDuration: proposalDurationLabel(recommendedKey),
           recommendedPlanScope: proposalScopeDetail(recommendedKey),
           adoptionWaveModel: wave,
-          progressionGuidance: progressionItems,
           quote: quote.main,
           quoteDetail: quote.detail,
           totalEstimate,
@@ -8348,7 +8391,6 @@ ${clientUrlSection}`);
       const decision = planDecision();
       const directMode = state.proposalMode === "direct";
       const activeComparisons = directMode ? [] : activePlanComparisons(recommendedKey, decision);
-      const progressionItems = progressionGuidance(recommendedKey);
       const aiSummaryText = state.aiSummary && state.aiSummary.text ? state.aiSummary.text : "";
       const companyResearchMarkup = formatCompanyResearch(state.aiSummary && state.aiSummary.companyResearch);
       const validationSummaryText = state.aiValidation && state.aiValidation.summary ? filterValidationSummaryForProposal(state.aiValidation.summary) : "";
@@ -8540,7 +8582,6 @@ ${clientUrlSection}`);
               </div>
               ${wave ? `<div class="card wave-card" style="margin-top:5mm"><strong>Modelo de olas del plan principal actual</strong><p>${escapeHtml(wave.note)}</p><div class="wave-meta"><div><span>Modalidad</span><strong>${escapeHtml(wave.label)}</strong></div><div><span>Despliegue</span><strong>${escapeHtml(wave.title)}</strong></div><div><span>Segmentación</span><strong>${escapeHtml(wave.groups)}</strong></div></div></div>` : ""}
               ${recommendedKey === "plan1" ? `<div class="card" style="margin-top:5mm"><strong>P1 no es solo capacitación</strong><p>Productividad Digital combina diagnóstico, comunicación, formación aplicada, acompañamiento y medición. Las sesiones son una parte del recorrido; el valor es instalar hábitos Microsoft 365 medibles por ola.</p></div>` : ""}
-              ${progressionItems.length ? `<div class="card" style="margin-top:5mm"><strong>Lectura de progresión comercial</strong><ul>${progressionItems.map((item) => `<li><strong>${escapeHtml(item.level)}:</strong> ${escapeHtml(item.desc)} ${escapeHtml(item.action)}</li>`).join("")}</ul></div>` : ""}
             </div>
             <div class="card price-card">
               <strong>Resumen económico</strong>
