@@ -301,6 +301,7 @@
       white-space: nowrap;
       opacity: .62;
       backdrop-filter: blur(10px);
+      cursor: pointer;
     }
     .version-badge:hover {
       background: var(--cp-brand-yellow-soft);
@@ -2993,6 +2994,36 @@
       color: var(--cp-text-muted);
     }
     .decision-help-list li { margin: 4px 0; break-inside: avoid; }
+    .technical-overview-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      overflow: hidden;
+      border: 1px solid var(--cp-border);
+      border-radius: 14px;
+      font-size: 13px;
+    }
+    .technical-overview-table th,
+    .technical-overview-table td {
+      border-bottom: 1px solid var(--cp-border);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    .technical-overview-table th {
+      background: var(--cp-surface-soft);
+      color: var(--cp-text);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    .technical-overview-table tr:last-child td { border-bottom: 0; }
+    .technical-overview-table code {
+      border-radius: 6px;
+      padding: 2px 5px;
+      background: var(--cp-surface-soft);
+      font-size: 12px;
+    }
     .modal-header {
       display: flex;
       justify-content: space-between;
@@ -3322,7 +3353,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.59 · técnico</a>
+  <button class="version-badge" id="technicalOverviewBtn" type="button" title="Abrir resumen técnico">MVP 0.10.60 · técnico</button>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -3519,6 +3550,19 @@
         </div>
       </div>
       <div id="decisionHelpContent" class="decision-help-content"></div>
+    </div>
+  </div>
+  <div id="technicalOverviewModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="technicalOverviewTitle">
+    <div class="modal-card decision-help-card">
+      <div class="modal-header">
+        <div>
+          <span class="ai-badge">Resumen técnico</span>
+          <h3 id="technicalOverviewTitle">Cómo está construida la app</h3>
+          <p>Vista ejecutiva para explicar arquitectura, scoring, propuestas, add-ons, IA y publicación sin salir de la demo.</p>
+        </div>
+        <button class="btn ghost" id="closeTechnicalOverviewBtn">Cerrar</button>
+      </div>
+      <div id="technicalOverviewContent" class="decision-help-content"></div>
     </div>
   </div>
   <div id="confidenceModal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="confidenceModalTitle">
@@ -8835,6 +8879,73 @@ Opcionales/adicionales: ${totalEstimate.addons}${aiSection}${validationSection}`
     function closeDecisionHelpModal() {
       $("decisionHelpModal").classList.add("hidden");
     }
+    function renderTechnicalOverview() {
+      $("technicalOverviewContent").innerHTML = `
+        <section class="decision-help-section">
+          <h4>1. Objetivo</h4>
+          <p>La app ayuda a un comercial o preventa a relevar contexto de cliente y convertirlo en una propuesta de adopción Microsoft 365 / Copilot lista para presentar.</p>
+          <div class="decision-help-grid">
+            <div class="decision-plan-card"><strong>Dos caminos</strong><span>Recomendar plan con diagnóstico o crear una propuesta directa cuando el plan ya está definido.</span></div>
+            <div class="decision-plan-card"><strong>Salida comercial</strong><span>Propuesta final, resumen económico, madurez, roadmap, PDF y mail de envío.</span></div>
+            <div class="decision-plan-card"><strong>IA asistida</strong><span>Resumen ejecutivo, validación comercial, comparación de planes y personalización de roadmap.</span></div>
+            <div class="decision-plan-card"><strong>Trazabilidad</strong><span>Se conserva plan sugerido, plan seleccionado, confianza, razones y alternativas cuando aplica.</span></div>
+          </div>
+        </section>
+        <section class="decision-help-section">
+          <h4>2. Arquitectura</h4>
+          <p>Frontend estático en HTML/CSS/JavaScript vanilla, publicado como Azure Static Web App, con Azure Functions para integraciones y automatizaciones.</p>
+          <table class="technical-overview-table">
+            <thead><tr><th>Componente</th><th>Uso</th></tr></thead>
+            <tbody>
+              <tr><td><code>index.html</code></td><td>Wizard, scoring, UI, propuesta final, PDF, mail, payloads y consumo de APIs.</td></tr>
+              <tr><td><code>api/*</code></td><td>Funciones HTTP para IA, handoff, validación, precios de add-ons, roadmap y propuestas cliente.</td></tr>
+              <tr><td>Azure Static Web Apps</td><td>Hosting y publicación automática desde GitHub Actions.</td></tr>
+              <tr><td>Power Automate / Dataverse</td><td>Recepción de propuestas, precios externos y automatización del handoff.</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <section class="decision-help-section">
+          <h4>3. Modelo comercial y scoring</h4>
+          <p>El algoritmo pondera señales del relevamiento y calcula plan recomendado, confianza, razones y alternativas cercanas.</p>
+          <table class="technical-overview-table">
+            <thead><tr><th>Lectura visible</th><th>Plan comercial</th><th>Cuándo aplica</th></tr></thead>
+            <tbody>
+              <tr><td>Productividad Digital</td><td>Productividad Digital (P1)</td><td>Ordenar hábitos, documentos, Teams/SharePoint, tareas y medición.</td></tr>
+              <tr><td>Exploración · Envisioning IA</td><td>Envisioning IA (P0)</td><td>Explorar IA, casos de uso y business case antes de Copilot completo.</td></tr>
+              <tr><td>Adopción IA · Copilot aplicado al trabajo</td><td>IA aplicada al trabajo (P2)</td><td>Activar Microsoft 365 Copilot con casos por rol, prompts y medición.</td></tr>
+              <tr><td>Gobierno y escala · Productividad Digital + IA</td><td>Productividad Digital + Microsoft 365 Copilot (P3)</td><td>Programa integral con cambio, gobierno, Copilot, agentes y escala.</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <section class="decision-help-section">
+          <h4>4. Madurez y add-ons</h4>
+          <p>La madurez muestra dónde está parada la organización y el siguiente salto lógico. En P3 puede avanzar dentro del mismo programa si se seleccionan add-ons avanzados.</p>
+          <ol class="decision-flow">
+            <li><b>0</b><div><strong>Productividad Digital</strong><span>Base de colaboración, documentos, tareas, reuniones y hábitos Microsoft 365.</span></div></li>
+            <li><b>1</b><div><strong>Exploración</strong><span>Casos de uso, sponsor, quick wins y business case.</span></div></li>
+            <li><b>2</b><div><strong>Adopción IA</strong><span>Copilot aplicado con licencias, escenarios por rol y medición de valor.</span></div></li>
+            <li><b>3</b><div><strong>Gobierno</strong><span>Datos, seguridad, ownership, aprobación y uso responsable.</span></div></li>
+            <li><b>4</b><div><strong>Agentes</strong><span>Copilot Studio o PEAT Discovery mueven el pin a agentes/procesos.</span></div></li>
+            <li><b>5</b><div><strong>Escala</strong><span>PEAT Build o Foundry/Fabric/Data Readiness mueven el pin a escalamiento.</span></div></li>
+          </ol>
+        </section>
+        <section class="decision-help-section">
+          <h4>5. Entregables de demo</h4>
+          <div class="decision-help-grid">
+            <div class="decision-plan-card"><strong>PDF comercial</strong><span>Portada, metodología, recomendación, madurez, cotización, alternativas y roadmap.</span></div>
+            <div class="decision-plan-card"><strong>Mail de propuesta</strong><span>Campos clave resaltados, cotización y botón HTML para abrir la propuesta del cliente.</span></div>
+            <div class="decision-plan-card"><strong>Vista cliente</strong><span>Propuesta limpia, sin controles internos ni guía de preventa.</span></div>
+            <div class="decision-plan-card"><strong>Vista interna</strong><span>Detalle de cálculo, confianza, alternativas, add-ons y guía interna cuando hay atajos.</span></div>
+          </div>
+        </section>`;
+    }
+    function openTechnicalOverviewModal() {
+      renderTechnicalOverview();
+      $("technicalOverviewModal").classList.remove("hidden");
+    }
+    function closeTechnicalOverviewModal() {
+      $("technicalOverviewModal").classList.add("hidden");
+    }
     function exportDecisionHelpPdf() {
       renderDecisionHelp();
       const printWindow = window.open("", "_blank");
@@ -9010,6 +9121,11 @@ Opcionales/adicionales: ${totalEstimate.addons}${aiSection}${validationSection}`
     $("confirmProposalBtn").addEventListener("click", generatePlan);
     $("confirmProposalModal").addEventListener("click", (event) => {
       if (event.target === $("confirmProposalModal")) closeConfirmProposalModal();
+    });
+    $("technicalOverviewBtn").addEventListener("click", openTechnicalOverviewModal);
+    $("closeTechnicalOverviewBtn").addEventListener("click", closeTechnicalOverviewModal);
+    $("technicalOverviewModal").addEventListener("click", (event) => {
+      if (event.target === $("technicalOverviewModal")) closeTechnicalOverviewModal();
     });
     $("closeHandoffModalBtn").addEventListener("click", closeHandoffModal);
     $("cancelHandoffBtn").addEventListener("click", closeHandoffModal);
