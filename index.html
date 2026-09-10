@@ -3353,7 +3353,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <button class="version-badge" id="technicalOverviewBtn" type="button" title="Abrir resumen técnico">MVP 0.10.60 · técnico</button>
+  <button class="version-badge" id="technicalOverviewBtn" type="button" title="Abrir resumen técnico">MVP 0.10.61 · técnico</button>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -8882,61 +8882,78 @@ Opcionales/adicionales: ${totalEstimate.addons}${aiSection}${validationSection}`
     function renderTechnicalOverview() {
       $("technicalOverviewContent").innerHTML = `
         <section class="decision-help-section">
-          <h4>1. Objetivo</h4>
-          <p>La app ayuda a un comercial o preventa a relevar contexto de cliente y convertirlo en una propuesta de adopción Microsoft 365 / Copilot lista para presentar.</p>
+          <h4>1. Qué se construyó</h4>
+          <p>MVP web para que adopción, preventa y sales diseñen propuestas Microsoft 365 / Copilot con diagnóstico, scoring, cotización, madurez, roadmap, PDF y handoff por mail.</p>
           <div class="decision-help-grid">
-            <div class="decision-plan-card"><strong>Dos caminos</strong><span>Recomendar plan con diagnóstico o crear una propuesta directa cuando el plan ya está definido.</span></div>
-            <div class="decision-plan-card"><strong>Salida comercial</strong><span>Propuesta final, resumen económico, madurez, roadmap, PDF y mail de envío.</span></div>
-            <div class="decision-plan-card"><strong>IA asistida</strong><span>Resumen ejecutivo, validación comercial, comparación de planes y personalización de roadmap.</span></div>
-            <div class="decision-plan-card"><strong>Trazabilidad</strong><span>Se conserva plan sugerido, plan seleccionado, confianza, razones y alternativas cuando aplica.</span></div>
+            <div class="decision-plan-card"><strong>Producto funcional</strong><span>Wizard guiado, propuesta directa, edición, vista cliente, PDF comercial y mail HTML.</span></div>
+            <div class="decision-plan-card"><strong>Lógica comercial</strong><span>Planes P0/P1/P2/P3, confianza, alternativas, add-ons, guardrails internos y madurez estratégica.</span></div>
+            <div class="decision-plan-card"><strong>IA aplicada</strong><span>Resumen ejecutivo, validación comercial, comparación de planes y roadmap personalizado.</span></div>
+            <div class="decision-plan-card"><strong>Operación conectada</strong><span>Precios desde Dataverse, handoff por Power Automate y publicación en Azure Static Web Apps.</span></div>
           </div>
         </section>
         <section class="decision-help-section">
-          <h4>2. Arquitectura</h4>
-          <p>Frontend estático en HTML/CSS/JavaScript vanilla, publicado como Azure Static Web App, con Azure Functions para integraciones y automatizaciones.</p>
+          <h4>2. Lenguajes, herramientas y plataforma</h4>
+          <p>La solución se armó con una arquitectura liviana para acelerar el MVP, reducir dependencias y mantener el despliegue simple.</p>
           <table class="technical-overview-table">
-            <thead><tr><th>Componente</th><th>Uso</th></tr></thead>
+            <thead><tr><th>Capa</th><th>Tecnología</th><th>Uso</th></tr></thead>
             <tbody>
-              <tr><td><code>index.html</code></td><td>Wizard, scoring, UI, propuesta final, PDF, mail, payloads y consumo de APIs.</td></tr>
-              <tr><td><code>api/*</code></td><td>Funciones HTTP para IA, handoff, validación, precios de add-ons, roadmap y propuestas cliente.</td></tr>
-              <tr><td>Azure Static Web Apps</td><td>Hosting y publicación automática desde GitHub Actions.</td></tr>
-              <tr><td>Power Automate / Dataverse</td><td>Recepción de propuestas, precios externos y automatización del handoff.</td></tr>
+              <tr><td>Frontend</td><td>HTML, CSS y JavaScript vanilla</td><td>Interfaz completa, scoring local, render de propuesta, modales, PDF y mail.</td></tr>
+              <tr><td>Backend serverless</td><td>Azure Functions en JavaScript</td><td>Endpoints HTTP para IA, precios, handoff, validación, roadmap y comparaciones.</td></tr>
+              <tr><td>Hosting</td><td>Azure Static Web Apps</td><td>Publicación web, API integrada y despliegue automático desde GitHub Actions.</td></tr>
+              <tr><td>Repositorio</td><td>GitHub</td><td>Versionado, commits por iteración y pipeline de publicación.</td></tr>
+              <tr><td>Automatización</td><td>Power Automate</td><td>Flows para leer precios, enviar handoff y ejecutar resumen/validación IA.</td></tr>
+              <tr><td>Datos comerciales</td><td>Dataverse</td><td>Tabla de precios para planes, add-ons y adicionales de modalidad.</td></tr>
+              <tr><td>Desarrollo asistido</td><td>Microsoft Scout / Copilot Agent</td><td>Construcción iterativa, refactor, debugging, pruebas visuales y despliegues.</td></tr>
             </tbody>
           </table>
         </section>
         <section class="decision-help-section">
-          <h4>3. Modelo comercial y scoring</h4>
-          <p>El algoritmo pondera señales del relevamiento y calcula plan recomendado, confianza, razones y alternativas cercanas.</p>
+          <h4>3. Integración con Power Platform</h4>
+          <p>La app combina frontend liviano con Power Platform para que los valores comerciales y los flujos operativos puedan administrarse fuera del código.</p>
+          <div class="decision-help-grid">
+            <div class="decision-plan-card"><strong>Dataverse</strong><span>37 registros de precios: planes base, add-ons, modalidad presencial/mixta y módulos avanzados PEAT/Foundry.</span></div>
+            <div class="decision-plan-card"><strong>Power Automate</strong><span>Flows activos para leer precios, enviar propuesta por handoff y generar resumen ejecutivo con IA.</span></div>
+            <div class="decision-plan-card"><strong>Fallback seguro</strong><span>Si un Flow no está disponible, la app mantiene precios/roadmap locales para no bloquear la demo o preventa.</span></div>
+            <div class="decision-plan-card"><strong>Escalabilidad</strong><span>La lógica puede evolucionar hacia Dynamics Sales, aprobaciones, propuestas persistidas y analítica comercial.</span></div>
+          </div>
+        </section>
+        <section class="decision-help-section">
+          <h4>4. Comparación de esfuerzo: Scout vs equipo clásico</h4>
+          <p>Estimación interna basada en el desarrollo del MVP. Compara costo operativo en tiempo, perfiles y coordinación; no incluye licencias ni consumo cloud.</p>
           <table class="technical-overview-table">
-            <thead><tr><th>Lectura visible</th><th>Plan comercial</th><th>Cuándo aplica</th></tr></thead>
+            <thead><tr><th>Modalidad</th><th>Tiempo estimado</th><th>Equipo involucrado</th><th>Resultado</th></tr></thead>
             <tbody>
-              <tr><td>Productividad Digital</td><td>Productividad Digital (P1)</td><td>Ordenar hábitos, documentos, Teams/SharePoint, tareas y medición.</td></tr>
-              <tr><td>Exploración · Envisioning IA</td><td>Envisioning IA (P0)</td><td>Explorar IA, casos de uso y business case antes de Copilot completo.</td></tr>
-              <tr><td>Adopción IA · Copilot aplicado al trabajo</td><td>IA aplicada al trabajo (P2)</td><td>Activar Microsoft 365 Copilot con casos por rol, prompts y medición.</td></tr>
-              <tr><td>Gobierno y escala · Productividad Digital + IA</td><td>Productividad Digital + Microsoft 365 Copilot (P3)</td><td>Programa integral con cambio, gobierno, Copilot, agentes y escala.</td></tr>
+              <tr><td>Owner funcional + Scout Agent</td><td>2 a 3 días</td><td>1 owner funcional iterando con IA</td><td>MVP funcional publicado con IA, precios, PDF, mail, vista cliente, roadmap y UX refinada.</td></tr>
+              <tr><td>Equipo clásico</td><td>3 a 6 semanas</td><td>PM/analista, UX/UI, frontend, backend, Power Platform y QA</td><td>MVP similar con mayor formalidad inicial, pero más coordinación, handoffs y ciclos de validación.</td></tr>
             </tbody>
           </table>
         </section>
         <section class="decision-help-section">
-          <h4>4. Madurez y add-ons</h4>
-          <p>La madurez muestra dónde está parada la organización y el siguiente salto lógico. En P3 puede avanzar dentro del mismo programa si se seleccionan add-ons avanzados.</p>
-          <ol class="decision-flow">
-            <li><b>0</b><div><strong>Productividad Digital</strong><span>Base de colaboración, documentos, tareas, reuniones y hábitos Microsoft 365.</span></div></li>
-            <li><b>1</b><div><strong>Exploración</strong><span>Casos de uso, sponsor, quick wins y business case.</span></div></li>
-            <li><b>2</b><div><strong>Adopción IA</strong><span>Copilot aplicado con licencias, escenarios por rol y medición de valor.</span></div></li>
-            <li><b>3</b><div><strong>Gobierno</strong><span>Datos, seguridad, ownership, aprobación y uso responsable.</span></div></li>
-            <li><b>4</b><div><strong>Agentes</strong><span>Copilot Studio o PEAT Discovery mueven el pin a agentes/procesos.</span></div></li>
-            <li><b>5</b><div><strong>Escala</strong><span>PEAT Build o Foundry/Fabric/Data Readiness mueven el pin a escalamiento.</span></div></li>
-          </ol>
+          <h4>5. Estimación clásica por perfil</h4>
+          <table class="technical-overview-table">
+            <thead><tr><th>Rol</th><th>Esfuerzo estimado</th></tr></thead>
+            <tbody>
+              <tr><td>Análisis funcional / discovery</td><td>2 a 4 días</td></tr>
+              <tr><td>UX/UI + iteraciones visuales</td><td>3 a 6 días</td></tr>
+              <tr><td>Frontend</td><td>8 a 15 días</td></tr>
+              <tr><td>Backend / APIs / seguridad</td><td>3 a 6 días</td></tr>
+              <tr><td>Power Automate / Dataverse</td><td>3 a 6 días</td></tr>
+              <tr><td>PDF / mail / vista cliente</td><td>3 a 5 días</td></tr>
+              <tr><td>QA funcional + ajustes</td><td>4 a 8 días</td></tr>
+              <tr><td>Deploy / configuración / documentación</td><td>1 a 3 días</td></tr>
+              <tr><td><strong>Total aproximado</strong></td><td><strong>27 a 53 días-persona</strong></td></tr>
+            </tbody>
+          </table>
         </section>
         <section class="decision-help-section">
-          <h4>5. Entregables de demo</h4>
+          <h4>6. Ahorro y lectura ejecutiva</h4>
           <div class="decision-help-grid">
-            <div class="decision-plan-card"><strong>PDF comercial</strong><span>Portada, metodología, recomendación, madurez, cotización, alternativas y roadmap.</span></div>
-            <div class="decision-plan-card"><strong>Mail de propuesta</strong><span>Campos clave resaltados, cotización y botón HTML para abrir la propuesta del cliente.</span></div>
-            <div class="decision-plan-card"><strong>Vista cliente</strong><span>Propuesta limpia, sin controles internos ni guía de preventa.</span></div>
-            <div class="decision-plan-card"><strong>Vista interna</strong><span>Detalle de cálculo, confianza, alternativas, add-ons y guía interna cuando hay atajos.</span></div>
+            <div class="decision-plan-card"><strong>85% a 95%</strong><span>Menos tiempo calendario frente a un desarrollo clásico de 3 a 6 semanas.</span></div>
+            <div class="decision-plan-card"><strong>70% a 90%</strong><span>Menos esfuerzo operativo/persona, especialmente por menor coordinación y retrabajo.</span></div>
+            <div class="decision-plan-card"><strong>Iteración inmediata</strong><span>Feedback comercial convertido en cambios de UI, lógica, PDF y mail durante la misma conversación.</span></div>
+            <div class="decision-plan-card"><strong>Buen fit para MVP</strong><span>Scout acelera discovery, prototipado y validación; una V2 enterprise puede sumar hardening, seguridad y gobierno formal.</span></div>
           </div>
+          <p><strong>Mensaje para la demo:</strong> con enfoque tradicional, este MVP habría requerido semanas de un equipo mixto. Con Scout Agent y un owner funcional, se llegó a una versión publicable en pocos días, integrada con Azure, Power Automate, Dataverse e IA.</p>
         </section>`;
     }
     function openTechnicalOverviewModal() {

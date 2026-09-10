@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.60**
+Versión documentada: **MVP 0.10.61**
 Última actualización funcional: **2026-09-09**
 Aplicación publicada: <https://ambitious-bay-044b6a010.3.azurestaticapps.net/>
 
@@ -67,6 +67,8 @@ No hay framework frontend ni build step obligatorio. La app corre como HTML/CSS/
 La propuesta final incluye una sección visual **Madurez actual en el camino hacia IA escalable** inmediatamente después de las fechas de inicio/fin y antes del detalle de alcance del plan. Es una línea horizontal que ubica al cliente en una progresión estratégica: productividad digital base, exploración IA, Copilot aplicado, IA gobernada, agentes/procesos y escalamiento. El marcador activo se deriva del plan principal seleccionado (P1, P0, P2 o P3) y se muestra como pin "Hoy está acá" sobre el punto actual; los demás puntos quedan como marcadores discretos sin numeración para evitar repetir etapas. En P3, el pin puede avanzar dentro del mismo programa integral si el alcance incluye add-ons avanzados: Copilot Studio o PEAT Discovery lo ubican en Agentes; PEAT Build o Foundry/Fabric/Data Readiness lo ubican en Escala.
 
 Las alertas de progresión comercial se muestran solo como **guía interna para preventa** en la vista editable/admin. No se incluyen en la vista pública del cliente, el PDF ni el payload de propuesta enviada; sí pueden usarse como contexto interno para ordenar la hoja de ruta antes de cerrar alcance.
+
+El badge técnico abre un modal interno formateado con stack, herramientas, Power Platform, Dataverse, Azure, Scout Agent y comparación de esfuerzo contra desarrollo clásico.
 
 ## 3.1 Modos de trabajo
 
