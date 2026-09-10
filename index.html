@@ -3322,7 +3322,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.57 · técnico</a>
+  <a class="version-badge" href="TECHNICAL_OVERVIEW.md" target="_blank" rel="noopener" title="Abrir resumen técnico">MVP 0.10.58 · técnico</a>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -4906,7 +4906,8 @@
     }
     function renderAddonSection(title, description, addons, selected, planKey, open = false) {
       if (!addons.length) return "";
-      return `<details class="addon-section" ${open ? "open" : ""}>
+      const shouldOpen = open || addons.some((addon) => selected.has(addon.id));
+      return `<details class="addon-section" ${shouldOpen ? "open" : ""}>
         <summary class="addon-section-header">
           <div>
             <h4>${title}</h4>
