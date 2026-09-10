@@ -1,6 +1,6 @@
 # Resumen técnico · Generador de Propuestas de Adopción
 
-Versión documentada: **MVP 0.10.61**
+Versión documentada: **MVP 0.10.62**
 Última actualización funcional: **2026-09-09**
 Aplicación publicada: <https://ambitious-bay-044b6a010.3.azurestaticapps.net/>
 

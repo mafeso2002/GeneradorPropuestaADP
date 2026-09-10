@@ -2411,6 +2411,23 @@
       border-color: var(--cp-brand-yellow);
       background: var(--cp-brand-yellow-soft);
     }
+    .addon-option.included .option-check {
+      top: 14px;
+      right: 14px;
+      width: auto;
+      height: auto;
+      border: 1px solid rgba(46, 45, 49, .12);
+      border-radius: 999px;
+      padding: 5px 9px;
+      background: rgba(255, 255, 255, .82);
+      color: var(--cp-text-muted);
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
     .addon-option.compact {
       min-height: auto;
       grid-template-columns: minmax(0, 1fr);
@@ -2431,6 +2448,10 @@
     .addon-option.compact .option-check { display: none; }
     .addon-option.disabled:hover {
       border-color: var(--cp-border);
+      box-shadow: none;
+    }
+    .addon-option.included:hover {
+      border-color: var(--cp-brand-yellow);
       box-shadow: none;
     }
     .addon-option:hover,
@@ -3353,7 +3374,7 @@
       <button class="btn ghost" id="resetBtn">Reiniciar</button>
     </div>
   </header>
-  <button class="version-badge" id="technicalOverviewBtn" type="button" title="Abrir resumen técnico">MVP 0.10.61 · técnico</button>
+  <button class="version-badge" id="technicalOverviewBtn" type="button" title="Abrir resumen técnico">MVP 0.10.62 · técnico</button>
 
   <div class="shell">
     <section id="modeSelect" class="mode-hero">
@@ -4950,7 +4971,7 @@
           <span class="addon-requirement">${addonRequirement(addon, stateName, planKey)}</span>
           ${addon.pricingNotes ? `<span class="addon-requirement">${escapeHtml(addon.pricingNotes)}</span>` : ""}
         </div>
-        <div class="option-check">${isSelected ? "✓" : ""}</div>
+        <div class="option-check">${stateName === "included" ? "Incluido" : isSelected ? "✓" : ""}</div>
       </button>`;
     }
     function renderAddonSection(title, description, addons, selected, planKey, open = false) {
